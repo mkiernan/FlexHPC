@@ -97,6 +97,6 @@ echo "$USER ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 # Disable tty requirement for sudo
 sed -i 's/^Defaults[ ]*requiretty/# Defaults requiretty/g' /etc/sudoers
 
-chmod +x install-exa.sh
-source install-exa.sh $USER
+#chmod +x install-exa.sh
+#source install-exa.sh $USER
 
