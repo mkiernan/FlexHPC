@@ -1,4 +1,5 @@
 #!/bin/bash
+
 USER=$1
 PASS=$2
 
