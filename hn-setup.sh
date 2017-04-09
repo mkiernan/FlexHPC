@@ -24,7 +24,7 @@ wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-9.noarch.rpm
 rpm -ivh epel-release-7-9.noarch.rpm
 yum install -y -q nfs-utils sshpass nmap htop npm
 yum groupinstall -y "X Window System"
-npm install -g azure-cli
+#npm install -g azure-cli
 
 echo "/mnt/nfsshare $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports
 echo "/mnt/resource/scratch $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports

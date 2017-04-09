@@ -1,4 +1,4 @@
-# Simple deployment of a VM Scale Set of Linux VMs with a jumpbox
+# Flexible VM Scale Set of Linux VMs with a Head Node / NFS Server
 <table>
 <tr>
 <td>
@@ -25,5 +25,5 @@ ssh {username}@{vm-private-ip-address}
 PARAMETER RESTRICTIONS
 ======================
 
-vmssName must be 3-61 characters in length. It should also be globally unique across all of Azure. If it isn't globally unique, it is possible that this template will still deploy properly, but we don't recommend relying on this pseudo-probabilistic behavior.
+vmssName must be 3-61 characters in length. It should also be globally unique across all of Azure. 
 instanceCount must be 100 or less.

@@ -17,21 +17,39 @@
 				"description": "Azure region where all resources will be deployed. This is distinct from resource group location."
 			}
 		},
-		"vmSku": {
-			"defaultValue": "DS5_v2",
+		"virtualNetworkName": {
+           "type": "string",
+           "metadata": {
+              "description": "This is the name of the existing VNet."
+           }
+        },
+        "virtualNetworkResourceGroup": {
+           "type": "string",
+           "metadata": {
+              "description": "This is the name of the Resource Group which contains the VNet."
+           }
+        },
+        "subnetName": {
+           "type": "string",
+           "metadata": {
+              "description": "This is the name of the subnet to use for the NFS server."
+           }
+        },
+
+        "vmSku": {
+			"defaultValue": "Standard_A4",
 			"allowedValues": [
-				"Basic_A4",
-				"DS5_v2",
-				"DS14_v2",
-				"DS15_v2",
+				"Standard_A4",
 				"Standard_A8",
 				"Standard_A9",
+				"Standard_A10",
+				"Standard_A11",
 				"Standard_H16r",
-				"Standard_H16mr"
+				"Standard_H16mr"				
 			],
 			"type": "String",
 			"metadata": {
-				"description": "Which instance would you like to deploy to? Not all VMs are available in all regions"
+				"description": "Which instance would you like to deploy to?"
 			}
 		},
 		"vmssName": {
@@ -82,12 +100,8 @@
 		"saCount": "[length(variables('uniqueStringArray'))]",
 		"vhdContainerName": "[concat(variables('namingInfix'), 'vhd')]",
 		"osDiskName": "[concat(variables('namingInfix'), 'osdisk')]",
-		"addressPrefix": "10.0.0.0/16",
-		"subnetPrefix": "10.0.0.0/24",
-		"virtualNetworkName": "[concat(variables('namingInfix'), 'vnet')]",
-		"subnetName": "[concat(variables('namingInfix'), 'subnet')]",
-		"vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
-		"subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+        "vnetID": "[resourceId(parameters('virtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
+        "subnetRef": "[concat(variables('vnetID'),'/subnets/', parameters('subnetName'))]",
 		"publicIPAddressName": "[concat(variables('namingInfix'), 'pip')]",
 		"publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
 		"nicName": "[concat(variables('namingInfix'), 'nic')]",
@@ -106,33 +120,16 @@
 			"scriptsToDownload": [
 				"[concat(variables('scriptUrl'), 'cn-setup.sh')]",
 				"[concat(variables('scriptUrl'), 'hn-setup.sh')]",
-				"[concat(variables('scriptUrl'), 'clusRun.sh')]"
+				"[concat(variables('scriptUrl'), 'clusRun.sh')]",
+				"[concat(variables('scriptUrl'), 'install-exa.sh')]"
 			],
 			"commandToExecute": ""
 		},
-		"computeApiVersion": "2016-04-30-preview",
-		"networkApiVersion": "2016-06-01",
+		"computeApiVersion": "2016-03-30",
+		"networkApiVersion": "2016-03-30",
 		"storageApiVersion": "2015-06-15"
 	},
-	"resources": [{
-		"type": "Microsoft.Network/virtualNetworks",
-		"name": "[variables('virtualNetworkName')]",
-		"apiVersion": "[variables('networkApiVersion')]",
-		"location": "[parameters('resourceLocation')]",
-		"properties": {
-			"addressSpace": {
-				"addressPrefixes": [
-					"[variables('addressPrefix')]"
-				]
-			},
-			"subnets": [{
-				"name": "[variables('subnetName')]",
-				"properties": {
-					"addressPrefix": "[variables('subnetPrefix')]"
-				}
-			}]
-		}
-	}, {
+	"resources": [ {
 		"type": "Microsoft.Storage/storageAccounts",
 		"name": "[variables('jumpBoxSAName')]",
 		"apiVersion": "[variables('storageApiVersion')]",
@@ -183,8 +180,7 @@
 			}]
 		},
 		"dependsOn": [
-			"[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
-			"[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+			"[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]"
 		]
 	}, {
 		"type": "Microsoft.Compute/virtualMachines",
@@ -238,8 +234,7 @@
 				"autoUpgradeMinorVersion": true,
 				"settings": {
 					"fileUris": "[variables('vmScripts').scriptsToDownload]",
-					"commandToExecute": "[concat('bash ', 'hn-setup.sh ',parameters('adminUsername'),' ',parameters('adminPassword')) ]",
-					"timestamp": 4
+					"commandToExecute": "[concat('bash ', 'hn-setup.sh ',parameters('adminUsername'),' ',parameters('adminPassword')) ]"
 				}
 			},
 			"dependsOn": [
@@ -296,7 +291,7 @@
 								"name": "[variables('ipConfigName')]",
 								"properties": {
 									"subnet": {
-										"id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'), '/subnets/', variables('subnetName'))]"
+										"id": "[variables('subnetRef')]"
 									}
 								}
 							}]
@@ -306,8 +301,7 @@
 			}
 		},
 		"dependsOn": [
-			"storageLoop",
-			"[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+			"storageLoop"
 		]
 	}]
 }
