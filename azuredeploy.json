@@ -83,7 +83,7 @@
 		"osType": {
 			"publisher": "OpenLogic",
 			"offer": "CentOS-HPC",
-			"sku": "7.2",
+			"sku": "7.1",
 			"version": "latest"
 		},
 		"imageReference": "[variables('osType')]",
