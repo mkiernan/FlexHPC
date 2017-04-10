@@ -23,18 +23,15 @@ setup_disks()
 	mkdir -p $SHARE_HOME
 	chown $HPC_USER:$HPC_GROUP $SHARE_SPACE 
 	chown $HPC_USER:$HPC_GROUP $SHARE_HOME
-#$mkdir -p /mnt/resource/scratch
-#mkdir -p /mnt/nfsshare
 	echo "$SHARE_SPACE $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports
-#	echo "/mnt/resource/scratch $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports
 	echo "$SHARE_HOME $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports
 	chmod -R 777 $SHARE_SPACE
 }
 
 setup_system_centos72()
 {
-	echo "*               hard    memlock         unlimited" >> /etc/security/limits.conf
-	echo "*               soft    memlock         unlimited" >> /etc/security/limits.conf
+	echo "* hard memlock unlimited" >> /etc/security/limits.conf
+	echo "* soft memlock unlimited" >> /etc/security/limits.conf
 
 	ln -s /opt/intel/impi/5.1.3.181/intel64/bin/ /opt/intel/impi/5.1.3.181/bin
 	ln -s /opt/intel/impi/5.1.3.181/lib64/ /opt/intel/impi/5.1.3.181/lib
@@ -85,8 +82,8 @@ setup_user()
 
 	echo "Host *" > $SHARE_HOME/$HPC_USER/.ssh/config
 	echo "    StrictHostKeyChecking no" >> $SHARE_HOME/$HPC_USER/.ssh/config
-	echo "    UserKnownHostsFile /dev/null" >> $SHARE_HOME/$HPC_USER/.ssh/config
-	echo "    PasswordAuthentication no" >> $SHARE_HOME/$HPC_USER/.ssh/config
+ 	echo "    UserKnownHostsFile /dev/null" >> $SHARE_HOME/$HPC_USER/.ssh/config
+ 	echo "    PasswordAuthentication no" >> $SHARE_HOME/$HPC_USER/.ssh/config
 
 	# Fix .ssh folder ownership
 	chown -R $HPC_USER:$HPC_GROUP $SHARE_HOME/$HPC_USER
@@ -101,21 +98,18 @@ setup_user()
 
 setup_utilities()
 {
-	mv clusRun.sh cn-setup.sh pingpong.sh /home/$HPC_USER/bin
-	chmod +x /home/$HPC_USER/bin/*.sh
-	chown $HPC_USER:$HPC_GROUP /home/$HPC_USER/bin
+	mv clusRun.sh cn-setup.sh pingpong.sh $SHARE_HOME/$HPC_USER/bin
+	chmod +x $SHARE_HOME/$HPC_USER/bin/*.sh
+	chown $HPC_USER:$HPC_GROUP $SHARE_HOME/$HPC_USER/bin
 
-	nmap -sn $localip.* | grep $localip. | awk '{print $5}' > /home/$HPC_USER/bin/nodeips.txt
+	nmap -sn $localip.* | grep $localip. | awk '{print $5}' > $SHARE_HOME/$HPC_USER/bin/nodeips.txt
 	myhost=`hostname -i`
-	sed -i '/\<'$myhost'\>/d' /home/$HPC_USER/bin/nodeips.txt
-	sed -i '/\<10.0.0.1\>/d' /home/$HPC_USER/bin/nodeips.txt
+	sed -i '/\<'$myhost'\>/d' $SHARE_HOME/$HPC_USER/bin/nodeips.txt
+	sed -i '/\<10.0.0.1\>/d' $SHARE_HOME/$HPC_USER/bin/nodeips.txt
 
-#	cp /home/$HPC_USER/bin/nodenames.txt /mnt/resource/scratch/hosts
-	chown -R $HPC_USER:$HPC_USER /home/$USER/bin/
-#	chown -R $HPC_USER:$HPC_USER /mnt/resource/scratch/
-#	chmod -R 744 /mnt/resource/scratch/
-
+	chown -R $HPC_USER:$HPC_USER $SHARE_HOME/$HPC_USER/bin/
 }
+
 setup_disks
 setup_system_centos72
 setup_user
