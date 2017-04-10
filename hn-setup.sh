@@ -81,9 +81,9 @@ setup_user()
 	# Disable tty requirement for sudo
 	sed -i 's/^Defaults[ ]*requiretty/# Defaults requiretty/g' /etc/sudoers
    
-        # Add User
-	useradd -c "HPC User" -g $HPC_GROUP -m -d $SHARE_HOME/$HPC_USER -s /bin/bash -u $HPC_UID $HPC_USER
+        # Add User + Group
 	groupadd -g $HPC_GID $HPC_GROUP
+	useradd -c "HPC User" -g $HPC_GROUP -m -d $SHARE_HOME/$HPC_USER -s /bin/bash -u $HPC_UID $HPC_USER
 
 	# Undo the HOME setup done by waagent ossetup
 #	mv -p /home/$HPC_USER $SHARE_HOME
