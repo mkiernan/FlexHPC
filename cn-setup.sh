@@ -2,19 +2,40 @@
 echo ##################################################
 echo ############# Compute Node Setup #################
 echo ##################################################
+set -x
+#set -xeuo pipefail
+
+if [[ $(id -u) -ne 0 ]] ; then
+    echo "Must be run as root"
+    exit 1
+fi
+
 IPPRE=$1
-HPC_USER=$2
+#HPC_USER=$2
+#$HPC_GROUP=$HPC_USER
+
+# User
+HPC_USER=hpc
+HPC_UID=7007
+HPC_GROUP=hpc
+HPC_GID=7007
+
+# Shares
+SHARE_DATA=/share/data
 #SHARE_HOME=/space/home
-SHARE_HOME=/home
-SHARE_SPACE=/space
+SHARE_HOME=/share/home
+LOCAL_SCRATCH=/mnt/resource
 
 setup_disks()
 {
 	mkdir -p $SHARE_SPACE
 	mkdir -p $SHARE_HOME
-	mkdir -p /mnt/resource/scratch
+	mkdir -p $LOCAL_SCRATCH
+#	mkdir -p /mnt/resource/scratch
 	chown -R $HPC_USER:$HPC_USER /mnt/resource/
 	chmod 777 $SHARE_SPACE
+	chmod 777 $SHARE_DATA
+	chmod 777 $LOCAL_SCRATCH
 }
 
 setup_system_centos72()
@@ -63,34 +84,14 @@ setup_user()
         # Disable tty requirement for sudo
         sed -i 's/^Defaults[ ]*requiretty/# Defaults requiretty/g' /etc/sudoers
 
-        # Steps done by waagent ossetup
-##      useradd -c "HPC User" -g $HPC_GROUP -m -d $SHARE_HOME/$HPC_USER -s /bin/bash -u $HPC_UID $HPC_USER
-##      groupadd -g $HPC_GID $HPC_GROUP
+        # Add User
+        useradd -c "HPC User" -g $HPC_GROUP -m -d $SHARE_HOME/$HPC_USER -s /bin/bash -u $HPC_UID $HPC_USER
+        groupadd -g $HPC_GID $HPC_GROUP
 
         # Undo the HOME setup done by waagent ossetup
 #        mv -p /home/$HPC_USER $SHARE_HOME
 #        usermod -m -d $SHARE_HOME/$HPC_USER $HPC_USER
 
-        mkdir -p $SHARE_HOME/$HPC_USER/.ssh
-
-        # Configure public key auth for the HPC user
-        ssh-keygen -t rsa -f $SHARE_HOME/$HPC_USER/.ssh/id_rsa -q -P ""
-        cat $SHARE_HOME/$HPC_USER/.ssh/id_rsa.pub >> $SHARE_HOME/$HPC_USER/.ssh/authorized_keys
-
-        echo "Host *" > $SHARE_HOME/$HPC_USER/.ssh/config
-        echo "    StrictHostKeyChecking no" >> $SHARE_HOME/$HPC_USER/.ssh/config
-        echo "    UserKnownHostsFile /dev/null" >> $SHARE_HOME/$HPC_USER/.ssh/config
-        echo "    PasswordAuthentication no" >> $SHARE_HOME/$HPC_USER/.ssh/config
-
-        # Fix .ssh folder ownership
-        chown -R $HPC_USER:$HPC_GROUP $SHARE_HOME/$HPC_USER
-
-        # Fix permissions
-        chmod 700 $SHARE_HOME/$HPC_USER/.ssh
-        chmod 644 $SHARE_HOME/$HPC_USER/.ssh/config
-        chmod 644 $SHARE_HOME/$HPC_USER/.ssh/authorized_keys
-        chmod 600 $SHARE_HOME/$HPC_USER/.ssh/id_rsa
-        chmod 644 $SHARE_HOME/$HPC_USER/.ssh/id_rsa.pub
 }
 setup_disks
 setup_system_centos72

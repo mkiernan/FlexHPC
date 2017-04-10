@@ -2,16 +2,28 @@
 #
 # CentOS 7.2 Head-Node Installation Script: mkiernan@microsoft.com
 #
+set -x
+#set -xeuo pipefail
 
-HPC_USER=$1
-HPC_GROUP=$HPC_USER
-PASS=$2
+if [[ $(id -u) -ne 0 ]] ; then
+    echo "Must be run as root"
+    exit 1
+fi
+
+#HPC_USER=$1
+#$HPC_GROUP=$HPC_USER
+#PASS=$2
+
+# User
+HPC_USER=hpc
+HPC_UID=7007
+HPC_GROUP=hpc
+HPC_GID=7007
 
 # Shares 
-SHARE_SPACE=/space
-#SHARE_HOME=/space/home
-SHARE_HOME=/home
-#LOCAL_SCRATCH=/mnt/resource
+SHARE_DATA=/share/data
+SHARE_HOME=/share/home
+LOCAL_SCRATCH=/mnt/resource
 
 IP=`ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'`
 localip=`echo $IP | cut --delimiter='.' -f -3`
@@ -20,13 +32,15 @@ echo User is: $HPC_USER
 
 setup_disks()
 {
-	mkdir -p $SHARE_SPACE
-	chown $HPC_USER:$HPC_GROUP $SHARE_SPACE 
-#	mkdir -p $SHARE_HOME
-#	chown $HPC_USER:$HPC_GROUP $SHARE_HOME
-	echo "$SHARE_SPACE $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports
+	mkdir -p $SHARE_DATA
+	mkdir -p $SHARE_HOME
+	mkdir -p $LOCAL_SCRATCH
+	chmod -R 777 $SHARE_HOME
+	chmod -R 777 $SHARE_DATA
+	chmod -R 777 $LOCAL_SCRATCH
+	echo "$SHARE_DATA $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports
 	echo "$SHARE_HOME $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports
-	chmod -R 777 $SHARE_SPACE
+#	echo "$LOCAL_SCRATCH $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports
 }
 
 setup_system_centos72()
@@ -67,9 +81,9 @@ setup_user()
 	# Disable tty requirement for sudo
 	sed -i 's/^Defaults[ ]*requiretty/# Defaults requiretty/g' /etc/sudoers
    
-        # Steps done by waagent ossetup
-##	useradd -c "HPC User" -g $HPC_GROUP -m -d $SHARE_HOME/$HPC_USER -s /bin/bash -u $HPC_UID $HPC_USER
-##	groupadd -g $HPC_GID $HPC_GROUP
+        # Add User
+	useradd -c "HPC User" -g $HPC_GROUP -m -d $SHARE_HOME/$HPC_USER -s /bin/bash -u $HPC_UID $HPC_USER
+	groupadd -g $HPC_GID $HPC_GROUP
 
 	# Undo the HOME setup done by waagent ossetup
 #	mv -p /home/$HPC_USER $SHARE_HOME
@@ -95,6 +109,11 @@ setup_user()
 	chmod 644 $SHARE_HOME/$HPC_USER/.ssh/authorized_keys
 	chmod 600 $SHARE_HOME/$HPC_USER/.ssh/id_rsa
 	chmod 644 $SHARE_HOME/$HPC_USER/.ssh/id_rsa.pub
+
+#	chown $HPC_USER:$HPC_GROUP $SHARE_SCRATCH
+#	chown $HPC_USER:$HPC_GROUP $SHARE_DATA
+	chown $HPC_USER:$HPC_GROUP $LOCAL_SCRATCH
+
 }
 
 setup_utilities()
@@ -117,4 +136,3 @@ setup_utilities
 
 #chmod +x custom_extras.sh 
 #source custom_extras.sh $USER
-
