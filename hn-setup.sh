@@ -1,103 +1,126 @@
 #!/bin/bash
+#
+# CentOS 7.2 Head-Node Installation Script: mkiernan@microsoft.com
+#
 
-USER=$1
+HPC_USER=$1
+HPC_GROUP=$HPC_USER
 PASS=$2
+
+# Shares 
+SHARE_SPACE=/space
+SHARE_HOME=/space/home
+#LOCAL_SCRATCH=/mnt/resource
 
 IP=`ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'`
 localip=`echo $IP | cut --delimiter='.' -f -3`
 
-echo User is: $USER
-echo Pass is: $PASS
+echo User is: $HPC_USER
 
-echo "*               hard    memlock         unlimited" >> /etc/security/limits.conf
-echo "*               soft    memlock         unlimited" >> /etc/security/limits.conf
+setup_disks()
+{
+	mkdir -p $SHARE_SPACE
+	mkdir -p $SHARE_HOME
+	chown $HPC_USER:$HPC_GROUP $SHARE_SPACE 
+	chown $HPC_USER:$HPC_GROUP $SHARE_HOME
+#$mkdir -p /mnt/resource/scratch
+#mkdir -p /mnt/nfsshare
+	echo "$SHARE_SPACE $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports
+#	echo "/mnt/resource/scratch $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports
+	echo "$SHARE_HOME $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports
+	chmod -R 777 $SHARE_SPACE
+}
 
-mkdir -p /home/$USER/.ssh
-mkdir -p /home/$USER/bin
-mkdir -p /mnt/resource/scratch
-mkdir -p /mnt/nfsshare
+setup_system_centos72()
+{
+	echo "*               hard    memlock         unlimited" >> /etc/security/limits.conf
+	echo "*               soft    memlock         unlimited" >> /etc/security/limits.conf
 
-ln -s /opt/intel/impi/5.1.3.181/intel64/bin/ /opt/intel/impi/5.1.3.181/bin
-ln -s /opt/intel/impi/5.1.3.181/lib64/ /opt/intel/impi/5.1.3.181/lib
+	ln -s /opt/intel/impi/5.1.3.181/intel64/bin/ /opt/intel/impi/5.1.3.181/bin
+	ln -s /opt/intel/impi/5.1.3.181/lib64/ /opt/intel/impi/5.1.3.181/lib
 
-wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-9.noarch.rpm
+	wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-9.noarch.rpm
 
-rpm -ivh epel-release-7-9.noarch.rpm
-yum install -y -q nfs-utils sshpass nmap htop npm
-yum groupinstall -y "X Window System"
-#npm install -g azure-cli
+	rpm -ivh epel-release-7-9.noarch.rpm
+	yum install -y -q nfs-utils sshpass nmap htop
+	yum groupinstall -y "X Window System"
+	#npm install -g azure-cli
 
-echo "/mnt/nfsshare $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports
-echo "/mnt/resource/scratch $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports
-chmod -R 777 /mnt/nfsshare/
-systemctl enable rpcbind
-systemctl enable nfs-server
-systemctl enable nfs-lock
-systemctl enable nfs-idmap
-systemctl start rpcbind
-systemctl start nfs-server
-systemctl start nfs-lock
-systemctl start nfs-idmap
-systemctl restart nfs-server
+	systemctl enable rpcbind
+	systemctl enable nfs-server
+	systemctl enable nfs-lock
+	systemctl enable nfs-idmap
+	systemctl start rpcbind
+	systemctl start nfs-server
+	systemctl start nfs-lock
+	systemctl start nfs-idmap
+	systemctl restart nfs-server
+}
 
-mv clusRun.sh cn-setup.sh /home/$USER/bin
-chmod +x /home/$USER/bin/*.sh
-chown $USER:$USER /home/$USER/bin
-
-nmap -sn $localip.* | grep $localip. | awk '{print $5}' > /home/$USER/bin/nodeips.txt
-myhost=`hostname -i`
-sed -i '/\<'$myhost'\>/d' /home/$USER/bin/nodeips.txt
-sed -i '/\<10.0.0.1\>/d' /home/$USER/bin/nodeips.txt
-
-echo -e  'y\n' | ssh-keygen -f /home/$USER/.ssh/id_rsa -t rsa -N ''
-echo 'Host *' >> /home/$USER/.ssh/config
-echo 'StrictHostKeyChecking no' >> /home/$USER/.ssh/config
-chmod 400 /home/$USER/.ssh/config
-chown $USER:$USER /home/$USER/.ssh/config
-
-mkdir -p ~/.ssh
-echo 'Host *' >> ~/.ssh/config
-echo 'StrictHostKeyChecking no' >> ~/.ssh/config
-chmod 400 ~/.ssh/config
-
-for NAME in `cat /home/$USER/bin/nodeips.txt`; do sshpass -p $PASS ssh -o ConnectTimeout=2 $USER@$NAME 'hostname' >> /home/$USER/bin/nodenames.txt;done
-
-NAMES=`cat /home/$USER/bin/nodeips.txt` #names from names.txt file
-for NAME in $NAMES; do
-        sshpass -p $PASS scp -o "StrictHostKeyChecking no" -o ConnectTimeout=2 /home/$USER/bin/cn-setup.sh $USER@$NAME:/home/$USER/
-        sshpass -p $PASS scp -o "StrictHostKeyChecking no" -o ConnectTimeout=2 /home/$USER/bin/nodenames.txt $USER@$NAME:/home/$USER/
-        sshpass -p $PASS ssh -t -t -o ConnectTimeout=2 $USER@$NAME 'echo "'$PASS'" | sudo -S sh /home/'$USER'/cn-setup.sh '$IP' '$USER
-        sshpass -p $PASS ssh -o ConnectTimeout=2 $USER@$NAME 'mkdir /home/'$USER'/.ssh && chmod 700 .ssh'
-        sshpass -p $PASS ssh -o ConnectTimeout=2 $USER@$NAME "echo -e  'y\n' | ssh-keygen -f .ssh/id_rsa -t rsa -N ''"
-        sshpass -p $PASS ssh -o ConnectTimeout=2 $USER@$NAME 'touch /home/'$USER'/.ssh/config'
-        sshpass -p $PASS ssh -o ConnectTimeout=2 $USER@$NAME 'echo "Host *" >  /home/'$USER'/.ssh/config'
-        sshpass -p $PASS ssh -o ConnectTimeout=2 $USER@$NAME 'echo StrictHostKeyChecking no >> /home/'$USER'/.ssh/config'
-        sshpass -p $PASS ssh -o ConnectTimeout=2 $USER@$NAME 'chmod 400 /home/'$USER'/.ssh/config'
-        cat /home/$USER/.ssh/id_rsa.pub | sshpass -p $PASS ssh -o ConnectTimeout=2 $USER@$NAME 'cat >> /home/'$USER'/.ssh/authorized_keys'
-        sshpass -p $PASS scp -o "StrictHostKeyChecking no" -o ConnectTimeout=2 $USER@$NAME:/home/$USER/.ssh/id_rsa.pub /home/$USER/.ssh/sub_node.pub
-
-        for SUBNODE in `cat /home/$USER/bin/nodeips.txt`; do
-                sshpass -p $PASS ssh -o ConnectTimeout=2 $USER@$SUBNODE 'mkdir -p .ssh'
-                cat /home/$USER/.ssh/sub_node.pub | sshpass -p $PASS ssh -o ConnectTimeout=2 $USER@$SUBNODE 'cat >> /home/'$USER'/.ssh/authorized_keys'
-        done
-        sshpass -p $PASS ssh -o ConnectTimeout=2 $USER@$NAME 'chmod 700 /home/'$USER'/.ssh/'
-        sshpass -p $PASS ssh -o ConnectTimeout=2 $USER@$NAME 'chmod 640 /home/'$USER'/.ssh/authorized_keys'
-done
-
-cp ~/.ssh/authorized_keys /home/$USER/.ssh/authorized_keys
-cp /home/$USER/bin/nodenames.txt /mnt/resource/scratch/hosts
-chown -R $USER:$USER /home/$USER/.ssh/
-chown -R $USER:$USER /home/$USER/bin/
-chown -R $USER:$USER /mnt/resource/scratch/
-chmod -R 744 /mnt/resource/scratch/
-
-
-# Don't require password for HPC user sudo
-echo "$USER ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+setup_user()
+{
+	# disable selinux
+	sed -i 's/enforcing/disabled/g' /etc/selinux/config
+	setenforce permissive
     
-# Disable tty requirement for sudo
-sed -i 's/^Defaults[ ]*requiretty/# Defaults requiretty/g' /etc/sudoers
+	# Don't require password for HPC user sudo
+	echo "$HPC_USER ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+    
+	# Disable tty requirement for sudo
+	sed -i 's/^Defaults[ ]*requiretty/# Defaults requiretty/g' /etc/sudoers
+   
+        # Steps done by waagent ossetup
+##	useradd -c "HPC User" -g $HPC_GROUP -m -d $SHARE_HOME/$HPC_USER -s /bin/bash -u $HPC_UID $HPC_USER
+##	groupadd -g $HPC_GID $HPC_GROUP
 
-#chmod +x install-exa.sh
-#source install-exa.sh $USER
+	# Undo the HOME setup done by waagent ossetup
+	mv -p /home/$HPC_USER $SHARE_HOME
+	usermod -m -d $SHARE_HOME/$HPC_USER $HPC_USER
+
+	mkdir -p $SHARE_HOME/$HPC_USER/.ssh
+
+	# Configure public key auth for the HPC user
+	ssh-keygen -t rsa -f $SHARE_HOME/$HPC_USER/.ssh/id_rsa -q -P ""
+	cat $SHARE_HOME/$HPC_USER/.ssh/id_rsa.pub >> $SHARE_HOME/$HPC_USER/.ssh/authorized_keys
+
+	echo "Host *" > $SHARE_HOME/$HPC_USER/.ssh/config
+	echo "    StrictHostKeyChecking no" >> $SHARE_HOME/$HPC_USER/.ssh/config
+	echo "    UserKnownHostsFile /dev/null" >> $SHARE_HOME/$HPC_USER/.ssh/config
+	echo "    PasswordAuthentication no" >> $SHARE_HOME/$HPC_USER/.ssh/config
+
+	# Fix .ssh folder ownership
+	chown -R $HPC_USER:$HPC_GROUP $SHARE_HOME/$HPC_USER
+
+	# Fix permissions
+	chmod 700 $SHARE_HOME/$HPC_USER/.ssh
+	chmod 644 $SHARE_HOME/$HPC_USER/.ssh/config
+	chmod 644 $SHARE_HOME/$HPC_USER/.ssh/authorized_keys
+	chmod 600 $SHARE_HOME/$HPC_USER/.ssh/id_rsa
+	chmod 644 $SHARE_HOME/$HPC_USER/.ssh/id_rsa.pub
+}
+
+setup_utilities()
+{
+	mv clusRun.sh cn-setup.sh pingpong.sh /home/$HPC_USER/bin
+	chmod +x /home/$HPC_USER/bin/*.sh
+	chown $HPC_USER:$HPC_GROUP /home/$HPC_USER/bin
+
+	nmap -sn $localip.* | grep $localip. | awk '{print $5}' > /home/$HPC_USER/bin/nodeips.txt
+	myhost=`hostname -i`
+	sed -i '/\<'$myhost'\>/d' /home/$HPC_USER/bin/nodeips.txt
+	sed -i '/\<10.0.0.1\>/d' /home/$HPC_USER/bin/nodeips.txt
+
+#	cp /home/$HPC_USER/bin/nodenames.txt /mnt/resource/scratch/hosts
+	chown -R $HPC_USER:$HPC_USER /home/$USER/bin/
+#	chown -R $HPC_USER:$HPC_USER /mnt/resource/scratch/
+#	chmod -R 744 /mnt/resource/scratch/
+
+}
+setup_disks
+setup_system_centos72
+setup_user
+setup_utilities
+
+#chmod +x custom_extras.sh 
+#source custom_extras.sh $USER
 
