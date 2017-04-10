@@ -4,7 +4,8 @@ echo ############# Compute Node Setup #################
 echo ##################################################
 IPPRE=$1
 HPC_USER=$2
-SHARE_HOME=/space/home
+#SHARE_HOME=/space/home
+SHARE_HOME=/home
 SHARE_SPACE=/space
 
 setup_disks()
@@ -67,8 +68,8 @@ setup_user()
 ##      groupadd -g $HPC_GID $HPC_GROUP
 
         # Undo the HOME setup done by waagent ossetup
-        mv -p /home/$HPC_USER $SHARE_HOME
-        usermod -m -d $SHARE_HOME/$HPC_USER $HPC_USER
+#        mv -p /home/$HPC_USER $SHARE_HOME
+#        usermod -m -d $SHARE_HOME/$HPC_USER $HPC_USER
 
         mkdir -p $SHARE_HOME/$HPC_USER/.ssh
 

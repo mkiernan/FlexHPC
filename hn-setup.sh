@@ -9,7 +9,8 @@ PASS=$2
 
 # Shares 
 SHARE_SPACE=/space
-SHARE_HOME=/space/home
+#SHARE_HOME=/space/home
+SHARE_HOME=/home
 #LOCAL_SCRATCH=/mnt/resource
 
 IP=`ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'`
@@ -71,8 +72,8 @@ setup_user()
 ##	groupadd -g $HPC_GID $HPC_GROUP
 
 	# Undo the HOME setup done by waagent ossetup
-	mv -p /home/$HPC_USER $SHARE_HOME
-	usermod -m -d $SHARE_HOME/$HPC_USER $HPC_USER
+#	mv -p /home/$HPC_USER $SHARE_HOME
+#	usermod -m -d $SHARE_HOME/$HPC_USER $HPC_USER
 
 	mkdir -p $SHARE_HOME/$HPC_USER/.ssh
 
