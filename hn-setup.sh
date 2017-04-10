@@ -21,9 +21,9 @@ echo User is: $HPC_USER
 setup_disks()
 {
 	mkdir -p $SHARE_SPACE
-	mkdir -p $SHARE_HOME
 	chown $HPC_USER:$HPC_GROUP $SHARE_SPACE 
-	chown $HPC_USER:$HPC_GROUP $SHARE_HOME
+#	mkdir -p $SHARE_HOME
+#	chown $HPC_USER:$HPC_GROUP $SHARE_HOME
 	echo "$SHARE_SPACE $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports
 	echo "$SHARE_HOME $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports
 	chmod -R 777 $SHARE_SPACE
@@ -99,6 +99,7 @@ setup_user()
 
 setup_utilities()
 {
+	mkdir -p $SHARE_HOME/$HPC_USER/bin
 	mv clusRun.sh cn-setup.sh pingpong.sh $SHARE_HOME/$HPC_USER/bin
 	chmod +x $SHARE_HOME/$HPC_USER/bin/*.sh
 	chown $HPC_USER:$HPC_GROUP $SHARE_HOME/$HPC_USER/bin
@@ -107,8 +108,6 @@ setup_utilities()
 	myhost=`hostname -i`
 	sed -i '/\<'$myhost'\>/d' $SHARE_HOME/$HPC_USER/bin/nodeips.txt
 	sed -i '/\<10.0.0.1\>/d' $SHARE_HOME/$HPC_USER/bin/nodeips.txt
-
-	chown -R $HPC_USER:$HPC_USER $SHARE_HOME/$HPC_USER/bin/
 }
 
 setup_disks
