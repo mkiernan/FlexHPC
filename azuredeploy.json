@@ -94,7 +94,8 @@
 				"[concat(variables('scriptUrl'), 'pingpong.sh')]",
 				"[concat(variables('scriptUrl'), 'clusRun.sh')]"
 			],
-			"commandToExecute": ""
+            "commandToExecute": "[concat('bash ', 'cn-setup.sh ',parameters('adminUsername'),' ',parameters('adminPassword')) ]",
+
 		},
 		"computeApiVersion": "2016-04-30-preview",
 		"networkApiVersion": "2016-06-01",
@@ -288,6 +289,24 @@
 							}]
 						}
 					}]
+				},
+				"extensionProfile": {
+					"extensions": [
+						{
+							"name": "installCN",
+							"properties": {
+								"publisher": "Microsoft.Azure.Extensions",
+								"type": "CustomScript",
+								"typeHandlerVersion": "2.0",
+								"autoUpgradeMinorVersion": true,
+								"settings": {
+									"fileUris": "[variables('vmScripts').scriptsToDownload]",
+									"commandToExecute": "[variables('vmScripts').commandToExecute]",
+									"timestamp": 12345
+								}
+							}
+						}
+					]
 				}
 			}
 		},
