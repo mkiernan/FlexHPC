@@ -44,8 +44,8 @@
 		}
 	},
 	"variables": {
-		"namingInfix": "vmss",
-		"longNamingInfix": "vmss",
+		"namingInfix": "flex",
+		"longNamingInfix": "flex",
 		"jumpBoxName": "[concat(variables('longNamingInfix'),'headnode')]",
 		"jumpBoxSAName": "[concat(uniqueString(concat(resourceGroup().id, variables('newStorageAccountSuffix'), 'jumpboxsa')), 'jb')]",
 		"jumpBoxOSDiskName": "[concat(variables('jumpBoxName'), 'osdisk')]",
