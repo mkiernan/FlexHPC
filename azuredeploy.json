@@ -3,7 +3,7 @@
 	"contentVersion": "1.0.0.0",
 	"parameters": {
 		"vmSku": {
-			"defaultValue": "DS5_v2",
+			"defaultValue": "Standard_H16r",
 			"allowedValues": [
 				"Basic_A4",
 				"DS5_v2",
@@ -12,7 +12,11 @@
 				"Standard_A8",
 				"Standard_A9",
 				"Standard_H16r",
-				"Standard_H16mr"
+				"Standard_H16mr",
+				"Standard_NC6",
+				"Standard_NC12",
+				"Standard_NC24",
+				"Standard_NC24r"
 			],
 			"type": "String",
 			"metadata": {
@@ -87,6 +91,12 @@
 			"version": "latest"
 		},
 		"imageReference": "[variables('osType')]",
+		"vmssScript": {
+			"scriptToDownload": [
+				"[concat(variables('scriptUrl'), 'cn-setup.sh')]"
+			],
+			"commandToExecute": "[concat('bash ', 'cn-setup.sh' ]",
+		},
 		"vmScripts": {
 			"scriptsToDownload": [
 				"[concat(variables('scriptUrl'), 'cn-setup.sh')]",
@@ -94,8 +104,7 @@
 				"[concat(variables('scriptUrl'), 'pingpong.sh')]",
 				"[concat(variables('scriptUrl'), 'clusRun.sh')]"
 			],
-            "commandToExecute": "[concat('bash ', 'cn-setup.sh ',parameters('adminUsername'),' ',parameters('adminPassword')) ]",
-
+            "commandToExecute": "",
 		},
 		"computeApiVersion": "2016-04-30-preview",
 		"networkApiVersion": "2016-06-01",
@@ -300,8 +309,8 @@
 								"typeHandlerVersion": "2.0",
 								"autoUpgradeMinorVersion": true,
 								"settings": {
-									"fileUris": "[variables('vmScripts').scriptsToDownload]",
-									"commandToExecute": "[variables('vmScripts').commandToExecute]",
+									"fileUris": "[variables('vmssScript').scriptToDownload]",
+									"commandToExecute": "[variables('vmssScript').commandToExecute]",
 									"timestamp": 12345
 								}
 							}
