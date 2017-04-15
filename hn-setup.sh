@@ -123,7 +123,7 @@ setup_utilities()
 {
 	mkdir -p $SHARE_HOME/$HPC_USER/bin
 	cp clusRun.sh hn-setup.sh cn-setup.sh pingpong.sh $SHARE_HOME/$HPC_USER/bin
-	chmod +x $SHARE_HOME/$HPC_USER/bin/*.sh
+	chmod 755 $SHARE_HOME/$HPC_USER/bin/*.sh
 	chown $HPC_USER:$HPC_GROUP $SHARE_HOME/$HPC_USER/bin
 
 	nmap -sn $localip.* | grep $localip. | awk '{print $5}' > $SHARE_HOME/$HPC_USER/bin/nodeips.txt

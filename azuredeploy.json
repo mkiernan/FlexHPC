@@ -22,14 +22,7 @@
 			"metadata": {
 				"description": "Which machine type would you like to deploy to? Not all VMs are available in all regions"
 			}
-		},
-		"vmssName": {
-			"maxLength": 10,
-			"type": "String",
-			"metadata": {
-				"description": "Scale Set Name: String used as a base for naming resources. Must be 3-10 characters in length and globally unique across Azure. A hash is prepended to this string for some resources, and resource-specific information is appended."
-			}
-		},
+		},		
 		"instanceCount": {
 			"maxValue": 100,
 			"type": "Int",
@@ -51,8 +44,8 @@
 		}
 	},
 	"variables": {
-		"namingInfix": "[toLower(substring(concat(parameters('vmssName'), uniqueString(resourceGroup().id)), 0, 9))]",
-		"longNamingInfix": "[toLower(parameters('vmssName'))]",
+		"namingInfix": "vmss",
+		"longNamingInfix": "vmss",
 		"jumpBoxName": "[concat(variables('longNamingInfix'),'headnode')]",
 		"jumpBoxSAName": "[concat(uniqueString(concat(resourceGroup().id, variables('newStorageAccountSuffix'), 'jumpboxsa')), 'jb')]",
 		"jumpBoxOSDiskName": "[concat(variables('jumpBoxName'), 'osdisk')]",

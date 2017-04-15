@@ -30,11 +30,9 @@ LOCAL_SCRATCH=/mnt/resource
 
 setup_disks()
 {
-	mkdir -p $SHARE_SPACE
+	mkdir -p $SHARE_DATA
 	mkdir -p $SHARE_HOME
 	mkdir -p $LOCAL_SCRATCH
-#	mkdir -p /mnt/resource/scratch
-	chown -R $HPC_USER:$HPC_USER /mnt/resource/
 	chmod 777 $SHARE_SPACE
 	chmod 777 $SHARE_DATA
 	chmod 777 $LOCAL_SCRATCH
@@ -81,15 +79,17 @@ setup_user()
         sed -i 's/enforcing/disabled/g' /etc/selinux/config
         setenforce permissive
 
+        # Add User + Group
+        groupadd -g $HPC_GID $HPC_GROUP
+        useradd -c "HPC User" -g $HPC_GROUP -m -d $SHARE_HOME/$HPC_USER -s /bin/bash -u $HPC_UID $HPC_USER
+
         # Don't require password for HPC user sudo
         echo "$HPC_USER ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
         # Disable tty requirement for sudo
         sed -i 's/^Defaults[ ]*requiretty/# Defaults requiretty/g' /etc/sudoers
 
-        # Add User + Group
-        groupadd -g $HPC_GID $HPC_GROUP
-        useradd -c "HPC User" -g $HPC_GROUP -m -d $SHARE_HOME/$HPC_USER -s /bin/bash -u $HPC_UID $HPC_USER
+#	chown -R $HPC_USER:$HPC_USER /mnt/resource/
 
         # Undo the HOME setup done by waagent ossetup
 #        mv -p /home/$HPC_USER $SHARE_HOME
@@ -99,4 +99,3 @@ setup_disks
 setup_system_centos72
 setup_user
 setup_env
-df
