@@ -16,6 +16,7 @@ IPHEADNODE=10.0.0.4
 #$HPC_GROUP=$HPC_USER
 
 # User
+#HPC_USER=$1
 HPC_USER=hpc
 HPC_UID=7007
 HPC_GROUP=hpc
@@ -58,10 +59,11 @@ setup_system_centos72()
 	systemctl start nfs-lock
 	systemctl start nfs-idmap
 #localip=`hostname -i | cut --delimiter='.' -f -3`
-	echo "$IPHEADNODE:$SHARE_SPACE $SHARE_SPACE nfs defaults,nofail 0 0" | tee -a /etc/fstab
+	echo "$IPHEADNODE:$SHARE_DATA $SHARE_DATA nfs defaults,nofail 0 0" | tee -a /etc/fstab
 	echo "$IPHEADNODE:$SHARE_HOME $SHARE_HOME nfs defaults,nofail 0 0" | tee -a /etc/fstab
-	showmount -e 10.0.0.4
+	showmount -e $IPHEADNODE
 	mount -a
+	df -h
 }
 
 setup_env()
@@ -92,7 +94,6 @@ setup_user()
         # Undo the HOME setup done by waagent ossetup
 #        mv -p /home/$HPC_USER $SHARE_HOME
 #        usermod -m -d $SHARE_HOME/$HPC_USER $HPC_USER
-
 }
 setup_disks
 setup_system_centos72

@@ -2,6 +2,9 @@
 #
 # CentOS 7.2 Head-Node Installation Script: mkiernan@microsoft.com
 #
+echo ##################################################
+echo ############### Head Node Setup ##################
+echo ##################################################
 set -x
 #set -xeuo pipefail
 
@@ -74,16 +77,16 @@ setup_user()
 	# disable selinux
 	sed -i 's/enforcing/disabled/g' /etc/selinux/config
 	setenforce permissive
-    
-	# Don't require password for HPC user sudo
-	echo "$HPC_USER ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-    
-	# Disable tty requirement for sudo
-	sed -i 's/^Defaults[ ]*requiretty/# Defaults requiretty/g' /etc/sudoers
    
         # Add User + Group
 	groupadd -g $HPC_GID $HPC_GROUP
 	useradd -c "HPC User" -g $HPC_GROUP -m -d $SHARE_HOME/$HPC_USER -s /bin/bash -u $HPC_UID $HPC_USER
+
+	# Don't require password for HPC user sudo
+	echo "$HPC_USER ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+	# Disable tty requirement for sudo
+	sed -i 's/^Defaults[ ]*requiretty/# Defaults requiretty/g' /etc/sudoers
 
 	# Undo the HOME setup done by waagent ossetup
 #	mv -p /home/$HPC_USER $SHARE_HOME
@@ -92,13 +95,14 @@ setup_user()
 	mkdir -p $SHARE_HOME/$HPC_USER/.ssh
 
 	# Configure public key auth for the HPC user
-	ssh-keygen -t rsa -f $SHARE_HOME/$HPC_USER/.ssh/id_rsa -q -P ""
+	#ssh-keygen -t rsa -f $SHARE_HOME/$HPC_USER/.ssh/id_rsa -q -P ""
+	ssh-keygen -t rsa -f $SHARE_HOME/$HPC_USER/.ssh/id_rsa -q -N ""
 	cat $SHARE_HOME/$HPC_USER/.ssh/id_rsa.pub >> $SHARE_HOME/$HPC_USER/.ssh/authorized_keys
 
 	echo "Host *" > $SHARE_HOME/$HPC_USER/.ssh/config
-	echo "    StrictHostKeyChecking no" >> $SHARE_HOME/$HPC_USER/.ssh/config
- 	echo "    UserKnownHostsFile /dev/null" >> $SHARE_HOME/$HPC_USER/.ssh/config
- 	echo "    PasswordAuthentication no" >> $SHARE_HOME/$HPC_USER/.ssh/config
+	echo "StrictHostKeyChecking no" >> $SHARE_HOME/$HPC_USER/.ssh/config
+# 	echo "UserKnownHostsFile /dev/null" >> $SHARE_HOME/$HPC_USER/.ssh/config
+# 	echo "PasswordAuthentication no" >> $SHARE_HOME/$HPC_USER/.ssh/config
 
 	# Fix .ssh folder ownership
 	chown -R $HPC_USER:$HPC_GROUP $SHARE_HOME/$HPC_USER
@@ -113,13 +117,12 @@ setup_user()
 #	chown $HPC_USER:$HPC_GROUP $SHARE_SCRATCH
 #	chown $HPC_USER:$HPC_GROUP $SHARE_DATA
 	chown $HPC_USER:$HPC_GROUP $LOCAL_SCRATCH
-
 }
 
 setup_utilities()
 {
 	mkdir -p $SHARE_HOME/$HPC_USER/bin
-	mv clusRun.sh cn-setup.sh pingpong.sh $SHARE_HOME/$HPC_USER/bin
+	cp clusRun.sh hn-setup.sh cn-setup.sh pingpong.sh $SHARE_HOME/$HPC_USER/bin
 	chmod +x $SHARE_HOME/$HPC_USER/bin/*.sh
 	chown $HPC_USER:$HPC_GROUP $SHARE_HOME/$HPC_USER/bin
 
@@ -127,6 +130,9 @@ setup_utilities()
 	myhost=`hostname -i`
 	sed -i '/\<'$myhost'\>/d' $SHARE_HOME/$HPC_USER/bin/nodeips.txt
 	sed -i '/\<10.0.0.1\>/d' $SHARE_HOME/$HPC_USER/bin/nodeips.txt
+
+	for NAME in `cat $SHARE_HOME/$HPC_USER/bin/nodeips.txt`; do ssh -o ConnectTimeout=2 $HPC_USER@$NAME 'hostname' >> $SHARE_HOME/$HPC_USER/bin/nodenames.txt;done
+
 }
 
 setup_disks
