@@ -10,7 +10,8 @@ if [[ $(id -u) -ne 0 ]] ; then
     exit 1
 fi
 
-IPPRE=$1
+#IPHEADNODE=$1
+IPHEADNODE=10.0.0.4
 #HPC_USER=$2
 #$HPC_GROUP=$HPC_USER
 
@@ -57,8 +58,8 @@ setup_system_centos72()
 	systemctl start nfs-lock
 	systemctl start nfs-idmap
 #localip=`hostname -i | cut --delimiter='.' -f -3`
-	echo "$IPPRE:$SHARE_SPACE $SHARE_SPACE nfs defaults,nofail 0 0" | tee -a /etc/fstab
-	echo "$IPPRE:$SHARE_HOME $SHARE_HOME nfs defaults,nofail 0 0" | tee -a /etc/fstab
+	echo "$IPHEADNODE:$SHARE_SPACE $SHARE_SPACE nfs defaults,nofail 0 0" | tee -a /etc/fstab
+	echo "$IPHEADNODE:$SHARE_HOME $SHARE_HOME nfs defaults,nofail 0 0" | tee -a /etc/fstab
 	showmount -e 10.0.0.4
 	mount -a
 }
