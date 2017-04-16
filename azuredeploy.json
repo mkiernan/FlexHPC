@@ -250,7 +250,7 @@
 		"apiVersion": "[variables('computeApiVersion')]",
 		"location": "[resourceGroup().location]",
 		"properties": {
-			"overprovision": "true",
+			"overprovision": "false",
 			"upgradePolicy": {
 				"mode": "Manual"
 			},

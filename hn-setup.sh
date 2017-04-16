@@ -79,7 +79,7 @@ setup_system_centos72()
 	rpm -ivh epel-release-7-9.noarch.rpm
 	yum install -y -q sshpass nmap htop
 	yum install -y -q environment-modules
-	yum groupinstall -y "X Window System"
+	#yum groupinstall -y "X Window System"
 	#npm install -g azure-cli
 }
 
