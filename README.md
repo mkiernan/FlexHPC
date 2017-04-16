@@ -12,7 +12,7 @@
 
 	1) Deploy the ARM Template: 
 		a. Click on the "Deploy to Azure" button above.
-		b. Select HPC available region 
+		b. Select the region to deploy (check where HPC Resources are available <a href="https://azure.microsoft.com/en-us/pricing/details/virtual-machines/linux/">here.</a>
 		c. Name your Resource Group - one per cluster is advisable. 
 		d. Select VM size (eg: H16m/H16mr or A8/A9) and quantity (make sure to have quota for it)
 		e. Name your user account - this is the account you will login and run jobs with.
