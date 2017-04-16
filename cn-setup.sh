@@ -62,8 +62,10 @@ setup_system_centos72()
 	systemctl start nfs-lock
 	systemctl start nfs-idmap
 #localip=`hostname -i | cut --delimiter='.' -f -3`
-	echo "$IPHEADNODE:$SHARE_DATA $SHARE_DATA nfs defaults,nofail 0 0" | tee -a /etc/fstab
-	echo "$IPHEADNODE:$SHARE_HOME $SHARE_HOME nfs defaults,nofail 0 0" | tee -a /etc/fstab
+	#echo "$IPHEADNODE:$SHARE_DATA $SHARE_DATA nfs defaults,nofail 0 0" | tee -a /etc/fstab
+	#echo "$IPHEADNODE:$SHARE_HOME $SHARE_HOME nfs defaults,nofail 0 0" | tee -a /etc/fstab
+	echo "$IPHEADNODE:$SHARE_DATA $SHARE_DATA nfs4 rw,auto,_netdev 0 0" | tee -a /etc/fstab
+	echo "$IPHEADNODE:$SHARE_HOME $SHARE_HOME nfs4 rw,auto,_netdev 0 0" | tee -a /etc/fstab
 	cat /etc/fstab
 	rpcinfo -p 10.0.0.4
 	showmount -e $IPHEADNODE
