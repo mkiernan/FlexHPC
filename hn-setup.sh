@@ -49,6 +49,10 @@ setup_disks()
 
 setup_system_centos72()
 {
+	# disable selinux
+	sed -i 's/enforcing/disabled/g' /etc/selinux/config
+	setenforce permissive
+
 	echo "* hard memlock unlimited" >> /etc/security/limits.conf
 	echo "* soft memlock unlimited" >> /etc/security/limits.conf
 
@@ -76,10 +80,6 @@ setup_system_centos72()
 
 setup_user()
 {
-	# disable selinux
-	sed -i 's/enforcing/disabled/g' /etc/selinux/config
-	setenforce permissive
-   
         # Add User + Group
 	groupadd -g $HPC_GID $HPC_GROUP
 	useradd -c "HPC User" -g $HPC_GROUP -m -d $SHARE_HOME/$HPC_USER -s /bin/bash -u $HPC_UID $HPC_USER
