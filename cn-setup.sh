@@ -52,6 +52,8 @@ setup_system_centos72()
 	ln -s /opt/intel/impi/5.1.3.181/lib64/ /opt/intel/impi/5.1.3.181/lib
 
 	yum install -y -q nfs-utils
+	yum install -y -q libibverbs-utils
+	yum install -y -q infiniband-diags
 
 	systemctl enable rpcbind
 	systemctl enable nfs-server
@@ -61,16 +63,17 @@ setup_system_centos72()
 	systemctl start nfs-server
 	systemctl start nfs-lock
 	systemctl start nfs-idmap
-#localip=`hostname -i | cut --delimiter='.' -f -3`
 	#echo "$IPHEADNODE:$SHARE_DATA $SHARE_DATA nfs defaults,nofail 0 0" | tee -a /etc/fstab
 	#echo "$IPHEADNODE:$SHARE_HOME $SHARE_HOME nfs defaults,nofail 0 0" | tee -a /etc/fstab
-	echo "$IPHEADNODE:$SHARE_DATA $SHARE_DATA nfs4 rw,auto,_netdev 0 0" | tee -a /etc/fstab
-	echo "$IPHEADNODE:$SHARE_HOME $SHARE_HOME nfs4 rw,auto,_netdev 0 0" | tee -a /etc/fstab
+	echo "$IPHEADNODE:$SHARE_DATA $SHARE_DATA nfs4 rw,retry=5,timeo=60,auto,_netdev 0 0" | tee -a /etc/fstab
+	echo "$IPHEADNODE:$SHARE_HOME $SHARE_HOME nfs4 rw,retry=5,timeo=60,auto,_netdev 0 0" | tee -a /etc/fstab
 	cat /etc/fstab
 	rpcinfo -p 10.0.0.4
 	showmount -e $IPHEADNODE
 	mount -a
 	df -h
+	touch $SHARE_HOME/hosts/$HOSTNAME
+	echo `hostname -i` >>$SHARE_HOME/hosts/$HOSTNAME
 }
 
 setup_env()

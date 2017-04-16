@@ -41,6 +41,7 @@ setup_disks()
 	mkdir -p $SHARE_DATA
 	mkdir -p $SHARE_HOME
 	mkdir -p $LOCAL_SCRATCH
+	mkdir -p $SHARE_HOME/hosts
 	chmod -R 777 $SHARE_HOME
 	chmod -R 777 $SHARE_DATA
 	chmod -R 777 $LOCAL_SCRATCH
@@ -58,6 +59,17 @@ setup_system_centos72()
 	echo "* hard memlock unlimited" >> /etc/security/limits.conf
 	echo "* soft memlock unlimited" >> /etc/security/limits.conf
 
+	# do this before rpm's or too slow for the scaleset mounts
+	systemctl enable rpcbind
+	systemctl enable nfs-server
+	systemctl enable nfs-lock
+	systemctl enable nfs-idmap
+	systemctl start rpcbind
+	systemctl start nfs-server
+	systemctl start nfs-lock
+	systemctl start nfs-idmap
+	#systemctl restart nfs-server
+
 	ln -s /opt/intel/impi/5.1.3.181/intel64/bin/ /opt/intel/impi/5.1.3.181/bin
 	ln -s /opt/intel/impi/5.1.3.181/lib64/ /opt/intel/impi/5.1.3.181/lib
 
@@ -68,16 +80,6 @@ setup_system_centos72()
 	yum install -y -q environment-modules
 	yum groupinstall -y "X Window System"
 	#npm install -g azure-cli
-
-	systemctl enable rpcbind
-	systemctl enable nfs-server
-	systemctl enable nfs-lock
-	systemctl enable nfs-idmap
-	systemctl start rpcbind
-	systemctl start nfs-server
-	systemctl start nfs-lock
-	systemctl start nfs-idmap
-	#systemctl restart nfs-server
 }
 
 setup_user()
