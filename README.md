@@ -28,7 +28,7 @@
 
 <img src="https://github.com/tanewill/5clickTemplates/blob/master/images/hpc_vmss_architecture.png"  align="middle" width="395" height="274"  alt="hpc_vmss_architecture" border="1"/> <br></br>
 
-This skeleton template deploys a Linux VM Scale Set (VMSS) along with a Head Node (+ NFS server in the same VM) in the same virtual network. No HPC applications are installed. You can connect to the headnode via the public IP address, then connect from there to VMs in the scale set via private IP addresses. To ssh into the headnode, use the following command:
+This skeleton template deploys a Linux VM Scale Set (VMSS) along with a Head Node (+ NFS server in the same VM) in the same virtual network. No HPC applications are installed. You can connect to the headnode via the public IP address (look into the resource group in the portal and look for the VM called "flexheadnode"), then connect from there to VMs in the scale set via private IP addresses. To ssh into the headnode, use the following command:
 
 ssh {username}@{headnode-public-ip-address}
 
@@ -40,7 +40,9 @@ ssh {username}@{vm-private-ip-address}
 
 You will also find the private IP addresses in /share/home/username/bin/nodeips.txt
 
-Note: VM scaleset overprovisioning is disabled in this version for now. 
+Notes:
+a. VM scaleset overprovisioning is disabled in this version for now to keep things predictable. 
+b. To prevent configuration conflicts, the user account is locked out from ssh access until the configuration script has terminated. Patience is a virtue. 
 
 <b>Adding & Removing Nodes</b>
 

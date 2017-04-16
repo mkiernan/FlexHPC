@@ -18,7 +18,7 @@ fi
 
 HPC_USER=$1
 $HPC_GROUP=$HPC_USER
-PASS=$2
+#PASS=$2
 
 # User
 #HPC_USER=hpc

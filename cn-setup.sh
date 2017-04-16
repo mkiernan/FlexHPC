@@ -71,6 +71,7 @@ setup_system_centos72()
 	showmount -e $IPHEADNODE
 	mount -a
 	df -h
+	ls -lR $SHARE_HOME/$HPC_USER
 	touch $SHARE_HOME/$HPC_USER/hosts/$HOSTNAME
 	echo `hostname -i` >>$SHARE_HOME/$HPC_USER/hosts/$HOSTNAME
 }
