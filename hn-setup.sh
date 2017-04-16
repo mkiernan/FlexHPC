@@ -75,7 +75,7 @@ setup_system_centos72()
 	systemctl start nfs-server
 	systemctl start nfs-lock
 	systemctl start nfs-idmap
-	systemctl restart nfs-server
+	#systemctl restart nfs-server
 }
 
 setup_user()
