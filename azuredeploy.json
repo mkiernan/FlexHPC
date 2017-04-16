@@ -88,7 +88,7 @@
 			"scriptToDownload": [
 				"[concat(variables('scriptUrl'), 'cn-setup.sh')]"
 			],
-			"commandToExecute": "[concat('bash ', 'cn-setup.sh')]"
+			"commandToExecute": "[concat('bash ', 'cn-setup.sh')]",
 		},
 		"vmScripts": {
 			"scriptsToDownload": [
@@ -97,7 +97,7 @@
 				"[concat(variables('scriptUrl'), 'pingpong.sh')]",
 				"[concat(variables('scriptUrl'), 'clusRun.sh')]"
 			],
-            "commandToExecute": ""
+            "commandToExecute": "",
 		},
 		"computeApiVersion": "2016-04-30-preview",
 		"networkApiVersion": "2016-06-01",
@@ -315,7 +315,6 @@
 			"storageLoop",
 			"[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
 			"[concat('Microsoft.Compute/virtualMachines/', variables('jumpBoxName'))]"
-
 		]
 	}]
 }
