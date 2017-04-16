@@ -88,7 +88,7 @@
 			"scriptToDownload": [
 				"[concat(variables('scriptUrl'), 'cn-setup.sh')]"
 			],
-			"commandToExecute": "[concat('bash ', 'cn-setup.sh')]",
+            "commandToExecute": "[concat('bash ', 'cn-setup.sh ',parameters('adminUsername'),' ',parameters('adminPassword')) ]",
 		},
 		"vmScripts": {
 			"scriptsToDownload": [

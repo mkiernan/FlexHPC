@@ -13,15 +13,14 @@ fi
 
 #IPHEADNODE=$1
 IPHEADNODE=10.0.0.4
-#HPC_USER=$2
-#$HPC_GROUP=$HPC_USER
+HPC_USER=$1
+HPC_GROUP=$HPC_USER
 
 # User
-#HPC_USER=$1
-HPC_USER=hpc
-HPC_UID=7007
-HPC_GROUP=hpc
-HPC_GID=7007
+#HPC_USER=hpc
+#HPC_UID=7007
+#HPC_GROUP=hpc
+#HPC_GID=7007
 
 # Shares
 SHARE_DATA=/share/data
@@ -72,8 +71,8 @@ setup_system_centos72()
 	showmount -e $IPHEADNODE
 	mount -a
 	df -h
-	touch $SHARE_HOME/hosts/$HOSTNAME
-	echo `hostname -i` >>$SHARE_HOME/hosts/$HOSTNAME
+	touch $SHARE_HOME/$HPC_USER/hosts/$HOSTNAME
+	echo `hostname -i` >>$SHARE_HOME/$HPC_USER/hosts/$HOSTNAME
 }
 
 setup_env()
@@ -88,8 +87,10 @@ setup_env()
 setup_user()
 {
         # Add User + Group
-        groupadd -g $HPC_GID $HPC_GROUP
-        useradd -c "HPC User" -g $HPC_GROUP -m -d $SHARE_HOME/$HPC_USER -s /bin/bash -u $HPC_UID $HPC_USER
+#       groupadd -g $HPC_GID $HPC_GROUP
+#       useradd -c "HPC User" -g $HPC_GROUP -m -d $SHARE_HOME/$HPC_USER -s /bin/bash -u $HPC_UID $HPC_USER
+        # Undo the HOME setup done by waagent ossetup
+        usermod -m -d $SHARE_HOME/$HPC_USER $HPC_USER
 
         # Don't require password for HPC user sudo
         echo "$HPC_USER ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
@@ -99,9 +100,6 @@ setup_user()
 
 #	chown -R $HPC_USER:$HPC_USER /mnt/resource/
 
-        # Undo the HOME setup done by waagent ossetup
-#        mv -p /home/$HPC_USER $SHARE_HOME
-#        usermod -m -d $SHARE_HOME/$HPC_USER $HPC_USER
 }
 setup_disks
 setup_system_centos72

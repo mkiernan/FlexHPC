@@ -16,15 +16,15 @@ if [[ $(id -u) -ne 0 ]] ; then
     exit 1
 fi
 
-#HPC_USER=$1
-#$HPC_GROUP=$HPC_USER
-#PASS=$2
+HPC_USER=$1
+$HPC_GROUP=$HPC_USER
+PASS=$2
 
 # User
-HPC_USER=hpc
-HPC_UID=7007
-HPC_GROUP=hpc
-HPC_GID=7007
+#HPC_USER=hpc
+#HPC_UID=7007
+#HPC_GROUP=hpc
+#HPC_GID=7007
 
 # Shares 
 SHARE_DATA=/share/data
@@ -41,7 +41,6 @@ setup_disks()
 	mkdir -p $SHARE_DATA
 	mkdir -p $SHARE_HOME
 	mkdir -p $LOCAL_SCRATCH
-	mkdir -p $SHARE_HOME/hosts
 	chmod -R 777 $SHARE_HOME
 	chmod -R 777 $SHARE_DATA
 	chmod -R 777 $LOCAL_SCRATCH
@@ -86,18 +85,17 @@ setup_system_centos72()
 setup_user()
 {
         # Add User + Group
-	groupadd -g $HPC_GID $HPC_GROUP
-	useradd -c "HPC User" -g $HPC_GROUP -m -d $SHARE_HOME/$HPC_USER -s /bin/bash -u $HPC_UID $HPC_USER
+#	groupadd -g $HPC_GID $HPC_GROUP
+#	useradd -c "HPC User" -g $HPC_GROUP -m -d $SHARE_HOME/$HPC_USER -s /bin/bash -u $HPC_UID $HPC_USER
+	# Undo the HOME setup done by waagent ossetup
+	mv -p /home/$HPC_USER $SHARE_HOME
+	usermod -m -d $SHARE_HOME/$HPC_USER $HPC_USER
 
 	# Don't require password for HPC user sudo
 	echo "$HPC_USER ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 	# Disable tty requirement for sudo
 	sed -i 's/^Defaults[ ]*requiretty/# Defaults requiretty/g' /etc/sudoers
-
-	# Undo the HOME setup done by waagent ossetup
-#	mv -p /home/$HPC_USER $SHARE_HOME
-#	usermod -m -d $SHARE_HOME/$HPC_USER $HPC_USER
 
 	mkdir -p $SHARE_HOME/$HPC_USER/.ssh
 
@@ -129,19 +127,27 @@ setup_user()
 setup_utilities()
 {
 	mkdir -p $SHARE_HOME/$HPC_USER/bin
+	mkdir -p $SHARE_HOME/$HPC_USER/hosts
 	cp clusRun.sh hn-setup.sh cn-setup.sh pingpong.sh $SHARE_HOME/$HPC_USER/bin
 	chmod 755 $SHARE_HOME/$HPC_USER/bin/*.sh
+	chmod 755 $SHARE_HOME/$HPC_USER/hosts
 	chown $HPC_USER:$HPC_GROUP $SHARE_HOME/$HPC_USER/bin
+	chown $HPC_USER:$HPC_GROUP $SHARE_HOME/$HPC_USER/hosts
 
 	nmap -sn $localip.* | grep $localip. | awk '{print $5}' > $SHARE_HOME/$HPC_USER/bin/nodeips.txt
 	myhost=`hostname -i`
 	sed -i '/\<'$myhost'\>/d' $SHARE_HOME/$HPC_USER/bin/nodeips.txt
 	sed -i '/\<10.0.0.1\>/d' $SHARE_HOME/$HPC_USER/bin/nodeips.txt
 
-##	for NAME in `cat $SHARE_HOME/$HPC_USER/bin/nodeips.txt`; do ssh -o ConnectTimeout=2 $HPC_USER@$NAME 'hostname' >> $SHARE_HOME/$HPC_USER/bin/nodenames.txt;done
-	for NAME in `cat $SHARE_HOME/$HPC_USER/bin/nodeips.txt`; do sudo -u $HPC_USER -s ssh -o ConnectTimeout=2 $HPC_USER@$NAME 'hostname' >> $SHARE_HOME/$HPC_USER/bin/nodenames.txt;done
+#	for NAME in `cat $SHARE_HOME/$HPC_USER/bin/nodeips.txt`; do sudo -u $HPC_USER -s ssh -o ConnectTimeout=2 $HPC_USER@$NAME 'hostname' >> $SHARE_HOME/$HPC_USER/bin/nodenames.txt;done
+	NAMES=`ls $SHARE_HOME/$HPC_USER/hosts`
+	for NAME in $NAMES; do echo $NAME >> $SHARE_HOME/$HPC_USER/bin/nodenames.txt; done
 
 }
+
+#
+# For later, will use environment modules to load user app environments
+#
 setup_environment_modules()
 {
 	echo "source /etc/profile.d/modules.sh" >> $SHARE_HOME/$HPC_USER/.bashrc
