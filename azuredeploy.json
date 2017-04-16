@@ -88,7 +88,7 @@
 			"scriptToDownload": [
 				"[concat(variables('scriptUrl'), 'cn-setup.sh')]"
 			],
-            "commandToExecute": "[concat('bash ', 'cn-setup.sh ',parameters('adminUsername'),' ',parameters('adminPassword')) ]",
+			"commandToExecute": "[concat('bash ', 'cn-setup.sh ',parameters('adminUsername')) ]",
 		},
 		"vmScripts": {
 			"scriptsToDownload": [
@@ -227,7 +227,7 @@
 				"autoUpgradeMinorVersion": true,
 				"settings": {
 					"fileUris": "[variables('vmScripts').scriptsToDownload]",
-					"commandToExecute": "[concat('bash ', 'hn-setup.sh ',parameters('adminUsername'),' ',parameters('adminPassword')) ]",
+					"commandToExecute": "[concat('bash ', 'hn-setup.sh ',parameters('adminUsername')) ]",
 					"timestamp": 4
 				}
 			},
