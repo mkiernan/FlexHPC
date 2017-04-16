@@ -34,9 +34,9 @@ setup_disks()
 	mkdir -p $SHARE_DATA
 	mkdir -p $SHARE_HOME
 	mkdir -p $LOCAL_SCRATCH
-	chmod 777 $SHARE_SPACE
-	chmod 777 $SHARE_DATA
-	chmod 777 $LOCAL_SCRATCH
+	chmod -R 777 $SHARE_HOME
+	chmod -R 777 $SHARE_DATA
+	chmod -R 777 $LOCAL_SCRATCH
 }
 
 setup_system_centos72()
@@ -65,7 +65,6 @@ setup_system_centos72()
 	echo "$IPHEADNODE:$SHARE_DATA $SHARE_DATA nfs defaults,nofail 0 0" | tee -a /etc/fstab
 	echo "$IPHEADNODE:$SHARE_HOME $SHARE_HOME nfs defaults,nofail 0 0" | tee -a /etc/fstab
 	cat /etc/fstab
-	ping 10.0.0.4
 	rpcinfo -p 10.0.0.4
 	showmount -e $IPHEADNODE
 	mount -a

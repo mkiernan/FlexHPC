@@ -1,6 +1,8 @@
 #!/bin/bash
 #
-# CentOS 7.2 Head-Node Installation Script: mkiernan@microsoft.com
+# Head-Node Installation Script
+#
+# Tested On: CentOS 7.1, 7.2
 #
 echo ##################################################
 echo ############### Head Node Setup ##################
