@@ -5,18 +5,18 @@
 		"vmSku": {
 			"defaultValue": "Standard_H16r",
 			"allowedValues": [
-				"Basic_A4",
-				"DS5_v2",
-				"DS14_v2",
-				"DS15_v2",
-				"Standard_A8",
-				"Standard_A9",
 				"Standard_H16r",
 				"Standard_H16mr",
 				"Standard_NC6",
 				"Standard_NC12",
 				"Standard_NC24",
-				"Standard_NC24r"
+				"Standard_NC24r",
+				"Standard_A8",
+				"Standard_A9",
+				"Basic_A4",
+				"DS5_v2",
+				"DS14_v2",
+				"DS15_v2"
 			],
 			"type": "String",
 			"metadata": {
@@ -232,7 +232,8 @@
 				}
 			},
 			"dependsOn": [
-				"[concat('Microsoft.Compute/virtualMachines/', variables('jumpBoxName'))]"
+				"[concat('Microsoft.Compute/virtualMachines/', variables('jumpBoxName'))]",
+				"[concat('Microsoft.Compute/virtualMachineScaleSets/',variables('namingInfix'))]"
 			]
 		}],
 		"dependsOn": [
