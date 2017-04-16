@@ -232,8 +232,7 @@
 				}
 			},
 			"dependsOn": [
-				"[concat('Microsoft.Compute/virtualMachines/', variables('jumpBoxName'))]",
-				"[concat('Microsoft.Compute/virtualMachineScaleSets/',variables('namingInfix'))]"
+				"[concat('Microsoft.Compute/virtualMachines/', variables('jumpBoxName'))]"
 			]
 		}],
 		"dependsOn": [
