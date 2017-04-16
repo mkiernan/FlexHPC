@@ -128,11 +128,15 @@ setup_utilities()
 {
 	mkdir -p $SHARE_HOME/$HPC_USER/bin
 	mkdir -p $SHARE_HOME/$HPC_USER/hosts
-	cp clusRun.sh hn-setup.sh cn-setup.sh pingpong.sh $SHARE_HOME/$HPC_USER/bin
-	chmod 755 $SHARE_HOME/$HPC_USER/bin/*.sh
+	mkdir -p $SHARE_HOME/$HPC_USER/deploy
 	chmod 755 $SHARE_HOME/$HPC_USER/hosts
+	chmod 755 $SHARE_HOME/$HPC_USER/deploy
 	chown $HPC_USER:$HPC_GROUP $SHARE_HOME/$HPC_USER/bin
 	chown $HPC_USER:$HPC_GROUP $SHARE_HOME/$HPC_USER/hosts
+	chown $HPC_USER:$HPC_GROUP $SHARE_HOME/$HPC_USER/deploy
+	cp hn-setup.sh cn-setup.sh $SHARE_HOME/$HPC_USER/deploy
+	cp clusRun.sh pingpong.sh $SHARE_HOME/$HPC_USER/bin
+	chmod 755 $SHARE_HOME/$HPC_USER/bin/*.sh
 
 	nmap -sn $localip.* | grep $localip. | awk '{print $5}' > $SHARE_HOME/$HPC_USER/bin/nodeips.txt
 	myhost=`hostname -i`
@@ -140,8 +144,8 @@ setup_utilities()
 	sed -i '/\<10.0.0.1\>/d' $SHARE_HOME/$HPC_USER/bin/nodeips.txt
 
 #	for NAME in `cat $SHARE_HOME/$HPC_USER/bin/nodeips.txt`; do sudo -u $HPC_USER -s ssh -o ConnectTimeout=2 $HPC_USER@$NAME 'hostname' >> $SHARE_HOME/$HPC_USER/bin/nodenames.txt;done
-	NAMES=`ls $SHARE_HOME/$HPC_USER/hosts`
-	for NAME in $NAMES; do echo $NAME >> $SHARE_HOME/$HPC_USER/bin/nodenames.txt; done
+#	NAMES=`ls $SHARE_HOME/$HPC_USER/hosts`
+#	for NAME in $NAMES; do echo $NAME >> $SHARE_HOME/$HPC_USER/bin/nodenames.txt; done
 
 }
 
@@ -153,10 +157,12 @@ setup_environment_modules()
 	echo "source /etc/profile.d/modules.sh" >> $SHARE_HOME/$HPC_USER/.bashrc
 }
 
+passwd -l $HPC_USER #-- lock account to prevent treading on homedir changes
 setup_disks
 setup_system_centos72
 setup_user
 setup_utilities
+passwd -u $HPC_USER #-- unlock account
 date
 
 #chmod +x custom_extras.sh 

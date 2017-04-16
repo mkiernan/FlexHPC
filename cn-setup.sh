@@ -101,8 +101,10 @@ setup_user()
 #	chown -R $HPC_USER:$HPC_USER /mnt/resource/
 
 }
+passwd -l $HPC_USER #-- lock account to prevent treading on homedir changes
 setup_disks
 setup_system_centos72
 setup_user
 setup_env
 date
+passwd -u $HPC_USER #-- unlock account

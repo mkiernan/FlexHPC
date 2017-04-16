@@ -1,6 +1,8 @@
 #!/bin/bash
-USER=`whoami`
-NAMES=`cat /share/home/$USER/bin/nodenames.txt` #names from names.txt file
+HPC_USER=`whoami`
+SHARE_HOME=/share/home
+NAMES=`ls $SHARE_HOME/$HPC_USER/hosts`
+#NAMES=`cat /share/home/$USER/bin/nodenames.txt` #names from names.txt file
 echo "launching $1"
 for NAME in $NAMES; do
   #the & here will fork off a run for each node and move to the next, the wait at the end waits until all is complete
@@ -9,4 +11,3 @@ for NAME in $NAMES; do
 done
 wait
 echo "completed $1"
-
