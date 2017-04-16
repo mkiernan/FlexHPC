@@ -232,8 +232,7 @@
 				}
 			},
 			"dependsOn": [
-				"[concat('Microsoft.Compute/virtualMachines/', variables('jumpBoxName'))]",
-				"[concat('Microsoft.Compute/virtualMachineScaleSets/',variables('namingInfix'))]"
+				"[concat('Microsoft.Compute/virtualMachines/', variables('jumpBoxName'))]"
 			]
 		}],
 		"dependsOn": [
@@ -314,7 +313,9 @@
 		},
 		"dependsOn": [
 			"storageLoop",
-			"[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+			"[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+			"[concat('Microsoft.Compute/virtualMachines/', variables('jumpBoxName'))]"
+
 		]
 	}]
 }

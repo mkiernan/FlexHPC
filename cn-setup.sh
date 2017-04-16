@@ -2,6 +2,7 @@
 echo ##################################################
 echo ############# Compute Node Setup #################
 echo ##################################################
+date
 set -x
 #set -xeuo pipefail
 
@@ -99,3 +100,4 @@ setup_disks
 setup_system_centos72
 setup_user
 setup_env
+date

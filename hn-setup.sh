@@ -5,6 +5,7 @@
 echo ##################################################
 echo ############### Head Node Setup ##################
 echo ##################################################
+date
 set -x
 #set -xeuo pipefail
 
@@ -58,6 +59,7 @@ setup_system_centos72()
 
 	rpm -ivh epel-release-7-9.noarch.rpm
 	yum install -y -q nfs-utils sshpass nmap htop
+	yum install -y -q environment-modules
 	yum groupinstall -y "X Window System"
 	#npm install -g azure-cli
 
@@ -131,14 +133,20 @@ setup_utilities()
 	sed -i '/\<'$myhost'\>/d' $SHARE_HOME/$HPC_USER/bin/nodeips.txt
 	sed -i '/\<10.0.0.1\>/d' $SHARE_HOME/$HPC_USER/bin/nodeips.txt
 
-	for NAME in `cat $SHARE_HOME/$HPC_USER/bin/nodeips.txt`; do ssh -o ConnectTimeout=2 $HPC_USER@$NAME 'hostname' >> $SHARE_HOME/$HPC_USER/bin/nodenames.txt;done
+##	for NAME in `cat $SHARE_HOME/$HPC_USER/bin/nodeips.txt`; do ssh -o ConnectTimeout=2 $HPC_USER@$NAME 'hostname' >> $SHARE_HOME/$HPC_USER/bin/nodenames.txt;done
+	for NAME in `cat $SHARE_HOME/$HPC_USER/bin/nodeips.txt`; do sudo -u $HPC_USER -s ssh -o ConnectTimeout=2 $HPC_USER@$NAME 'hostname' >> $SHARE_HOME/$HPC_USER/bin/nodenames.txt;done
 
+}
+setup_environment_modules()
+{
+	echo "source /etc/profile.d/modules.sh" >> $SHARE_HOME/$HPC_USER/.bashrc
 }
 
 setup_disks
 setup_system_centos72
 setup_user
 setup_utilities
+date
 
 #chmod +x custom_extras.sh 
 #source custom_extras.sh $USER
