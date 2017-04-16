@@ -60,6 +60,7 @@ setup_system_centos72()
 	echo "* soft memlock unlimited" >> /etc/security/limits.conf
 
 	# do this before rpm's or too slow for the scaleset mounts
+	yum install -y -q nfs-utils
 	systemctl enable rpcbind
 	systemctl enable nfs-server
 	systemctl enable nfs-lock
@@ -76,7 +77,7 @@ setup_system_centos72()
 	wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-9.noarch.rpm
 
 	rpm -ivh epel-release-7-9.noarch.rpm
-	yum install -y -q nfs-utils sshpass nmap htop
+	yum install -y -q sshpass nmap htop
 	yum install -y -q environment-modules
 	yum groupinstall -y "X Window System"
 	#npm install -g azure-cli
