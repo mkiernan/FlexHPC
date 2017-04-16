@@ -60,6 +60,7 @@ setup_system_centos72()
 #localip=`hostname -i | cut --delimiter='.' -f -3`
 	echo "$IPHEADNODE:$SHARE_DATA $SHARE_DATA nfs defaults,nofail 0 0" | tee -a /etc/fstab
 	echo "$IPHEADNODE:$SHARE_HOME $SHARE_HOME nfs defaults,nofail 0 0" | tee -a /etc/fstab
+	sleep 30
 	showmount -e $IPHEADNODE
 	mount -a
 	df -h
