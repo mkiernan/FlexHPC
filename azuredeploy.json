@@ -46,11 +46,9 @@
 	"variables": {
 		"namingInfix": "flex",
 		"longNamingInfix": "flex",
-		"jumpBoxName": "[concat(variables('longNamingInfix'),'headnode')]",
-		"jumpBoxOSDiskName": "[concat(variables('jumpBoxName'), 'osdisk')]",
-		"jumpBoxVHDContainerName": "[concat(variables('jumpBoxName'), 'vhd')]",
-		"jumpBoxIPConfigName": "[concat(variables('jumpBoxName'), 'ipconfig')]",
-		"jumpBoxNicName": "[concat(variables('jumpBoxName'), 'nic')]",
+		"HeadNodeName": "[concat(variables('longNamingInfix'),'headnode')]",
+		"HeadNodeIPConfigName": "[concat(variables('HeadNodeName'), 'ipconfig')]",
+		"HeadNodeNicName": "[concat(variables('HeadNodeName'), 'nic')]",
 		"addressPrefix": "10.0.0.0/16",
 		"subnetPrefix": "10.0.0.0/24",
 		"virtualNetworkName": "[concat(variables('namingInfix'), 'vnet')]",
@@ -121,12 +119,12 @@
 		}
 	}, {
 		"type": "Microsoft.Network/networkInterfaces",
-		"name": "[variables('jumpBoxNicName')]",
+		"name": "[variables('HeadNodeNicName')]",
 		"apiVersion": "[variables('networkApiVersion')]",
 		"location": "[resourceGroup().location]",
 		"properties": {
 			"ipConfigurations": [{
-				"name": "[variables('jumpBoxIPConfigName')]",
+				"name": "[variables('HeadNodeIPConfigName')]",
 				"properties": {
 					"privateIPAllocationMethod": "Dynamic",
 					"publicIPAddress": {
@@ -144,7 +142,7 @@
 		]
 	}, {
 		"type": "Microsoft.Compute/virtualMachines",
-		"name": "[variables('jumpBoxName')]",
+		"name": "[variables('HeadNodeName')]",
 		"apiVersion": "[variables('computeApiVersion')]",
 		"location": "[resourceGroup().location]",
 		"properties": {
@@ -152,7 +150,7 @@
 				"vmSize": "[parameters('vmSku')]"
 			},
 			"osProfile": {
-				"computerName": "[variables('jumpBoxName')]",
+				"computerName": "[variables('HeadNodeName')]",
 				"adminUsername": "[parameters('adminUsername')]",
 				"adminPassword": "[parameters('adminPassword')]"
 			},
@@ -165,7 +163,7 @@
 			},
 			"networkProfile": {
 				"networkInterfaces": [{
-					"id": "[resourceId('Microsoft.Network/networkInterfaces',variables('jumpBoxNicName'))]"
+					"id": "[resourceId('Microsoft.Network/networkInterfaces',variables('HeadNodeNicName'))]"
 				}]
 			}
 		},
@@ -189,11 +187,11 @@
 				}
 			},
 			"dependsOn": [
-				"[concat('Microsoft.Compute/virtualMachines/', variables('jumpBoxName'))]"
+				"[concat('Microsoft.Compute/virtualMachines/', variables('HeadNodeName'))]"
 			]
 		}],
 		"dependsOn": [
-			"[concat('Microsoft.Network/networkInterfaces/', variables('jumpBoxNicName'))]"
+			"[concat('Microsoft.Network/networkInterfaces/', variables('HeadNodeNicName'))]"
 		]
 	}, {
 		"type": "Microsoft.Compute/virtualMachineScaleSets",
@@ -261,7 +259,7 @@
 		},
 		"dependsOn": [
 			"[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-			"[concat('Microsoft.Compute/virtualMachines/', variables('jumpBoxName'))]"
+			"[concat('Microsoft.Compute/virtualMachines/', variables('HeadNodeName'))]"
 		]
 	}]
 }

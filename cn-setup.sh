@@ -1,7 +1,7 @@
 #!/bin/bash
-echo ##################################################
-echo ############# Compute Node Setup #################
-echo ##################################################
+echo "##################################################"
+echo "############# Compute Node Setup #################"
+echo "##################################################"
 date
 set -x
 #set -xeuo pipefail
@@ -11,20 +11,13 @@ if [[ $(id -u) -ne 0 ]] ; then
     exit 1
 fi
 
-#IPHEADNODE=$1
-IPHEADNODE=10.0.0.4
+# Passed in user created by waagent
 HPC_USER=$1
 HPC_GROUP=$HPC_USER
-
-# User
-#HPC_USER=hpc
-#HPC_UID=7007
-#HPC_GROUP=hpc
-#HPC_GID=7007
+IPHEADNODE=10.0.0.4
 
 # Shares
 SHARE_DATA=/share/data
-#SHARE_HOME=/space/home
 SHARE_HOME=/share/home
 LOCAL_SCRATCH=/mnt/resource
 
@@ -62,8 +55,6 @@ setup_system_centos72()
 	systemctl start nfs-server
 	systemctl start nfs-lock
 	systemctl start nfs-idmap
-	#echo "$IPHEADNODE:$SHARE_DATA $SHARE_DATA nfs defaults,nofail 0 0" | tee -a /etc/fstab
-	#echo "$IPHEADNODE:$SHARE_HOME $SHARE_HOME nfs defaults,nofail 0 0" | tee -a /etc/fstab
 	echo "$IPHEADNODE:$SHARE_DATA $SHARE_DATA nfs4 rw,retry=5,timeo=60,auto,_netdev 0 0" | tee -a /etc/fstab
 	echo "$IPHEADNODE:$SHARE_HOME $SHARE_HOME nfs4 rw,retry=5,timeo=60,auto,_netdev 0 0" | tee -a /etc/fstab
 	cat /etc/fstab
@@ -98,10 +89,8 @@ setup_user()
 
         # Disable tty requirement for sudo
         sed -i 's/^Defaults[ ]*requiretty/# Defaults requiretty/g' /etc/sudoers
-
-#	chown -R $HPC_USER:$HPC_USER /mnt/resource/
-
 }
+
 passwd -l $HPC_USER #-- lock account to prevent treading on homedir changes
 setup_disks
 setup_system_centos72

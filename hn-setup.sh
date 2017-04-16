@@ -4,9 +4,9 @@
 #
 # Tested On: CentOS 7.1, 7.2
 #
-echo ##################################################
-echo ############### Head Node Setup ##################
-echo ##################################################
+echo "##################################################"
+echo "############### Head Node Setup ##################"
+echo "##################################################"
 date
 set -x
 #set -xeuo pipefail
@@ -16,15 +16,9 @@ if [[ $(id -u) -ne 0 ]] ; then
     exit 1
 fi
 
+# Passed in user created by waagent
 HPC_USER=$1
 $HPC_GROUP=$HPC_USER
-#PASS=$2
-
-# User
-#HPC_USER=hpc
-#HPC_UID=7007
-#HPC_GROUP=hpc
-#HPC_GID=7007
 
 # Shares 
 SHARE_DATA=/share/data
@@ -143,6 +137,12 @@ setup_utilities()
 	sed -i '/\<'$myhost'\>/d' $SHARE_HOME/$HPC_USER/bin/nodeips.txt
 	sed -i '/\<10.0.0.1\>/d' $SHARE_HOME/$HPC_USER/bin/nodeips.txt
 
+#
+# Problem to record scale set node names since the nodes are not up yet. 
+# Workaround to have each scale set node create a file with it's hostname in ~/hosts directory. 
+# See touch statement in cn-setup.sh. clusRun.sh updated accordingly. 
+# This approach has the advantage that it's easy to add scale set nodes to the config also.
+#
 #	for NAME in `cat $SHARE_HOME/$HPC_USER/bin/nodeips.txt`; do sudo -u $HPC_USER -s ssh -o ConnectTimeout=2 $HPC_USER@$NAME 'hostname' >> $SHARE_HOME/$HPC_USER/bin/nodenames.txt;done
 #	NAMES=`ls $SHARE_HOME/$HPC_USER/hosts`
 #	for NAME in $NAMES; do echo $NAME >> $SHARE_HOME/$HPC_USER/bin/nodenames.txt; done
