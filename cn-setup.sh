@@ -46,6 +46,7 @@ setup_system_centos72()
 	yum install -y -q nfs-utils
 	yum install -y -q libibverbs-utils
 	yum install -y -q infiniband-diags
+	yum install -y -q htop sysstat
 
 	systemctl enable rpcbind
 	systemctl enable nfs-server

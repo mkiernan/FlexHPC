@@ -30,6 +30,24 @@
 				"description": "Number of VM instances (100 or less)."
 			}
 		},
+		"image": {
+			"type": "string",
+			"defaultValue": "OpenLogic:CentOS-HPC:7.1",
+			"allowedValues": [
+				"Canonical:UbuntuServer:16.04-LTS",
+				"Canonical:UbuntuServer:16.10",
+				"OpenLogic:CentOS-HPC:6.5",
+				"OpenLogic:CentOS:6.8",
+				"OpenLogic:CentOS-HPC:7.1",
+				"OpenLogic:CentOS:7.2",
+				"OpenLogic:CentOS:7.3",
+				"RedHat:RHEL:7.3",
+				"SUSE:SLES-HPC:12-SP2"
+			],
+			"metadata": {
+				"description": "OS version to deploy. -HPC suffixed images include the RDMA drivers for compute-to-compute MPI InfiniBand on A8, A9, H16r & H16mr VM sizes. Non *-HPC images need the RDMA drivers to be installed manually, or deploy without infiniband."
+			}
+		}, 
 		"adminUsername": {
 			"type": "String",
 			"metadata": {
@@ -56,19 +74,28 @@
 		"vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
 		"subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
 		"publicIPAddressName": "[concat(variables('namingInfix'), 'pip')]",
-		"publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
 		"nicName": "[concat(variables('namingInfix'), 'nic')]",
 		"ipConfigName": "[concat(variables('namingInfix'), 'ipconfig')]",
 		"scriptUrl": "https://raw.githubusercontent.com/mkiernan/FlexHPC/master/",
-		"cnSetupScript": "cn-setup.sh",
-		"hnSetupScript": "hn-setup.sh",
-		"osType": {
+		"imageReference_SUSE:SLES-HPC:12-SP2": {
+			"publisher": "SUSE",
+			"offer": "SLES-HPC",
+			"sku": "12-SP2",
+			"version": "latest"
+		},
+		"imageReference_OpenLogic:CentOS-HPC:7.1": {
 			"publisher": "OpenLogic",
 			"offer": "CentOS-HPC",
 			"sku": "7.1",
 			"version": "latest"
 		},
-		"imageReference": "[variables('osType')]",
+		"imageReference_Canonical:UbuntuServer:16.04-LTS": {
+     		 "publisher": "Canonical",
+    		  "offer": "UbuntuServer",
+ 		     "sku": "16.04-LTS",
+  		     "version": "latest"
+    	},
+	    "imageReference": "[variables(concat('imageReference_',parameters('image')))]",
 		"vmssScript": {
 			"scriptToDownload": [
 				"[concat(variables('scriptUrl'), 'cn-setup.sh')]"
