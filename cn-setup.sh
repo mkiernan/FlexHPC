@@ -166,7 +166,8 @@ setup_gpus_ubuntu1604()
 
 } #--- end of setup_gpus_ubuntu1604() ---#
 
-passwd -l $HPC_USER #-- lock account to prevent treading on homedir changes
+#passwd -l $HPC_USER #-- lock account to prevent treading on homedir changes
+echo "Deploying $PUBLISHER, $OFFER, $SKU....."
 setup_disks
 
 if [[ $PUBLISHER == "Canonical" && $OFFER == "UbuntuServer" && $SKU == "16.04-LTS" ]]; then
@@ -197,4 +198,4 @@ fi
 setup_user
 setup_env
 date
-passwd -u $HPC_USER #-- unlock account
+#passwd -u $HPC_USER #-- unlock account

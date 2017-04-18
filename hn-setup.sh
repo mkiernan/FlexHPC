@@ -164,11 +164,11 @@ setup_utilities()
 {
 	mkdir -p $SHARE_HOME/$HPC_USER/bin
 	mkdir -p $SHARE_HOME/$HPC_USER/hosts
-	#mkdir -p $SHARE_HOME/$HPC_USER/deploy
 	chmod 755 $SHARE_HOME/$HPC_USER/hosts
-	chmod 755 $SHARE_HOME/$HPC_USER/deploy
 	chown $HPC_USER:$HPC_GROUP $SHARE_HOME/$HPC_USER/bin
 	chown $HPC_USER:$HPC_GROUP $SHARE_HOME/$HPC_USER/hosts
+	#mkdir -p $SHARE_HOME/$HPC_USER/deploy
+	#chmod 755 $SHARE_HOME/$HPC_USER/deploy
 	#chown $HPC_USER:$HPC_GROUP $SHARE_HOME/$HPC_USER/deploy
 	#cp hn-setup.sh cn-setup.sh $SHARE_HOME/$HPC_USER/deploy
 	cp clusRun.sh pingpong.sh $SHARE_HOME/$HPC_USER/bin
@@ -198,7 +198,9 @@ setup_environment_modules()
 	echo "source /etc/profile.d/modules.sh" >> $SHARE_HOME/$HPC_USER/.bashrc
 }
 
-passwd -l $HPC_USER #-- lock account to prevent treading on homedir changes
+#passwd -l $HPC_USER #-- lock account to prevent treading on homedir changes
+
+echo "Deploying $PUBLISHER, $OFFER, $SKU....."
 setup_disks
 
 if [[ $PUBLISHER == "Canonical" && $OFFER == "UbuntuServer" && $SKU == "16.04-LTS" ]]; then
@@ -226,7 +228,7 @@ fi
 
 setup_user
 setup_utilities
-passwd -u $HPC_USER #-- unlock account
+#passwd -u $HPC_USER #-- unlock account
 date
 
 #chmod +x custom_extras.sh 
