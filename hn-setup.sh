@@ -202,9 +202,9 @@ passwd -l $HPC_USER #-- lock account to prevent treading on homedir changes
 setup_disks
 
 if [[ $PUBLISHER == "Canonical" && $OFFER == "UbuntuServer" && $SKU == "16.04-LTS" ]]; then
-	setup_system_ubuntu1604()
+	setup_system_ubuntu1604
 elif [[ $PUBLISHER == "Canonical" && $OFFER == "UbuntuServer" && $SKU == "16.10" ]]; then
-	setup_system_ubuntu1604()
+	setup_system_ubuntu1604
 elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS-HPC" && $SKU == "6.5" ]]; then
 	setup_system_centos72
 elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS" && $SKU == "6.8" ]]; then
