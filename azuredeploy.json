@@ -211,6 +211,18 @@
 			"[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
 		]
 	}, {
+		"type": "Microsoft.Compute/disks",
+		"name": "disk0",
+		"apiVersion": "2016-04-30-preview",
+		"location": "[resourceGroup().location]",
+		"properties": {
+			"creationData": {
+				"createOption": "Empty"
+			},
+			"accountType": "Standard_LRS",
+			"diskSizeGB": 1023
+		}
+	}, { 
 		"type": "Microsoft.Compute/virtualMachines",
 		"name": "[variables('HeadNodeName')]",
 		"apiVersion": "[variables('computeApiVersion')]",
@@ -233,14 +245,11 @@
            		"dataDisks": [
              		{
 						"lun": 0,
-						"name": "disk0",
 						"createOption": "Attach",
 						"caching": "ReadWrite",
 						"managedDisk": {
-							"storageAccountType": "Standard_LRS",
-							"id": "[resourceId('Microsoft.Compute/disks', 'disk00')]"
-						},
-						"diskSizeGB": 1023
+							"id": "[resourceId('Microsoft.Compute/disks', 'disk0')]"
+						}
 			 		}	
 				 ]
 			},
