@@ -111,8 +111,8 @@ setup_system_ubuntu1604()
 
 	apt-get -y update
 	apt-get -y upgrade
-	apt install -y pip
-	pip install --upgrade-pip
+	#apt install -y pip
+	#pip install --upgrade-pip
 	apt-get install -y -q sshpass nmap htop wget sysstat
 	apt-get install -y -q infiniband-diags
 	#apt-get install -y -q environment-modules
@@ -253,7 +253,7 @@ EOF
 		mdadm --create /dev/$raidDevice --level 0 --raid-devices $devices $createdPartitions
 		sleep 10
 		mdadm /dev/$raidDevice
-		mkfs.ext4 -i 2048 -I 512 -J size=400 -Odir_index,filetype /dev/$raidDevice
+		mkfs.ext4 -i 4096 -I 512 -J size=400 -Odir_index,filetype /dev/$raidDevice
 		sleep 5
 		tune2fs -o user_xattr /dev/$raidDevice
 		mkdir -p $mountPoint

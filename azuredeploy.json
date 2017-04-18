@@ -383,6 +383,14 @@
 							"id": "[resourceId('Microsoft.Compute/disks', 'disk0')]"
 						}
 			 		},
+					{
+						"lun": 1,
+						"createOption": "Attach",
+						"caching": "ReadWrite",
+						"managedDisk": {
+							"id": "[resourceId('Microsoft.Compute/disks', 'disk1')]"
+						}
+			 		},
              		{
 						"lun": 2,
 						"createOption": "Attach",
