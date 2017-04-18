@@ -228,10 +228,28 @@
 				"imageReference": "[variables('imageReference')]",
 				"osDisk": {
 					"caching": "ReadWrite",
-					"createOption": "FromImage"
-				}
+					"createOption": "FromImage",
+					"managedDisk": {
+						"storageAccountType": "Standard_LRS",
+						"id": "[resourceId('Microsoft.Compute/disks', 'osdiskname')]"
+					},
+					"diskSizeGB": 100
+				},
+           		"dataDisks": [
+             		{
+						"lun": 0,
+						"name": "disk0",
+						"createOption": "Attach",
+						"caching": "ReadWrite",
+						"managedDisk": {
+							"storageAccountType": "Standard_LRS",
+							"id": "[resourceId('Microsoft.Compute/disks', 'disk00')]"
+						},
+						"diskSizeGB": 1023
+			 		}	
+				 ]
 			},
-			"networkProfile": {
+ 			"networkProfile": {
 				"networkInterfaces": [{
 					"id": "[resourceId('Microsoft.Network/networkInterfaces',variables('HeadNodeNicName'))]"
 				}]

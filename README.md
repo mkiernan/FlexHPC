@@ -1,4 +1,9 @@
-# Flexible HPC Cluster + Head Node && NFS Server
+# Flexible HPC Cluster
+
+NB: Work in Progress. 
+
+HPC cluster deployment template, with add-on options for standalone NFS server, Fat nodes and additional scale sets. 
+
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmkiernan%2FFlexHPC%2Fmaster%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
@@ -17,6 +22,8 @@
 TBD: Grow + Shrink, Add Fat node, standalone NFS server & head nodes
 
 <b>Image Support Matrix</b>
+
+YES means the relevant RDMA or GPU drivers are included in the image or added dynamically during deployment. 
 <table>
 	<tr>
 	<th>OS Image</th>
