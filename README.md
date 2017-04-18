@@ -1,4 +1,4 @@
-# Flexible Linux VM Scale Set + Head Node && NFS Server
+# Flexible Compute Cluster + Head Node && NFS Server
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmkiernan%2FFlexHPC%2Fmaster%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
@@ -7,6 +7,14 @@
 <img src="http://armviz.io/visualizebutton.png"/>
 </a>
 <br><br>
+
+<b>Key Features</b>
+<li>Azure<a href="https://azure.microsoft.com/en-us/services/virtual-machine-scale-sets/">Scale Sets</a></li>
+<li>Azure<a href="https://azure.microsoft.com/en-us/services/managed-disks/">Managed Disks"></li></li>
+<li>Any Linux Image</li>
+<li>Up to 100 Nodes in the cluster</li>
+
+TBD: Grow + Shrink, Add Fat node, standalone NFS server.& head nodes
 
 <b>Quickstart</b>
 
