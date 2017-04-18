@@ -9,8 +9,8 @@
 <br><br>
 
 <b>Key Features</b>
-<li>Azure<a href="https://azure.microsoft.com/en-us/services/virtual-machine-scale-sets/">Scale Sets</a></li>
-<li>Azure<a href="https://azure.microsoft.com/en-us/services/managed-disks/">Managed Disks"></li></li>
+<li>azure <a href="https://azure.microsoft.com/en-us/services/virtual-machine-scale-sets/">scale sets</a></li>
+<li>azure <a href="https://azure.microsoft.com/en-us/services/managed-disks/">Managed Disks"></a></li></li>
 <li>Any Linux Image</li>
 <li>Up to 100 Nodes in the cluster</li>
 
