@@ -13,8 +13,8 @@
 <li>RDMA (FDR, QDR Infinband) and GPU (K80) compute nodes supported. 
 <li>azure <a href="https://azure.microsoft.com/en-us/services/virtual-machine-scale-sets/">scale sets</a></li>
 <li>azure <a href="https://azure.microsoft.com/en-us/services/managed-disks/">managed disks</a></li></li>
-<b>
-TBD: Grow + Shrink, Add Fat node, standalone NFS server.& head nodes
+
+TBD: Grow + Shrink, Add Fat node, standalone NFS server & head nodes
 
 <b>Image Support Matrix</b>
 <table>
