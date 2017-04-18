@@ -38,6 +38,7 @@ OFFER=`echo $VMIMAGE| awk -F ":" '{print $2}'`
 SKU=`echo $VMIMAGE| awk -F ":" '{print $3}'`
 
 # Shares 
+SHARE_ROOT=/share
 SHARE_DATA=/share/data
 SHARE_HOME=/share/home
 LOCAL_SCRATCH=/mnt/resource
@@ -199,9 +200,74 @@ setup_environment_modules()
 	echo "source /etc/profile.d/modules.sh" >> $SHARE_HOME/$HPC_USER/.bashrc
 }
 
+setup_diskpack()
+{
+	# have to fix /etc/fstab to avoid md device number cycling on Ubuntu; by hand:
+	# e2label /dev/md10 SPACE
+	# insert into /etc/fstab:
+	# LABEL=SPACE /space ext4 noatime,nodiratime,nobarrier,nofail 0 2
+	# https://support.clustrix.com/hc/en-us/articles/203655739-How-to-make-the-mdadm-RAID-volume-persists-after-reboot
+
+	raidDevice="md10"
+	filesystem="ext4"
+	mountPoint=$SHARE_ROOT
+
+	# Dump the current disk config for debugging
+	fdisk -l
+
+	# Dump the scsi config
+	lsscsi
+
+	# Get the root/OS disk so we know which device it uses and can ignore it later
+	rootDevice=`mount | grep "on / type" | awk '{print $1}' | sed 's/[0-9]//g'`
+
+	# Get the TMP disk so we know which device and can ignore it later
+	tmpDevice=`mount | grep "on /mnt type" | awk '{print $1}' | sed 's/[0-9]//g'`
+
+	createdPartitions=""
+	storageDiskSize=`fdisk -l | grep '^Disk /dev/' | grep -v $rootDevice | grep -v $tmpDevice | awk '{print $3}' | sort -n | tail -1`
+	echo $storageDiskSize
+	devices="`fdisk -l | grep '^Disk /dev/' | grep $storageDiskSize | awk '{print $2}' | awk -F: '{print $1}' | sort | tr '\n' ' ' | sed 's|/dev/||g'`"
+	echo $devices
+
+	# Loop through and partition disks until not found
+	for disk in $devices; do
+		fdisk -l /dev/$disk || break
+		fdisk /dev/$disk << EOF
+n
+p
+1
+
+
+t
+fd
+w
+EOF
+		createdPartitions="$createdPartitions /dev/${disk}1"
+	done
+	sleep 10
+
+	# Create RAID-0 volume
+	if [ -n "$createdPartitions" ]; then
+		devices=`echo $createdPartitions | wc -w`
+		mdadm --create /dev/$raidDevice --level 0 --raid-devices $devices $createdPartitions
+		sleep 10
+		mdadm /dev/$raidDevice
+		mkfs.ext4 -i 2048 -I 512 -J size=400 -Odir_index,filetype /dev/$raidDevice
+		sleep 5
+		tune2fs -o user_xattr /dev/$raidDevice
+		mkdir -p $mountPoint
+		echo "/dev/$raidDevice $mountPoint $filesystem noatime,nodiratime,nobarrier,nofail 0 2" >> /etc/fstab
+		sleep 10
+		mount /dev/$raidDevice
+        fi
+
+} #-- end of setup_diskpack() --#
+
 #passwd -l $HPC_USER #-- lock account to prevent treading on homedir changes
 
 echo "Deploying $PUBLISHER, $OFFER, $SKU....."
+setup_diskpack
 setup_disks
 
 if [[ $PUBLISHER == "Canonical" && $OFFER == "UbuntuServer" && $SKU == "16.04-LTS" ]]; then

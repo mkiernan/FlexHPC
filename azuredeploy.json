@@ -223,6 +223,138 @@
 			"diskSizeGB": 1023
 		}
 	}, { 
+		"type": "Microsoft.Compute/disks",
+		"name": "disk1",
+		"apiVersion": "2016-04-30-preview",
+		"location": "[resourceGroup().location]",
+		"properties": {
+			"creationData": {
+				"createOption": "Empty"
+			},
+			"accountType": "Standard_LRS",
+			"diskSizeGB": 1023
+		}
+	}, { 
+		"type": "Microsoft.Compute/disks",
+		"name": "disk2",
+		"apiVersion": "2016-04-30-preview",
+		"location": "[resourceGroup().location]",
+		"properties": {
+			"creationData": {
+				"createOption": "Empty"
+			},
+			"accountType": "Standard_LRS",
+			"diskSizeGB": 1023
+		}
+	}, { 
+		"type": "Microsoft.Compute/disks",
+		"name": "disk3",
+		"apiVersion": "2016-04-30-preview",
+		"location": "[resourceGroup().location]",
+		"properties": {
+			"creationData": {
+				"createOption": "Empty"
+			},
+			"accountType": "Standard_LRS",
+			"diskSizeGB": 1023
+		}
+	}, { 
+		"type": "Microsoft.Compute/disks",
+		"name": "disk4",
+		"apiVersion": "2016-04-30-preview",
+		"location": "[resourceGroup().location]",
+		"properties": {
+			"creationData": {
+				"createOption": "Empty"
+			},
+			"accountType": "Standard_LRS",
+			"diskSizeGB": 1023
+		}
+	}, { 
+		"type": "Microsoft.Compute/disks",
+		"name": "disk5",
+		"apiVersion": "2016-04-30-preview",
+		"location": "[resourceGroup().location]",
+		"properties": {
+			"creationData": {
+				"createOption": "Empty"
+			},
+			"accountType": "Standard_LRS",
+			"diskSizeGB": 1023
+		}
+	}, { 
+		"type": "Microsoft.Compute/disks",
+		"name": "disk6",
+		"apiVersion": "2016-04-30-preview",
+		"location": "[resourceGroup().location]",
+		"properties": {
+			"creationData": {
+				"createOption": "Empty"
+			},
+			"accountType": "Standard_LRS",
+			"diskSizeGB": 1023
+		}
+	}, { 
+		"type": "Microsoft.Compute/disks",
+		"name": "disk7",
+		"apiVersion": "2016-04-30-preview",
+		"location": "[resourceGroup().location]",
+		"properties": {
+			"creationData": {
+				"createOption": "Empty"
+			},
+			"accountType": "Standard_LRS",
+			"diskSizeGB": 1023
+		}
+	}, { 
+		"type": "Microsoft.Compute/disks",
+		"name": "disk8",
+		"apiVersion": "2016-04-30-preview",
+		"location": "[resourceGroup().location]",
+		"properties": {
+			"creationData": {
+				"createOption": "Empty"
+			},
+			"accountType": "Standard_LRS",
+			"diskSizeGB": 1023
+		}
+	}, { 
+		"type": "Microsoft.Compute/disks",
+		"name": "disk9",
+		"apiVersion": "2016-04-30-preview",
+		"location": "[resourceGroup().location]",
+		"properties": {
+			"creationData": {
+				"createOption": "Empty"
+			},
+			"accountType": "Standard_LRS",
+			"diskSizeGB": 1023
+		}
+	}, { 
+		"type": "Microsoft.Compute/disks",
+		"name": "disk10",
+		"apiVersion": "2016-04-30-preview",
+		"location": "[resourceGroup().location]",
+		"properties": {
+			"creationData": {
+				"createOption": "Empty"
+			},
+			"accountType": "Standard_LRS",
+			"diskSizeGB": 1023
+		}
+	}, { 
+		"type": "Microsoft.Compute/disks",
+		"name": "disk11",
+		"apiVersion": "2016-04-30-preview",
+		"location": "[resourceGroup().location]",
+		"properties": {
+			"creationData": {
+				"createOption": "Empty"
+			},
+			"accountType": "Standard_LRS",
+			"diskSizeGB": 1023
+		}
+	}, { 
 		"type": "Microsoft.Compute/virtualMachines",
 		"name": "[variables('HeadNodeName')]",
 		"apiVersion": "[variables('computeApiVersion')]",
@@ -249,6 +381,86 @@
 						"caching": "ReadWrite",
 						"managedDisk": {
 							"id": "[resourceId('Microsoft.Compute/disks', 'disk0')]"
+						}
+			 		},
+             		{
+						"lun": 2,
+						"createOption": "Attach",
+						"caching": "ReadWrite",
+						"managedDisk": {
+							"id": "[resourceId('Microsoft.Compute/disks', 'disk2')]"
+						}
+			 		},
+	        		{
+						"lun": 3,
+						"createOption": "Attach",
+						"caching": "ReadWrite",
+						"managedDisk": {
+							"id": "[resourceId('Microsoft.Compute/disks', 'disk3')]"
+						}
+			 		},
+             		{
+						"lun": 4,
+						"createOption": "Attach",
+						"caching": "ReadWrite",
+						"managedDisk": {
+							"id": "[resourceId('Microsoft.Compute/disks', 'disk4')]"
+						}
+			 		},
+             		{
+						"lun": 5,
+						"createOption": "Attach",
+						"caching": "ReadWrite",
+						"managedDisk": {
+							"id": "[resourceId('Microsoft.Compute/disks', 'disk5')]"
+						}
+			 		},	
+	            	{
+						"lun": 6,
+						"createOption": "Attach",
+						"caching": "ReadWrite",
+						"managedDisk": {
+							"id": "[resourceId('Microsoft.Compute/disks', 'disk6')]"
+						}
+			 		},
+             		{
+						"lun": 7,
+						"createOption": "Attach",
+						"caching": "ReadWrite",
+						"managedDisk": {
+							"id": "[resourceId('Microsoft.Compute/disks', 'disk7')]"
+						}
+			 		},
+	           		{
+						"lun": 8,
+						"createOption": "Attach",
+						"caching": "ReadWrite",
+						"managedDisk": {
+							"id": "[resourceId('Microsoft.Compute/disks', 'disk8')]"
+						}
+			 		},	
+             		{
+						"lun": 9,
+						"createOption": "Attach",
+						"caching": "ReadWrite",
+						"managedDisk": {
+							"id": "[resourceId('Microsoft.Compute/disks', 'disk9')]"
+						}
+			 		},
+             		{
+						"lun": 10,
+						"createOption": "Attach",
+						"caching": "ReadWrite",
+						"managedDisk": {
+							"id": "[resourceId('Microsoft.Compute/disks', 'disk10')]"
+						}
+			 		},	
+             		{
+						"lun": 11,
+						"createOption": "Attach",
+						"caching": "ReadWrite",
+						"managedDisk": {
+							"id": "[resourceId('Microsoft.Compute/disks', 'disk11')]"
 						}
 			 		}	
 				 ]
