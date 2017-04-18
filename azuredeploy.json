@@ -228,12 +228,7 @@
 				"imageReference": "[variables('imageReference')]",
 				"osDisk": {
 					"caching": "ReadWrite",
-					"createOption": "FromImage",
-					"managedDisk": {
-						"storageAccountType": "Standard_LRS",
-						"id": "[resourceId('Microsoft.Compute/disks', 'osdiskname')]"
-					},
-					"diskSizeGB": 100
+					"createOption": "FromImage"
 				},
            		"dataDisks": [
              		{
