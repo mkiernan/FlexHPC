@@ -100,7 +100,7 @@ setup_system_centos72()
 
 setup_system_ubuntu1604()
 {
-	env DEBIAN_FRONTEND noninteractive
+	export DEBIAN_FRONTEND=noninteractive
         echo "* hard memlock unlimited" >> /etc/security/limits.conf
         echo "* soft memlock unlimited" >> /etc/security/limits.conf
 
