@@ -89,7 +89,7 @@ setup_system_centos72()
 	touch $SHARE_HOME/$HPC_USER/hosts/$HOSTNAME
 	echo `hostname -i` >>$SHARE_HOME/$HPC_USER/hosts/$HOSTNAME
 
-} } #--- end of setup_system_centos72() ---#
+} #--- end of setup_system_centos72() ---#
 
 setup_system_ubuntu1604()
 {
@@ -152,7 +152,10 @@ setup_gpus_ubuntu1604()
 	wget -O /tmp/${CUDA_REPO_PKG} http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/${CUDA_REPO_PKG}
 	sudo dpkg -i /tmp/${CUDA_REPO_PKG}
 	rm -f /tmp/${CUDA_REPO_PKG}
-
+	#-- disable kernel updates to prevent nvidia driver issues for now:
+	for i in $(dpkg -l "*$(uname -r)*" | grep image | awk '{print $2}'); do echo $i hold | sudo dpkg --set-selections; done
+	#-- you can remove reverse this with:
+	#for i in $(dpkg -l "*$(uname -r)*" | grep image | awk '{print $2}'); do echo $i install | sudo dpkg --set-selections; done
 	#sudo apt-get update
 	#sudo apt-get upgrade -y
 	sudo apt-get install cuda-drivers
