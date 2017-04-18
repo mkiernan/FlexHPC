@@ -100,6 +100,7 @@ setup_system_centos72()
 
 setup_system_ubuntu1604()
 {
+	env DEBIAN_FRONTEND noninteractive
         echo "* hard memlock unlimited" >> /etc/security/limits.conf
         echo "* soft memlock unlimited" >> /etc/security/limits.conf
 
@@ -112,7 +113,7 @@ setup_system_ubuntu1604()
 	apt install -y pip
 	pip install --upgrade-pip
 	apt-get install -y -q sshpass nmap htop wget sysstat
-	apt-get install -y -q libibverb-utils infiniband-diags
+	apt-get install -y -q infiniband-diags
 	#apt-get install -y -q environment-modules
 
 } #--- end of setup_system_ubuntu1604() ---#

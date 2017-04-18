@@ -59,7 +59,6 @@ setup_system_centos72()
         echo "* hard memlock unlimited" >> /etc/security/limits.conf
         echo "* soft memlock unlimited" >> /etc/security/limits.conf
 
-
 	yum install -y -q nfs-utils
 
 #	systemctl enable rpcbind
@@ -81,7 +80,7 @@ setup_system_centos72()
 	echo "$IPHEADNODE:$SHARE_DATA $SHARE_DATA nfs4 rw,retry=5,timeo=60,auto,_netdev 0 0" | tee -a /etc/fstab
 	echo "$IPHEADNODE:$SHARE_HOME $SHARE_HOME nfs4 rw,retry=5,timeo=60,auto,_netdev 0 0" | tee -a /etc/fstab
 	cat /etc/fstab
-	rpcinfo -p 10.0.0.4
+	rpcinfo -p $IPHEADNODE
 	showmount -e $IPHEADNODE
 	mount -a
 	df -h
@@ -93,6 +92,7 @@ setup_system_centos72()
 
 setup_system_ubuntu1604()
 {
+	env DEBIAN_FRONTEND noninteractive
         echo "* hard memlock unlimited" >> /etc/security/limits.conf
         echo "* soft memlock unlimited" >> /etc/security/limits.conf
 
@@ -104,8 +104,19 @@ setup_system_ubuntu1604()
         apt-get -y update
         apt-get -y upgrade
         apt-get install -y -q sshpass nmap htop wget sysstat
-        apt-get install -y -q libibverb-utils infiniband-diags
+        apt-get install -y -q infiniband-diags
         #apt-get install -y -q environment-modules
+
+	echo "$IPHEADNODE:$SHARE_DATA $SHARE_DATA nfs4 rw,retry=5,timeo=60,auto,_netdev 0 0" | tee -a /etc/fstab
+	echo "$IPHEADNODE:$SHARE_HOME $SHARE_HOME nfs4 rw,retry=5,timeo=60,auto,_netdev 0 0" | tee -a /etc/fstab
+	cat /etc/fstab
+	rpcinfo -p $IPHEADNODE
+	showmount -e $IPHEADNODE
+	mount -a
+	df -h
+	ls -lR $SHARE_HOME/$HPC_USER
+	touch $SHARE_HOME/$HPC_USER/hosts/$HOSTNAME
+	echo `hostname -i` >>$SHARE_HOME/$HPC_USER/hosts/$HOSTNAME
 
 } #--- end of setup_system_ubuntu1604() ---#
 
