@@ -16,6 +16,24 @@
 <b>
 TBD: Grow + Shrink, Add Fat node, standalone NFS server.& head nodes
 
+<b>Image Support Matrix</b>
+<table>
+	<tr>
+	<th>OS Image</th>
+	<th>RDMA Support</th>
+	<th>GPU Support</th>
+	</tr>
+	<tr><td>Canonical:UbuntuServer:16.04-LTS</td><td>NO</td><td>YES</td></tr>
+	<tr><td>Canonical:UbuntuServer:16.10</td><td>NO</td><td>YES</td></tr>
+	<tr><td>OpenLogic:CentOS-HPC:6.5</td><td>YES</td><td>TBD</td></tr>
+	<tr><td>OpenLogic:CentOS:6.8</td><td>YES</td><td>TBD</td></tr>
+	<tr><td>OpenLogic:CentOS-HPC:7.1</td><td>YES</td><td>TBD</td></tr>
+	<tr><td>OpenLogic:CentOS:7.2</td><td>YES</td><td>TBD</td></tr>
+	<tr><td>OpenLogic:CentOS:7.3</td><td>YES</td><td>TBD</td></tr>
+	<tr><td>RedHat:RHEL:7.3</td><td>TBD</td><td>TBD</td></tr>
+	<tr><td>SUSE:SLES-HPC:12-SP2</td><td>YES</td><td>TBD</td></tr>
+</table>
+
 <b>Quickstart</b>
 
 	1) Deploy the ARM Template: 
