@@ -202,11 +202,6 @@ setup_environment_modules()
 
 setup_diskpack()
 {
-	# have to fix /etc/fstab to avoid md device number cycling on Ubuntu; by hand:
-	# e2label /dev/md10 SPACE
-	# insert into /etc/fstab:
-	# LABEL=SPACE /space ext4 noatime,nodiratime,nobarrier,nofail 0 2
-	# https://support.clustrix.com/hc/en-us/articles/203655739-How-to-make-the-mdadm-RAID-volume-persists-after-reboot
 
 	raidDevice="md10"
 	filesystem="ext4"
@@ -257,9 +252,18 @@ EOF
 		sleep 5
 		tune2fs -o user_xattr /dev/$raidDevice
 		mkdir -p $mountPoint
-		echo "/dev/$raidDevice $mountPoint $filesystem noatime,nodiratime,nobarrier,nofail 0 2" >> /etc/fstab
+		# have to fix /etc/fstab to avoid md device number cycling on Ubuntu; by hand:
+		# https://support.clustrix.com/hc/en-us/articles/203655739-How-to-make-the-mdadm-RAID-volume-persists-after-reboot
+		e2label /dev/md10 SPACE
+		# insert into /etc/fstab:
+		# LABEL=SPACE /space ext4 noatime,nodiratime,nobarrier,nofail 0 2
+		echo "LABEL=SPACE $mountPoint $filesystem noatime,nodiratime,nobarrier,nofail 0 2" >> /etc/fstab
+		#echo "/dev/$raidDevice $mountPoint $filesystem noatime,nodiratime,nobarrier,nofail 0 2" >> /etc/fstab
 		sleep 10
 		mount /dev/$raidDevice
+		df -h
+		# Backup mdadm config to its config file. (optional)
+		mdadm --verbose --detail --scan >> /etc/mdadm.conf
         fi
 
 } #-- end of setup_diskpack() --#
