@@ -18,6 +18,7 @@ HPC cluster deployment template, with add-on options for standalone NFS server, 
 <li>RDMA (FDR, QDR Infinband) and GPU (K80) compute nodes supported. 
 <li>azure <a href="https://azure.microsoft.com/en-us/services/virtual-machine-scale-sets/">scale sets</a></li>
 <li>azure <a href="https://azure.microsoft.com/en-us/services/managed-disks/">managed disks</a></li></li>
+<li>NFS Server with 10TB of Standard_LRS storage attached</li>
 
 TBD: Grow + Shrink, Add Fat node, standalone NFS server & head nodes
 

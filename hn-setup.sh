@@ -125,8 +125,9 @@ setup_user()
 #	groupadd -g $HPC_GID $HPC_GROUP
 #	useradd -c "HPC User" -g $HPC_GROUP -m -d $SHARE_HOME/$HPC_USER -s /bin/bash -u $HPC_UID $HPC_USER
 	# Undo the HOME setup done by waagent ossetup -> move it to NFS share
-	#mv -p /home/$HPC_USER $SHARE_HOME
 	usermod -m -d $SHARE_HOME/$HPC_USER $HPC_USER
+#	mv -p /home/$HPC_USER $SHARE_HOME
+#	usermod -d $SHARE_HOME/$HPC_USER $HPC_USER
 
 	# Don't require password for HPC user sudo
 	echo "$HPC_USER ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
@@ -301,6 +302,7 @@ setup_user
 setup_utilities
 #passwd -u $HPC_USER #-- unlock account
 date
+reboot #--- not really necessary, just to be 100% sure storage devices persist before users put data here. 
 
 #chmod +x custom_extras.sh 
 #source custom_extras.sh $USER
