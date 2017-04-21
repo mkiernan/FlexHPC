@@ -1,8 +1,7 @@
 #!/bin/bash
 HPC_USER=`whoami`
-SHARE_HOME=/share/home
-NAMES=`ls $SHARE_HOME/$HPC_USER/hosts`
-#NAMES=`cat /share/home/$USER/bin/nodenames.txt` #names from names.txt file
+CLUSTERMAPFS=/cluster
+NAMES=`ls $CLUSTERMAPFS/hosts`
 echo "launching $1"
 for NAME in $NAMES; do
   #the & here will fork off a run for each node and move to the next, the wait at the end waits until all is complete

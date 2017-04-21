@@ -1,8 +1,9 @@
 #!/bin/bash
-echo "##################################################"
-echo "############# Compute Node Setup #################"
-echo "##################################################"
-date
+#
+# Compute-Node Installation Script
+#
+# Tested On CentOS 7.1, 7.2, Ubuntu 16.04
+#
 set -x
 #set -xeuo pipefail
 
@@ -12,8 +13,8 @@ if [[ $(id -u) -ne 0 ]] ; then
 fi
 
 # Passed in user created by waagent
-HPC_USER=$1
-#HPC_GROUP=$HPC_USER
+HPC_ADMIN=$1
+#HPC_GROUP=$HPC_ADMIN
 
 # Linux distro detection remains a can of worms, just pass it in here:
 VMIMAGE=$2
@@ -35,18 +36,24 @@ SKU=`echo $VMIMAGE| awk -F ":" '{print $3}'`
 IPHEADNODE=10.0.0.4
 
 # Shares
-SHARE_DATA=/share/data
-SHARE_HOME=/share/home
+SHARE_DATA="$IPHEADNODE:/share/data"
+SHARE_HOME="$IPHEADNODE:/share/home"
+CLUSTERMAP="$IPHEADNODE:/share/clustermap"
 LOCAL_SCRATCH=/mnt/resource
 
-setup_disks()
+# Local filesystem to map shares to 
+DATAFS=/data
+SCRATCHFS=/scratch
+CLUSTERMAPFS=/clustermap
+
+setup_shares()
 {
-	mkdir -p $SHARE_DATA
-	mkdir -p $SHARE_HOME
-	mkdir -p $LOCAL_SCRATCH
-	chmod -R 777 $SHARE_HOME
-	chmod -R 777 $SHARE_DATA
-	chmod -R 777 $LOCAL_SCRATCH
+	mkdir -p $DATAFS
+	mkdir -p $SCRATCHFS
+	mkdir -p $CLUSTERMAPFS
+	chmod -R 777 $DATAFS
+	chmod -R 777 $SCRATCHFS
+	chmod -R 777 $CLUSTERMAPFS
 
 } #--- end of setup_disks() ---# 
 
@@ -61,32 +68,12 @@ setup_system_centos72()
 
 	yum install -y -q nfs-utils
 
-#	systemctl enable rpcbind
-#	systemctl enable nfs-server
-#	systemctl enable nfs-lock
-#	systemctl enable nfs-idmap
-#	systemctl start rpcbind
-#	systemctl start nfs-server
-#	systemctl start nfs-lock
-#	systemctl start nfs-idmap
-
 	ln -s /opt/intel/impi/5.1.3.181/intel64/bin/ /opt/intel/impi/5.1.3.181/bin
 	ln -s /opt/intel/impi/5.1.3.181/lib64/ /opt/intel/impi/5.1.3.181/lib
 
         yum install -y -q sshpass nmap htop sysstat
         yum install -y -q libibverb-utils infiniband-diags
         yum install -y -q environment-modules
-
-	echo "$IPHEADNODE:$SHARE_DATA $SHARE_DATA nfs4 rw,retry=5,timeo=60,auto,_netdev 0 0" | tee -a /etc/fstab
-	echo "$IPHEADNODE:$SHARE_HOME $SHARE_HOME nfs4 rw,retry=5,timeo=60,auto,_netdev 0 0" | tee -a /etc/fstab
-	cat /etc/fstab
-	rpcinfo -p $IPHEADNODE
-	showmount -e $IPHEADNODE
-	mount -a
-	df -h
-	ls -lR $SHARE_HOME/$HPC_USER
-	touch $SHARE_HOME/$HPC_USER/hosts/$HOSTNAME
-	echo `hostname -i` >>$SHARE_HOME/$HPC_USER/hosts/$HOSTNAME
 
 } #--- end of setup_system_centos72() ---#
 
@@ -98,7 +85,7 @@ setup_system_ubuntu1604()
 
         # do this before rpm's or too slow for the scaleset mounts
         #apt-get install -y -q rpcbind nfs-kernel-server nfs-common
-        apt-get install -y -q nfs-common
+        apt-get install -y -q nfs-common autofs
         #systemctl start nfs-kernel-server.service
 
         apt-get -y update
@@ -107,44 +94,7 @@ setup_system_ubuntu1604()
         apt-get install -y -q infiniband-diags
         #apt-get install -y -q environment-modules
 
-	echo "$IPHEADNODE:$SHARE_DATA $SHARE_DATA nfs4 rw,retry=5,timeo=60,auto,_netdev 0 0" | tee -a /etc/fstab
-	echo "$IPHEADNODE:$SHARE_HOME $SHARE_HOME nfs4 rw,retry=5,timeo=60,auto,_netdev 0 0" | tee -a /etc/fstab
-	cat /etc/fstab
-	rpcinfo -p $IPHEADNODE
-	showmount -e $IPHEADNODE
-	mount -a
-	df -h
-	ls -lR $SHARE_HOME/$HPC_USER
-	touch $SHARE_HOME/$HPC_USER/hosts/$HOSTNAME
-	echo `hostname -i` >>$SHARE_HOME/$HPC_USER/hosts/$HOSTNAME
-
 } #--- end of setup_system_ubuntu1604() ---#
-
-setup_env()
-{
-	echo export INTELMPI_ROOT=/opt/intel/impi/5.1.3.181 >> $SHARE_HOME/$HPC_USER/.bashrc
-	echo export I_MPI_FABRICS=shm:dapl >> $SHARE_HOME/$HPC_USER/.bashrc
-	echo export I_MPI_DAPL_PROVIDER=ofa-v2-ib0 >> $SHARE_HOME/$HPC_USER/.bashrc
-	echo export I_MPI_ROOT=/opt/intel/compilers_and_libraries_2016.2.181/linux/mpi >> $SHARE_HOME/$HPC_USER/.bashrc
-	echo export I_MPI_DYNAMIC_CONNECTION=0 >> $SHARE_HOME/$HPC_USER/.bashrc
-
-} #--- end of setup_env() ---#
-
-setup_user()
-{
-        # Add User + Group
-#       groupadd -g $HPC_GID $HPC_GROUP
-#       useradd -c "HPC User" -g $HPC_GROUP -m -d $SHARE_HOME/$HPC_USER -s /bin/bash -u $HPC_UID $HPC_USER
-        # Undo the HOME setup done by waagent ossetup
-        usermod -m -d $SHARE_HOME/$HPC_USER $HPC_USER
-
-        # Don't require password for HPC user sudo
-        echo "$HPC_USER ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-
-        # Disable tty requirement for sudo
-        sed -i 's/^Defaults[ ]*requiretty/# Defaults requiretty/g' /etc/sudoers
-
-} #--- end of setup_user() ---#
 
 setup_gpus_ubuntu1604()
 {
@@ -177,36 +127,100 @@ setup_gpus_ubuntu1604()
 
 } #--- end of setup_gpus_ubuntu1604() ---#
 
-#passwd -l $HPC_USER #-- lock account to prevent treading on homedir changes
+setup_system()
+{
+	if [[ $PUBLISHER == "Canonical" && $OFFER == "UbuntuServer" && $SKU == "16.04-LTS" ]]; then
+	        setup_system_ubuntu1604
+		setup_gpus_ubuntu1604
+	elif [[ $PUBLISHER == "Canonical" && $OFFER == "UbuntuServer" && $SKU == "16.10" ]]; then
+	        setup_system_ubuntu1604
+		setup_gpus_ubuntu1604
+	elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS-HPC" && $SKU == "6.5" ]]; then
+	        setup_system_centos72
+	elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS" && $SKU == "6.8" ]]; then
+	        setup_system_centos72
+	elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS-HPC" && $SKU == "7.1" ]]; then
+	        setup_system_centos72
+	elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS" && $SKU == "7.2" ]]; then
+	        setup_system_centos72
+	elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS" && $SKU == "7.3" ]]; then
+	        setup_system_centos72
+	elif [[ $PUBLISHER == "RedhHat" && $OFFER == "RHEL" && $SKU == "7.3" ]]; then
+	        setup_system_centos72
+	elif [[ $PUBLISHER == "SUSE" && $OFFER == "SLES-HPC" && $SKU == "12-SP2" ]]; then
+	        setup_system_centos72
+	else
+	        echo "***** IMAGE $PUBLISHER:$OFFER:$VERSION NOT SUPPORTED *****"
+	        exit -1
+	fi
+
+} #--- end of setup_system() ---#
+
+setup_env()
+{
+	echo export INTELMPI_ROOT=/opt/intel/impi/5.1.3.181 >> $SHARE_HOME/$HPC_ADMIN/.bashrc
+	echo export I_MPI_FABRICS=shm:dapl >> $SHARE_HOME/$HPC_ADMIN/.bashrc
+	echo export I_MPI_DAPL_PROVIDER=ofa-v2-ib0 >> $SHARE_HOME/$HPC_ADMIN/.bashrc
+	echo export I_MPI_ROOT=/opt/intel/compilers_and_libraries_2016.2.181/linux/mpi >> $SHARE_HOME/$HPC_ADMIN/.bashrc
+	echo export I_MPI_DYNAMIC_CONNECTION=0 >> $SHARE_HOME/$HPC_ADMIN/.bashrc
+
+} #--- end of setup_env() ---#
+
+setup_user()
+{
+        # Add User + Group
+#       groupadd -g $HPC_GID $HPC_GROUP
+#       useradd -c "HPC User" -g $HPC_GROUP -m -d $SHARE_HOME/$HPC_ADMIN -s /bin/bash -u $HPC_UID $HPC_ADMIN
+        # Undo the HOME setup done by waagent ossetup
+        #usermod -m -d $SHARE_HOME/$HPC_ADMIN $HPC_ADMIN
+        usermod -d $SHARE_HOME/$HPC_ADMIN $HPC_ADMIN
+	rm -rf /home/$HPC_ADMIN
+
+        # Don't require password for HPC user sudo
+        echo "$HPC_ADMIN ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+        # Disable tty requirement for sudo
+        sed -i 's/^Defaults[ ]*requiretty/# Defaults requiretty/g' /etc/sudoers
+
+} #--- end of setup_user() ---#
+
+setup_nfs_client()
+{
+	#-- static nfsv3 mounts
+	echo "$SHARE_DATA $DATAFS nfs rw,retry=5,timeo=60,auto,_netdev 0 0" | tee -a /etc/fstab
+	echo "$CLUSTERMAP $CLUSTERMAPFS nfs rw,retry=5,timeo=60,auto,_netdev 0 0" | tee -a /etc/fstab
+	#echo "$IPHEADNODE:$SHARE_HOME $SHARE_HOME nfs4 rw,retry=5,timeo=60,auto,_netdev 0 0" | tee -a /etc/fstab
+	cat /etc/fstab
+	rpcinfo -p $IPHEADNODE
+	showmount -e $IPHEADNODE
+	mount -a
+	df -h
+
+	#-- record hostname of this client in the /clustermap nfs path for the headnode
+	#touch $SHARE_HOME/$HPC_ADMIN/hosts/$HOSTNAME
+	#echo `hostname -i` >>$SHARE_HOME/$HPC_ADMIN/hosts/$HOSTNAME
+	touch $CLUSTERMAPFS/hosts/$HOSTNAME
+	echo `hostname -i` >>$CLUSTERMAPFS/hosts/$HOSTNAME
+
+	#-- setup nfsv3 automounter for /home
+	echo "/home /etc/auto.home" >> /etc/auto.master
+	echo "* $SHARE_HOME/&" > /etc/auto.home
+	service autofs restart
+	ls -lR /home/$HPC_ADMIN
+
+} #--- end of setup_nfs_client() ---#
+
+
+echo "##################################################"
+echo "############# Compute Node Setup #################"
+echo "##################################################"
+date
+#passwd -l $HPC_ADMIN #-- lock account to prevent conflicts during install
 echo "Deploying $PUBLISHER, $OFFER, $SKU....."
-setup_disks
-
-if [[ $PUBLISHER == "Canonical" && $OFFER == "UbuntuServer" && $SKU == "16.04-LTS" ]]; then
-        setup_system_ubuntu1604
-	setup_gpus_ubuntu1604
-elif [[ $PUBLISHER == "Canonical" && $OFFER == "UbuntuServer" && $SKU == "16.10" ]]; then
-        setup_system_ubuntu1604
-	setup_gpus_ubuntu1604
-elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS-HPC" && $SKU == "6.5" ]]; then
-        setup_system_centos72
-elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS" && $SKU == "6.8" ]]; then
-        setup_system_centos72
-elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS-HPC" && $SKU == "7.1" ]]; then
-        setup_system_centos72
-elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS" && $SKU == "7.2" ]]; then
-        setup_system_centos72
-elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS" && $SKU == "7.3" ]]; then
-        setup_system_centos72
-elif [[ $PUBLISHER == "RedhHat" && $OFFER == "RHEL" && $SKU == "7.3" ]]; then
-        setup_system_centos72
-elif [[ $PUBLISHER == "SUSE" && $OFFER == "SLES-HPC" && $SKU == "12-SP2" ]]; then
-        setup_system_centos72
-else
-        echo "***** IMAGE $PUBLISHER:$OFFER:$VERSION NOT SUPPORTED *****"
-        exit -1
-fi
-
+setup_system
+setup_shares
 setup_user
+setup_nfs_client
 setup_env
 date
-#passwd -u $HPC_USER #-- unlock account
+#passwd -u $HPC_ADMIN #-- unlock account

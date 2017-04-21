@@ -4,12 +4,8 @@
 #
 # Tested On: CentOS 7.1, 7.2, Ubuntu 16.04
 #
-echo "##################################################"
-echo "############### Head Node Setup ##################"
-echo "##################################################"
-date
 set -x
-#set -xeuo pipefail
+#set -xeuo pipefail #-- exit 
 
 if [[ $(id -u) -ne 0 ]] ; then
     echo "Must be run as root"
@@ -17,8 +13,8 @@ if [[ $(id -u) -ne 0 ]] ; then
 fi
 
 # Passed in user created by waagent
-HPC_USER=$1
-HPC_GROUP=$HPC_USER
+HPC_ADMIN=$1
+HPC_GROUP=$HPC_ADMIN
 
 # Linux distro detection remains a can of worms, just pass it in here:
 VMIMAGE=$2 
@@ -41,23 +37,32 @@ SKU=`echo $VMIMAGE| awk -F ":" '{print $3}'`
 SHARE_ROOT=/share
 SHARE_DATA=/share/data
 SHARE_HOME=/share/home
+SHARE_CLUSTERMAP=/share/clustermap
 LOCAL_SCRATCH=/mnt/resource
+
+# Local filesystem to map shares to
+DATAFS=/data
+SCRATCHFS=/scratch_local
+CLUSTERMAPFS=/clustermap
 
 IP=`ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'`
 localip=`echo $IP | cut --delimiter='.' -f -3`
 
-echo User is: $HPC_USER
+echo User is: $HPC_ADMIN
 
-setup_disks()
+setup_shares()
 {
 	mkdir -p $SHARE_DATA
 	mkdir -p $SHARE_HOME
-	mkdir -p $LOCAL_SCRATCH
+	mkdir -p $SCRATCHFS
+	mkdir -p $SHARE_CLUSTERMAP
 	chmod -R 777 $SHARE_HOME
 	chmod -R 777 $SHARE_DATA
-	chmod -R 777 $LOCAL_SCRATCH
+	chmod -R 777 $SCRATCHFS
+	chmod -R 777 $SHARE_CLUSTERMAP
 	echo "$SHARE_DATA $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports
 	echo "$SHARE_HOME $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports
+	echo "$SHARE_CLUSTERMAP $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports
 #	echo "$LOCAL_SCRATCH $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports
 
 } #--- end of setup_disks() ---#
@@ -72,7 +77,7 @@ setup_system_centos72()
 	echo "* soft memlock unlimited" >> /etc/security/limits.conf
 
 	# do this before rpm's or too slow for the scaleset mounts
-	yum install -y -q nfs-utils
+	yum install -y -q nfs-utils autofs
 	systemctl enable rpcbind
 	systemctl enable nfs-server
 	systemctl enable nfs-lock
@@ -106,7 +111,7 @@ setup_system_ubuntu1604()
         echo "* soft memlock unlimited" >> /etc/security/limits.conf
 
 	# do this before rpm's or too slow for the scaleset mounts
-	apt-get install -y -q rpcbind nfs-kernel-server nfs-common
+	apt-get install -y -q nfs-common rpcbind nfs-kernel-server autofs
 	systemctl start nfs-kernel-server.service
 
 	apt-get -y update
@@ -119,77 +124,110 @@ setup_system_ubuntu1604()
 
 } #--- end of setup_system_ubuntu1604() ---#
 
+
+setup_system()
+{
+        if [[ $PUBLISHER == "Canonical" && $OFFER == "UbuntuServer" && $SKU == "16.04-LTS" ]]; then
+                setup_system_ubuntu1604
+                setup_gpus_ubuntu1604
+        elif [[ $PUBLISHER == "Canonical" && $OFFER == "UbuntuServer" && $SKU == "16.10" ]]; then
+                setup_system_ubuntu1604
+                setup_gpus_ubuntu1604
+        elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS-HPC" && $SKU == "6.5" ]]; then
+                setup_system_centos72
+        elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS" && $SKU == "6.8" ]]; then
+                setup_system_centos72
+        elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS-HPC" && $SKU == "7.1" ]]; then
+                setup_system_centos72
+        elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS" && $SKU == "7.2" ]]; then
+                setup_system_centos72
+        elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS" && $SKU == "7.3" ]]; then
+                setup_system_centos72
+        elif [[ $PUBLISHER == "RedhHat" && $OFFER == "RHEL" && $SKU == "7.3" ]]; then
+                setup_system_centos72
+        elif [[ $PUBLISHER == "SUSE" && $OFFER == "SLES-HPC" && $SKU == "12-SP2" ]]; then
+                setup_system_centos72
+        else
+                echo "***** IMAGE $PUBLISHER:$OFFER:$VERSION NOT SUPPORTED *****"
+                exit -1
+        fi
+
+} #--- end of setup_system() ---#
+
 setup_user()
 {
         # Add User + Group
 #	groupadd -g $HPC_GID $HPC_GROUP
-#	useradd -c "HPC User" -g $HPC_GROUP -m -d $SHARE_HOME/$HPC_USER -s /bin/bash -u $HPC_UID $HPC_USER
+#	useradd -c "HPC User" -g $HPC_GROUP -m -d $SHARE_HOME/$HPC_ADMIN -s /bin/bash -u $HPC_UID $HPC_ADMIN
+
 	# Undo the HOME setup done by waagent ossetup -> move it to NFS share
-	usermod -m -d $SHARE_HOME/$HPC_USER $HPC_USER
-#	mv -p /home/$HPC_USER $SHARE_HOME
-#	usermod -d $SHARE_HOME/$HPC_USER $HPC_USER
+	#usermod -m -d $SHARE_HOME/$HPC_ADMIN $HPC_ADMIN
+	mv /home/$HPC_ADMIN $SHARE_HOME
+	usermod -d $SHARE_HOME/$HPC_ADMIN $HPC_ADMIN
 
 	# Don't require password for HPC user sudo
-	echo "$HPC_USER ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+	echo "$HPC_ADMIN ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 	# Disable tty requirement for sudo
 	sed -i 's/^Defaults[ ]*requiretty/# Defaults requiretty/g' /etc/sudoers
 
-	mkdir -p $SHARE_HOME/$HPC_USER/.ssh
+	mkdir -p $SHARE_HOME/$HPC_ADMIN/.ssh
 
 	# Configure public key auth for the HPC user
-	#ssh-keygen -t rsa -f $SHARE_HOME/$HPC_USER/.ssh/id_rsa -q -P ""
-	ssh-keygen -t rsa -f $SHARE_HOME/$HPC_USER/.ssh/id_rsa -q -N ""
-	cat $SHARE_HOME/$HPC_USER/.ssh/id_rsa.pub >> $SHARE_HOME/$HPC_USER/.ssh/authorized_keys
+	#ssh-keygen -t rsa -f $SHARE_HOME/$HPC_ADMIN/.ssh/id_rsa -q -P ""
+	ssh-keygen -t rsa -f $SHARE_HOME/$HPC_ADMIN/.ssh/id_rsa -q -N ""
+	cat $SHARE_HOME/$HPC_ADMIN/.ssh/id_rsa.pub >> $SHARE_HOME/$HPC_ADMIN/.ssh/authorized_keys
 
-	echo "Host *" > $SHARE_HOME/$HPC_USER/.ssh/config
-	echo "StrictHostKeyChecking no" >> $SHARE_HOME/$HPC_USER/.ssh/config
-# 	echo "UserKnownHostsFile /dev/null" >> $SHARE_HOME/$HPC_USER/.ssh/config
-# 	echo "PasswordAuthentication no" >> $SHARE_HOME/$HPC_USER/.ssh/config
+	echo "Host *" > $SHARE_HOME/$HPC_ADMIN/.ssh/config
+	echo "StrictHostKeyChecking no" >> $SHARE_HOME/$HPC_ADMIN/.ssh/config
+# 	echo "UserKnownHostsFile /dev/null" >> $SHARE_HOME/$HPC_ADMIN/.ssh/config
+# 	echo "PasswordAuthentication no" >> $SHARE_HOME/$HPC_ADMIN/.ssh/config
 
 	# Fix .ssh folder ownership
-	chown -R $HPC_USER:$HPC_GROUP $SHARE_HOME/$HPC_USER
+	chown -R $HPC_ADMIN:$HPC_GROUP $SHARE_HOME/$HPC_ADMIN
 
 	# Fix permissions
-	chmod 700 $SHARE_HOME/$HPC_USER/.ssh
-	chmod 644 $SHARE_HOME/$HPC_USER/.ssh/config
-	chmod 644 $SHARE_HOME/$HPC_USER/.ssh/authorized_keys
-	chmod 600 $SHARE_HOME/$HPC_USER/.ssh/id_rsa
-	chmod 644 $SHARE_HOME/$HPC_USER/.ssh/id_rsa.pub
+	chmod 700 $SHARE_HOME/$HPC_ADMIN/.ssh
+	chmod 644 $SHARE_HOME/$HPC_ADMIN/.ssh/config
+	chmod 644 $SHARE_HOME/$HPC_ADMIN/.ssh/authorized_keys
+	chmod 600 $SHARE_HOME/$HPC_ADMIN/.ssh/id_rsa
+	chmod 644 $SHARE_HOME/$HPC_ADMIN/.ssh/id_rsa.pub
 
-#	chown $HPC_USER:$HPC_GROUP $SHARE_SCRATCH
-#	chown $HPC_USER:$HPC_GROUP $SHARE_DATA
-	chown $HPC_USER:$HPC_GROUP $LOCAL_SCRATCH
+       	#-- setup nfsv3 automounter for /home
+        echo "/home /etc/auto.home" >> /etc/auto.master
+        echo "* $SHARE_HOME/&" > /etc/auto.home
+        service autofs restart
+        ls -lR /home/$HPC_ADMIN
 
 } #--- end of setup_user() ---#
 
 setup_utilities()
 {
-	mkdir -p $SHARE_HOME/$HPC_USER/bin
-	mkdir -p $SHARE_HOME/$HPC_USER/hosts
-	chmod 755 $SHARE_HOME/$HPC_USER/hosts
-	chown $HPC_USER:$HPC_GROUP $SHARE_HOME/$HPC_USER/bin
-	chown $HPC_USER:$HPC_GROUP $SHARE_HOME/$HPC_USER/hosts
-	#mkdir -p $SHARE_HOME/$HPC_USER/deploy
-	#chmod 755 $SHARE_HOME/$HPC_USER/deploy
-	#chown $HPC_USER:$HPC_GROUP $SHARE_HOME/$HPC_USER/deploy
-	#cp hn-setup.sh cn-setup.sh $SHARE_HOME/$HPC_USER/deploy
-	cp clusRun.sh pingpong.sh $SHARE_HOME/$HPC_USER/bin
-	chmod 755 $SHARE_HOME/$HPC_USER/bin/*.sh
+	mkdir -p $SHARE_CLUSTERMAP/hosts
+	chmod 755 $SHARE_CLUSTERMAP/hosts
+	chown $HPC_ADMIN:$HPC_GROUP $SHARE_CLUSTERMAP/hosts
+	mkdir -p $SHARE_HOME/$HPC_ADMIN/bin
+	chown $HPC_ADMIN:$HPC_GROUP $SHARE_HOME/$HPC_ADMIN/bin
+	#mkdir -p $SHARE_HOME/$HPC_ADMIN/deploy
+	#chmod 755 $SHARE_HOME/$HPC_ADMIN/deploy
+	#chown $HPC_ADMIN:$HPC_GROUP $SHARE_HOME/$HPC_ADMIN/deploy
+	#cp hn-setup.sh cn-setup.sh $SHARE_HOME/$HPC_ADMIN/deploy
+	cp clusRun.sh pingpong.sh $SHARE_HOME/$HPC_ADMIN/bin
+	chmod 755 $SHARE_HOME/$HPC_ADMIN/bin/*.sh
 
-	nmap -sn $localip.* | grep $localip. | awk '{print $5}' > $SHARE_HOME/$HPC_USER/bin/nodeips.txt
+	nmap -sn $localip.* | grep $localip. | awk '{print $5}' > $SHARE_HOME/$HPC_ADMIN/bin/nodeips.txt
 	myhost=`hostname -i`
-	sed -i '/\<'$myhost'\>/d' $SHARE_HOME/$HPC_USER/bin/nodeips.txt
-	sed -i '/\<10.0.0.1\>/d' $SHARE_HOME/$HPC_USER/bin/nodeips.txt
+	sed -i '/\<'$myhost'\>/d' $SHARE_HOME/$HPC_ADMIN/bin/nodeips.txt
+	sed -i '/\<10.0.0.1\>/d' $SHARE_HOME/$HPC_ADMIN/bin/nodeips.txt
 #
 # Problem to record scale set node names since the nodes are not up yet. 
-# Workaround to have each scale set node create a file with it's hostname in ~/hosts directory. 
+# Workaround to have each scale set node create a file with it's hostname in /clustermap/hosts directory. 
 # See touch statement in cn-setup.sh. clusRun.sh updated accordingly. 
 # This approach has the advantage that it's easy to add scale set nodes to the config also.
 #
-#	for NAME in `cat $SHARE_HOME/$HPC_USER/bin/nodeips.txt`; do sudo -u $HPC_USER -s ssh -o ConnectTimeout=2 $HPC_USER@$NAME 'hostname' >> $SHARE_HOME/$HPC_USER/bin/nodenames.txt;done
-#	NAMES=`ls $SHARE_HOME/$HPC_USER/hosts`
-#	for NAME in $NAMES; do echo $NAME >> $SHARE_HOME/$HPC_USER/bin/nodenames.txt; done
+#	for NAME in `cat $SHARE_HOME/$HPC_ADMIN/bin/nodeips.txt`; do sudo -u $HPC_ADMIN -s ssh -o ConnectTimeout=2 $HPC_ADMIN@$NAME 'hostname' >> $SHARE_HOME/$HPC_ADMIN/bin/nodenames.txt;done
+#	NAMES=`ls $SHARE_HOME/$HPC_ADMIN/hosts`
+#	for NAME in $NAMES; do echo $NAME >> $SHARE_HOME/$HPC_ADMIN/bin/nodenames.txt; done
 
 } #--- end of setup_utilities() ---#
 
@@ -198,12 +236,11 @@ setup_utilities()
 #
 setup_environment_modules()
 {
-	echo "source /etc/profile.d/modules.sh" >> $SHARE_HOME/$HPC_USER/.bashrc
+	echo "source /etc/profile.d/modules.sh" >> $SHARE_HOME/$HPC_ADMIN/.bashrc
 }
 
 setup_diskpack()
 {
-
 	raidDevice="md10"
 	filesystem="ext4"
 	mountPoint=$SHARE_ROOT
@@ -239,7 +276,7 @@ t
 fd
 w
 EOF
-		createdPartitions="$createdPartitions /dev/${disk}1"
+	createdPartitions="$createdPartitions /dev/${disk}1"
 	done
 	sleep 10
 
@@ -267,40 +304,20 @@ EOF
 		mdadm --verbose --detail --scan >> /etc/mdadm.conf
         fi
 
-} #-- end of setup_diskpack() --#
+} #--- end of setup_diskpack() ---#
 
-#passwd -l $HPC_USER #-- lock account to prevent treading on homedir changes
-
+echo "##################################################"
+echo "############### Head Node Setup ##################"
+echo "##################################################"
+date
+#passwd -l $HPC_ADMIN #-- lock account to prevent conflicts during install
 echo "Deploying $PUBLISHER, $OFFER, $SKU....."
+setup_system
 setup_diskpack
-setup_disks
-
-if [[ $PUBLISHER == "Canonical" && $OFFER == "UbuntuServer" && $SKU == "16.04-LTS" ]]; then
-	setup_system_ubuntu1604
-elif [[ $PUBLISHER == "Canonical" && $OFFER == "UbuntuServer" && $SKU == "16.10" ]]; then
-	setup_system_ubuntu1604
-elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS-HPC" && $SKU == "6.5" ]]; then
-	setup_system_centos72
-elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS" && $SKU == "6.8" ]]; then
-	setup_system_centos72
-elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS-HPC" && $SKU == "7.1" ]]; then
-	setup_system_centos72
-elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS" && $SKU == "7.2" ]]; then
-	setup_system_centos72
-elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS" && $SKU == "7.3" ]]; then
-	setup_system_centos72
-elif [[ $PUBLISHER == "RedhHat" && $OFFER == "RHEL" && $SKU == "7.3" ]]; then
-	setup_system_centos72
-elif [[ $PUBLISHER == "SUSE" && $OFFER == "SLES-HPC" && $SKU == "12-SP2" ]]; then
-	setup_system_centos72
-else 
-	echo "***** IMAGE $PUBLISHER:$OFFER:$VERSION NOT SUPPORTED *****"
-	exit -1
-fi
-
+setup_shares
 setup_user
 setup_utilities
-#passwd -u $HPC_USER #-- unlock account
+#passwd -u $HPC_ADMIN #-- unlock account
 date
 reboot #--- not really necessary, just to be 100% sure storage devices persist before users put data here. 
 
