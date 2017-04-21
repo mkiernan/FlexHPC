@@ -162,8 +162,10 @@ setup_user()
 
 	# Undo the HOME setup done by waagent ossetup -> move it to NFS share
 	#usermod -m -d $SHARE_HOME/$HPC_ADMIN $HPC_ADMIN
+	# automount will pick this up at the /share/home location and map it back to /home
+	# purpose of this is to have plenty of space in the homedir and keep it off the os disk. 
 	mv /home/$HPC_ADMIN $SHARE_HOME
-	usermod -d $SHARE_HOME/$HPC_ADMIN $HPC_ADMIN
+	#usermod -d $SHARE_HOME/$HPC_ADMIN $HPC_ADMIN
 
 	# Don't require password for HPC user sudo
 	echo "$HPC_ADMIN ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
@@ -205,7 +207,6 @@ setup_utilities()
 {
 	mkdir -p $SHARE_CLUSTERMAP/hosts
 	chmod 755 $SHARE_CLUSTERMAP/hosts
-	chown $HPC_ADMIN:$HPC_GROUP $SHARE_CLUSTERMAP/hosts
 	mkdir -p $SHARE_HOME/$HPC_ADMIN/bin
 	chown $HPC_ADMIN:$HPC_GROUP $SHARE_HOME/$HPC_ADMIN/bin
 	#mkdir -p $SHARE_HOME/$HPC_ADMIN/deploy
@@ -319,7 +320,7 @@ setup_user
 setup_utilities
 #passwd -u $HPC_ADMIN #-- unlock account
 date
-reboot #--- not really necessary, just to be 100% sure storage devices persist before users put data here. 
+#reboot #--- not really necessary, just to be 100% sure storage devices persist before users put data here. 
 
 #chmod +x custom_extras.sh 
 #source custom_extras.sh $USER

@@ -42,6 +42,7 @@ CLUSTERMAP="$IPHEADNODE:/share/clustermap"
 LOCAL_SCRATCH=/mnt/resource
 
 # Local filesystem to map shares to 
+HOMEDIR=/home/$HPC_ADMIN
 DATAFS=/data
 SCRATCHFS=/scratch
 CLUSTERMAPFS=/clustermap
@@ -158,11 +159,12 @@ setup_system()
 
 setup_env()
 {
-	echo export INTELMPI_ROOT=/opt/intel/impi/5.1.3.181 >> $SHARE_HOME/$HPC_ADMIN/.bashrc
-	echo export I_MPI_FABRICS=shm:dapl >> $SHARE_HOME/$HPC_ADMIN/.bashrc
-	echo export I_MPI_DAPL_PROVIDER=ofa-v2-ib0 >> $SHARE_HOME/$HPC_ADMIN/.bashrc
-	echo export I_MPI_ROOT=/opt/intel/compilers_and_libraries_2016.2.181/linux/mpi >> $SHARE_HOME/$HPC_ADMIN/.bashrc
-	echo export I_MPI_DYNAMIC_CONNECTION=0 >> $SHARE_HOME/$HPC_ADMIN/.bashrc
+	#-- setup HPC_ADMIN env variables 
+	echo export INTELMPI_ROOT=/opt/intel/impi/5.1.3.181 >> $HOMEDIR/.bashrc
+	echo export I_MPI_FABRICS=shm:dapl >> $HOMEDIR/.bashrc
+	echo export I_MPI_DAPL_PROVIDER=ofa-v2-ib0 >> $HOMEDIR/.bashrc
+	echo export I_MPI_ROOT=/opt/intel/compilers_and_libraries_2016.2.181/linux/mpi >> $HOMEDIR/.bashrc
+	echo export I_MPI_DYNAMIC_CONNECTION=0 >> $HOMEDIR/.bashrc
 
 } #--- end of setup_env() ---#
 
@@ -173,7 +175,7 @@ setup_user()
 #       useradd -c "HPC User" -g $HPC_GROUP -m -d $SHARE_HOME/$HPC_ADMIN -s /bin/bash -u $HPC_UID $HPC_ADMIN
         # Undo the HOME setup done by waagent ossetup
         #usermod -m -d $SHARE_HOME/$HPC_ADMIN $HPC_ADMIN
-        usermod -d $SHARE_HOME/$HPC_ADMIN $HPC_ADMIN
+        #usermod -d $HOMEDIR $HPC_ADMIN 
 	rm -rf /home/$HPC_ADMIN
 
         # Don't require password for HPC user sudo
