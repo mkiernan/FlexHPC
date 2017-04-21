@@ -571,7 +571,7 @@
 		},
 		"dependsOn": [
 			"[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-			"[concat('Microsoft.Compute/virtualMachines/', variables('HeadNodeName'), 'extensions/MasterExtension')]"
+			"[concat('Microsoft.Compute/virtualMachines/', variables('HeadNodeName'), '/extensions/MasterExtension')]"
 	  ]
 	}]
 }
