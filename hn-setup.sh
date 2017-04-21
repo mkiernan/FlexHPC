@@ -64,6 +64,7 @@ setup_shares()
 	echo "$SHARE_HOME $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports
 	echo "$SHARE_CLUSTERMAP $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports
 #	echo "$LOCAL_SCRATCH $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports
+	exportfs -a
 
 } #--- end of setup_disks() ---#
 
