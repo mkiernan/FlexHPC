@@ -79,17 +79,22 @@ setup_shares()
 
 } #--- end of setup_disks() ---#
 
-setup_system_centos72()
+setup_system_centosredhat()
 {
 	# disable selinux
 	sed -i 's/enforcing/disabled/g' /etc/selinux/config
 	setenforce permissive
 
+        if [[ $PUBLISHER == "RedHat" && $OFFER == "RHEL" && $SKU == "7.3" ]]; then
+		systemctl disable firewalld
+		service firewalld stop
+	fi
+
 	echo "* hard memlock unlimited" >> /etc/security/limits.conf
 	echo "* soft memlock unlimited" >> /etc/security/limits.conf
 
 	yum install -y -q nfs-utils autofs
-	if [ $OSVERS == "6.5" ]; then
+        if [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS-HPC" && $SKU == "6.5" ]]; then
 		chkconfig nfs on 
 		chkconfig rpcbind on 
 		service rpcbind start
@@ -119,11 +124,11 @@ setup_system_centos72()
 	ln -s /opt/intel/impi/5.1.3.181/intel64/bin/ /opt/intel/impi/5.1.3.181/bin
 	ln -s /opt/intel/impi/5.1.3.181/lib64/ /opt/intel/impi/5.1.3.181/lib
 
-	functiontimer "setup_system_centos72()"
+	functiontimer "setup_system_centosredhat()"
 
-} #--- end of setup_system_centos72() ---#
+} #--- end of setup_system_centosredhat() ---#
 
-setup_system_ubuntu1604()
+setup_system_ubuntu()
 {
 	export DEBIAN_FRONTEND=noninteractive
         echo "* hard memlock unlimited" >> /etc/security/limits.conf
@@ -140,30 +145,30 @@ setup_system_ubuntu1604()
 	apt-get install -y -q infiniband-diags
 	#apt-get install -y -q environment-modules
 
-	functiontimer "setup_system_ubuntu1604()"
+	functiontimer "setup_system_ubuntu()"
 
-} #--- end of setup_system_ubuntu1604() ---#
+} #--- end of setup_system_ubuntu() ---#
 
 setup_system()
 {
         if [[ $PUBLISHER == "Canonical" && $OFFER == "UbuntuServer" && $SKU == "16.04-LTS" ]]; then
-                setup_system_ubuntu1604
+                setup_system_ubuntu
         elif [[ $PUBLISHER == "Canonical" && $OFFER == "UbuntuServer" && $SKU == "16.10" ]]; then
-                setup_system_ubuntu1604
+                setup_system_ubuntu
         elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS-HPC" && $SKU == "6.5" ]]; then
-                setup_system_centos72
+                setup_system_centosredhat
         elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS" && $SKU == "6.8" ]]; then
-                setup_system_centos72
+                setup_system_centosredhat
         elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS-HPC" && $SKU == "7.1" ]]; then
-                setup_system_centos72
+                setup_system_centosredhat
         elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS" && $SKU == "7.2" ]]; then
-                setup_system_centos72
+                setup_system_centosredhat
         elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS" && $SKU == "7.3" ]]; then
-                setup_system_centos72
+                setup_system_centosredhat
         elif [[ $PUBLISHER == "RedHat" && $OFFER == "RHEL" && $SKU == "7.3" ]]; then
-                setup_system_centos72
+                setup_system_centosredhat
         elif [[ $PUBLISHER == "SUSE" && $OFFER == "SLES-HPC" && $SKU == "12-SP2" ]]; then
-                setup_system_centos72
+                setup_system_centosredhat
         else
                 echo "***** IMAGE $PUBLISHER:$OFFER:$VERSION NOT SUPPORTED *****"
                 exit -1
