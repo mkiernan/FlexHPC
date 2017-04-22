@@ -42,7 +42,7 @@
 				"OpenLogic:CentOS:7.2",
 				"OpenLogic:CentOS:7.3",
 				"RedHat:RHEL:7.3",
-				"SUSE:SLES-HPC:12-SP2"
+				"SUSE:SLES-HPC:12-SP1"
 			],
 			"metadata": {
 				"description": "OS version to deploy. -HPC suffixed images include the RDMA drivers for compute-to-compute MPI InfiniBand on A8, A9, H16r & H16mr VM sizes. Non *-HPC images need the RDMA drivers to be installed manually, or deploy without infiniband."
@@ -132,10 +132,10 @@
 			"sku": "7.3",
 			"version": "latest"
 		},
-		"imageReference_SUSE:SLES-HPC:12-SP2": {
+		"imageReference_SUSE:SLES-HPC:12-SP1": {
 			"publisher": "SUSE",
 			"offer": "SLES-HPC",
-			"sku": "12-SP2",
+			"sku": "12-SP1",
 			"version": "latest"
 		},
 	    "imageReference": "[variables(concat('imageReference_',parameters('image')))]",

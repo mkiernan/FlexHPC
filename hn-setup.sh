@@ -4,10 +4,10 @@
 # Head-Node Installation Script
 #
 # Tested On:
-# CentOS 6.5, 6.8, 7.1, 7.2, 7.3
-# Ubuntu 16.04, 16.10
+# CentOS HPC:6.5, 6.8, HPC:7.1, 7.2, 7.3
+# Ubuntu 16.04-LTS, 16.10
 # RedHat 7.3
-# SUSE SLES 12-SP2
+# SUSE SLES-HPC:12-SP1
 #
 ################################################################################
 set -x
@@ -33,7 +33,7 @@ VMIMAGE=$2
 #VMIMAGE="OpenLogic:CentOS:7.2"
 #VMIMAGE="OpenLogic:CentOS:7.3"
 #VMIMAGE="RedHat:RHEL:7.3"
-#VMIMAGE="SUSE:SLES-HPC:12-SP2"
+#VMIMAGE="SUSE:SLES-HPC:12-SP1"
 
 PUBLISHER=`echo $VMIMAGE| awk -F ":" '{print $1}'`
 OFFER=`echo $VMIMAGE| awk -F ":" '{print $2}'`
