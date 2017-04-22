@@ -127,12 +127,41 @@ setup_system_centosredhat()
 	#yum groupinstall -y "X Window System"
 	#npm install -g azure-cli
 
+	#-- Microsoft -HPC images should have this installed already
+	rpm -v -i --nodeps /opt/intelMPI/intel_mpi_packages/*.rpm
 	ln -s /opt/intel/impi/5.1.3.181/intel64/bin/ /opt/intel/impi/5.1.3.181/bin
 	ln -s /opt/intel/impi/5.1.3.181/lib64/ /opt/intel/impi/5.1.3.181/lib
 
 	functiontimer "setup_system_centosredhat()"
 
 } #--- end of setup_system_centosredhat() ---#
+
+setup_system_suse()
+{
+	echo "* hard memlock unlimited" >> /etc/security/limits.conf
+        echo "* soft memlock unlimited" >> /etc/security/limits.conf
+
+	pkgs="libbz2-1 libz1 openssl libopenssl-devel gcc gcc-c++ nfs-client nfs-utils rpcbind\
+              mdadm make automake multipath-tools nmap infiniband-diags nfs-kernel-server autofs"
+
+	zypper -n install $pkgs
+	zypper -n install environment-modules
+
+	systemctl enable rpcbind.service
+	systemctl start rpcbind.service
+	systemctl enable nfsserver.service
+	systemctl start nfsserver.service
+
+	# rdma pkgs not pre-installed on SLES so add them now. 
+	rpm -v -i --nodeps /opt/intelMPI/intel_mpi_packages/*.rpm
+	ln -s /opt/intel/impi/5.1.3.181/intel64/bin/ /opt/intel/impi/5.1.3.181/bin
+	ln -s /opt/intel/impi/5.1.3.181/lib64/ /opt/intel/impi/5.1.3.181/lib
+	#disable kernel updates to prevent rdma issues; unlock with zypper rl
+	zypper al 'kernel*'
+
+	functiontimer "setup_system_suse()"
+
+} #--- end of setup_system_suse() ---#
 
 setup_system_ubuntu()
 {
@@ -174,7 +203,7 @@ setup_system()
         elif [[ $PUBLISHER == "RedHat" && $OFFER == "RHEL" && $SKU == "7.3" ]]; then
                 setup_system_centosredhat
         elif [[ $PUBLISHER == "SUSE" && $OFFER == "SLES-HPC" && $SKU == "12-SP1" ]]; then
-                setup_system_centosredhat
+                setup_system_suse
         else
                 echo "***** IMAGE $PUBLISHER:$OFFER:$VERSION NOT SUPPORTED *****"
                 exit -1
