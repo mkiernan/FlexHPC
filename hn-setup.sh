@@ -2,7 +2,7 @@
 #
 # Head-Node Installation Script
 #
-# Tested On: CentOS 7.1, 7.2, Ubuntu 16.04
+# Tested On: CentOS 7.1, 7.2, 7.3, Ubuntu 16.04, 16.10
 #
 set -x
 #set -xeuo pipefail #-- strict/exit on fail
@@ -32,6 +32,7 @@ VMIMAGE=$2
 PUBLISHER=`echo $VMIMAGE| awk -F ":" '{print $1}'`
 OFFER=`echo $VMIMAGE| awk -F ":" '{print $2}'`
 SKU=`echo $VMIMAGE| awk -F ":" '{print $3}'`
+OSVERS=`echo $VMIMAGE| awk -F ":" '{print $4}'`
 
 # Shares 
 SHARE_ROOT=/share
@@ -87,31 +88,36 @@ setup_system_centos72()
 	echo "* hard memlock unlimited" >> /etc/security/limits.conf
 	echo "* soft memlock unlimited" >> /etc/security/limits.conf
 
-	# do this before rpms or too slow for the scaleset mounts
 	yum install -y -q nfs-utils autofs
-	systemctl enable rpcbind
-	systemctl enable nfs-server
-	systemctl enable nfs-lock
-	systemctl enable nfs-idmap
-	systemctl start rpcbind
-	systemctl start nfs-server
-	systemctl start nfs-lock
-	systemctl start nfs-idmap
-	#systemctl restart nfs-server
-
-	ln -s /opt/intel/impi/5.1.3.181/intel64/bin/ /opt/intel/impi/5.1.3.181/bin
-	ln -s /opt/intel/impi/5.1.3.181/lib64/ /opt/intel/impi/5.1.3.181/lib
-
+	if [ $OSVERS == "6.5" ]; then
+		chkconfig nfs on 
+		chkconfig rpcbind on 
+		service rpcbind start
+		service nfs start
+	else 
+		systemctl enable rpcbind
+		systemctl enable nfs-server
+		systemctl enable nfs-lock
+		systemctl enable nfs-idmap
+		systemctl start rpcbind
+		systemctl start nfs-server
+		systemctl start nfs-lock
+		systemctl start nfs-idmap
+		#systemctl restart nfs-server
 #-verify
-	wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-9.noarch.rpm
-	rpm -ivh epel-release-7-9.noarch.rpm
+		wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-9.noarch.rpm
+		rpm -ivh epel-release-7-9.noarch.rpm
 #-verify
+	fi
 
 	yum install -y -q sshpass nmap htop sysstat lsscsi
 	yum install -y -q libibverb-utils infiniband-diags
 	yum install -y -q environment-modules
 	#yum groupinstall -y "X Window System"
 	#npm install -g azure-cli
+
+	ln -s /opt/intel/impi/5.1.3.181/intel64/bin/ /opt/intel/impi/5.1.3.181/bin
+	ln -s /opt/intel/impi/5.1.3.181/lib64/ /opt/intel/impi/5.1.3.181/lib
 
 	functiontimer "setup_system_centos72()"
 
@@ -299,6 +305,7 @@ EOF
 		mdadm --create /dev/$raidDevice --level 0 --raid-devices $devices $createdPartitions
 		sleep 10
 		mdadm /dev/$raidDevice
+		#- beware this is VERY slow on CentOS 6.5 (about 30 minutes for 10TB)
 		mkfs.ext4 -i 4096 -I 512 -J size=400 -Odir_index,filetype /dev/$raidDevice
 		sleep 5
 		tune2fs -o user_xattr /dev/$raidDevice

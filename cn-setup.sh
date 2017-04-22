@@ -2,7 +2,7 @@
 #
 # Compute-Node Installation Script
 #
-# Tested On CentOS 7.1, 7.2, Ubuntu 16.04
+# Tested On: CentOS 7.1, 7.2, 7.3, Ubuntu 16.04, 16.10
 #
 set -x
 #set -xeuo pipefail #-- strict/exit on fail
@@ -32,6 +32,7 @@ VMIMAGE=$2
 PUBLISHER=`echo $VMIMAGE| awk -F ":" '{print $1}'`
 OFFER=`echo $VMIMAGE| awk -F ":" '{print $2}'`
 SKU=`echo $VMIMAGE| awk -F ":" '{print $3}'`
+OSVERS=`echo $VMIMAGE| awk -F ":" '{print $4}'`
 
 IPHEADNODE=10.0.0.4
 
