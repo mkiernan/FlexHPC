@@ -177,7 +177,7 @@ setup_system()
 	        setup_system_centosredhat
 	elif [[ $PUBLISHER == "RedHat" && $OFFER == "RHEL" && $SKU == "7.3" ]]; then
 	        setup_system_centosredhat
-	elif [[ $PUBLISHER == "SUSE" && $OFFER == "SLES-HPC" && $SKU == "12-SP2" ]]; then
+	elif [[ $PUBLISHER == "SUSE" && $OFFER == "SLES-HPC" && $SKU == "12-SP1" ]]; then
 	        setup_system_centosredhat
 	else
 	        echo "***** IMAGE $PUBLISHER:$OFFER:$VERSION NOT SUPPORTED *****"
