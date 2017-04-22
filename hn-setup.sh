@@ -1,9 +1,15 @@
 #!/bin/bash
+################################################################################
 #
 # Head-Node Installation Script
 #
-# Tested On: CentOS 7.1, 7.2, 7.3, Ubuntu 16.04, 16.10
+# Tested On:
+# CentOS 6.5, 6.8, 7.1, 7.2, 7.3
+# Ubuntu 16.04, 16.10
+# RedHat 7.3
+# SUSE SLES 12-SP2
 #
+################################################################################
 set -x
 #set -xeuo pipefail #-- strict/exit on fail
 
@@ -59,7 +65,7 @@ functiontimer()
         let WALLTIME+=$SECONDS
         SECONDS=0
 
-} #-- end of functiontimer() --#
+} #--- end of functiontimer() ---#
 
 setup_shares()
 {
