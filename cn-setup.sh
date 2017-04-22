@@ -5,7 +5,7 @@
 # Tested On CentOS 7.1, 7.2, Ubuntu 16.04
 #
 set -x
-#set -xeuo pipefail
+#set -xeuo pipefail #-- strict/exit on fail
 
 if [[ $(id -u) -ne 0 ]] ; then
     echo "Must be run as root"
@@ -50,6 +50,16 @@ CLUSTERMAPFS=/clustermap
 SECONDS=0 #-- record wall time of script + functions
 timestamp() { echo "ELAPSED TIME> $SECONDS seconds"; }
 
+SECONDS=0 #-- use builtin shell var to record function times
+WALLTIME=0 #-- record wall time of script
+functiontimer() {
+
+        echo "Function $1 took $SECONDS seconds";
+        let WALLTIME+=$SECONDS
+        SECONDS=0
+
+} #-- end of functiontimer() --#
+
 setup_shares()
 {
 	mkdir -p $DATAFS
@@ -58,7 +68,8 @@ setup_shares()
 	chmod -R 777 $DATAFS
 	chmod -R 777 $SCRATCHFS
 	chmod -R 777 $CLUSTERMAPFS
-	timestamp
+
+	functiontimer "setup_shares()"
 
 } #--- end of setup_disks() ---# 
 
@@ -79,7 +90,8 @@ setup_system_centos72()
         yum install -y -q sshpass nmap htop sysstat
         yum install -y -q libibverb-utils infiniband-diags
         yum install -y -q environment-modules
-	timestamp
+
+	functiontimer "setup_system_centos72()"
 
 } #--- end of setup_system_centos72() ---#
 
@@ -99,7 +111,8 @@ setup_system_ubuntu1604()
         apt-get install -y -q sshpass nmap htop wget sysstat
         apt-get install -y -q infiniband-diags
         #apt-get install -y -q environment-modules
-	timestamp
+
+	functiontimer "setup_system_ubuntu1604()"
 
 } #--- end of setup_system_ubuntu1604() ---#
 
@@ -131,7 +144,8 @@ setup_gpus_ubuntu1604()
 	echo "export PATH=$PATH:/usr/local/cuda-8.0/bin/" >> ~/.bashrc
 	source ~/.bashrc
 	nvidia-smi
-	timestamp
+
+	functiontimer "setup_gpus_ubuntu1604()"
 
 } #--- end of setup_gpus_ubuntu1604() ---#
 
@@ -161,7 +175,7 @@ setup_system()
 	        echo "***** IMAGE $PUBLISHER:$OFFER:$VERSION NOT SUPPORTED *****"
 	        exit -1
 	fi
-	timestamp
+	functiontimer "setup_system()"
 
 } #--- end of setup_system() ---#
 
@@ -173,7 +187,8 @@ setup_env()
 	echo export I_MPI_DAPL_PROVIDER=ofa-v2-ib0 >> $HOMEDIR/.bashrc
 	echo export I_MPI_ROOT=/opt/intel/compilers_and_libraries_2016.2.181/linux/mpi >> $HOMEDIR/.bashrc
 	echo export I_MPI_DYNAMIC_CONNECTION=0 >> $HOMEDIR/.bashrc
-	timestamp
+
+	functiontimer "setup_env()"
 
 } #--- end of setup_env() ---#
 
@@ -192,7 +207,8 @@ setup_user()
 
         # Disable tty requirement for sudo
         sed -i 's/^Defaults[ ]*requiretty/# Defaults requiretty/g' /etc/sudoers
-	timestamp
+
+	functiontimer "setup_user()"
 
 } #--- end of setup_user() ---#
 
@@ -219,7 +235,8 @@ setup_nfs_client()
 	echo "* $SHARE_HOME/&" > /etc/auto.home
 	service autofs restart
 	ls -lR /home/$HPC_ADMIN
-	timestamp
+
+	functiontimer "setup_nfs_client()"
 
 } #--- end of setup_nfs_client() ---#
 
@@ -227,6 +244,7 @@ setup_nfs_client()
 echo "##################################################"
 echo "############# Compute Node Setup #################"
 echo "##################################################"
+#comment out the password locks when testing.
 #passwd -l $HPC_ADMIN #-- lock account to prevent conflicts during install
 echo "Deploying $PUBLISHER, $OFFER, $SKU....."
 setup_system
@@ -235,4 +253,4 @@ setup_user
 setup_nfs_client
 setup_env
 #passwd -u $HPC_ADMIN #-- unlock account
-echo "Script ran for $SECONDS seconds."
+echo "Script ran for $WALLTIME seconds."

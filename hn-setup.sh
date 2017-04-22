@@ -5,7 +5,7 @@
 # Tested On: CentOS 7.1, 7.2, Ubuntu 16.04
 #
 set -x
-#set -xeuo pipefail #-- exit 
+#set -xeuo pipefail #-- strict/exit on fail
 
 if [[ $(id -u) -ne 0 ]] ; then
     echo "Must be run as root"
@@ -50,8 +50,15 @@ localip=`echo $IP | cut --delimiter='.' -f -3`
 
 echo User is: $HPC_ADMIN
 
-SECONDS=0 #-- record wall time of script + functions
-timestamp() { echo "ELAPSED TIME> $SECONDS seconds"; }
+SECONDS=0 #-- use builtin shell var to record function times
+WALLTIME=0 #-- record wall time of script
+functiontimer() {
+
+        echo "Function $1 took $SECONDS seconds";
+        let WALLTIME+=$SECONDS
+        SECONDS=0
+
+} #-- end of functiontimer() --#
 
 setup_shares()
 {
@@ -63,12 +70,12 @@ setup_shares()
 	chmod -R 777 $SHARE_DATA
 	chmod -R 777 $SCRATCHFS
 	chmod -R 777 $SHARE_CLUSTERMAP
-	echo "$SHARE_DATA $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports
-	echo "$SHARE_HOME $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports
-	echo "$SHARE_CLUSTERMAP $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports
+	echo "$SHARE_DATA $localip.*(rw,sync,no_root_squash,no_all_squash,no_subtree_check)" | tee -a /etc/exports
+	echo "$SHARE_HOME $localip.*(rw,sync,no_root_squash,no_all_squash,no_subtree_check)" | tee -a /etc/exports
+	echo "$SHARE_CLUSTERMAP $localip.*(rw,sync,no_root_squash,no_all_squash,no_subtree_check)" | tee -a /etc/exports
 #	echo "$LOCAL_SCRATCH $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports
 	exportfs -a
-	timestamp
+	functiontimer "setup_shares()"
 
 } #--- end of setup_disks() ---#
 
@@ -81,7 +88,7 @@ setup_system_centos72()
 	echo "* hard memlock unlimited" >> /etc/security/limits.conf
 	echo "* soft memlock unlimited" >> /etc/security/limits.conf
 
-	# do this before rpm's or too slow for the scaleset mounts
+	# do this before rpms or too slow for the scaleset mounts
 	yum install -y -q nfs-utils autofs
 	systemctl enable rpcbind
 	systemctl enable nfs-server
@@ -106,7 +113,7 @@ setup_system_centos72()
 	yum install -y -q environment-modules
 	#yum groupinstall -y "X Window System"
 	#npm install -g azure-cli
-	timestamp
+	functiontimer "setup_system_centos72()"
 
 } #--- end of setup_system_centos72() ---#
 
@@ -127,7 +134,8 @@ setup_system_ubuntu1604()
 	apt-get install -y -q sshpass nmap htop wget sysstat
 	apt-get install -y -q infiniband-diags
 	#apt-get install -y -q environment-modules
-	timestamp
+
+	functiontimer "setup_system_ubuntu1604()"
 
 } #--- end of setup_system_ubuntu1604() ---#
 
@@ -158,7 +166,7 @@ setup_system()
                 echo "***** IMAGE $PUBLISHER:$OFFER:$VERSION NOT SUPPORTED *****"
                 exit -1
         fi
-	timestamp
+	functiontimer "setup_system()"
 
 } #--- end of setup_system() ---#
 
@@ -202,8 +210,9 @@ setup_user()
 	chmod 644 $SHARE_HOME/$HPC_ADMIN/.ssh/authorized_keys
 	chmod 600 $SHARE_HOME/$HPC_ADMIN/.ssh/id_rsa
 	chmod 644 $SHARE_HOME/$HPC_ADMIN/.ssh/id_rsa.pub
-	timestamp
 
+	functiontimer "setup_user()"
+_
 } #--- end of setup_user() ---#
 
 setup_utilities()
@@ -233,7 +242,7 @@ setup_utilities()
 #	NAMES=`ls $SHARE_HOME/$HPC_ADMIN/hosts`
 #	for NAME in $NAMES; do echo $NAME >> $SHARE_HOME/$HPC_ADMIN/bin/nodenames.txt; done
 
-	timestamp
+	functiontimer "setup_utilities()"
 
 } #--- end of setup_utilities() ---#
 
@@ -243,6 +252,7 @@ setup_utilities()
 setup_environment_modules()
 {
 	echo "source /etc/profile.d/modules.sh" >> $SHARE_HOME/$HPC_ADMIN/.bashrc
+	functiontimer "setup_environment_modules()"
 }
 
 setup_diskpack()
@@ -309,13 +319,14 @@ EOF
 		# Backup mdadm config to its config file. (optional)
 		mdadm --verbose --detail --scan >> /etc/mdadm.conf
         fi
-	timestamp
+	functiontimer "setup_diskpack()"
 
 } #--- end of setup_diskpack() ---#
 
 echo "##################################################"
 echo "############### Head Node Setup ##################"
 echo "##################################################"
+#comment out the password locks when testing. 
 #passwd -l $HPC_ADMIN #-- lock account to prevent conflicts during install
 echo "Deploying $PUBLISHER, $OFFER, $SKU....."
 setup_system
@@ -325,6 +336,6 @@ setup_user
 setup_utilities
 #passwd -u $HPC_ADMIN #-- unlock account
 #reboot #--- not really necessary, just to be 100% sure storage devices persist before users put data here. 
-echo "Script ran for $SECONDS seconds."
+echo "Script ran for $WALLTIME seconds."
 #chmod +x custom_extras.sh 
 #source custom_extras.sh $USER
