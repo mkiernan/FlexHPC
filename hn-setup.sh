@@ -160,7 +160,7 @@ setup_system()
                 setup_system_centos72
         elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS" && $SKU == "7.3" ]]; then
                 setup_system_centos72
-        elif [[ $PUBLISHER == "RedhHat" && $OFFER == "RHEL" && $SKU == "7.3" ]]; then
+        elif [[ $PUBLISHER == "RedHat" && $OFFER == "RHEL" && $SKU == "7.3" ]]; then
                 setup_system_centos72
         elif [[ $PUBLISHER == "SUSE" && $OFFER == "SLES-HPC" && $SKU == "12-SP2" ]]; then
                 setup_system_centos72
