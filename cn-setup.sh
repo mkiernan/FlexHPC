@@ -41,13 +41,18 @@ SHARE_HOME="$IPHEADNODE:/share/home"
 CLUSTERMAP="$IPHEADNODE:/share/clustermap"
 LOCAL_SCRATCH=/mnt/resource
 
+# Local filesystem to map shares to
+DATAFS=/data
+#SCRATCHFS=/scratchlocal
+CLUSTERMAPFS=/clustermap
+
 SECONDS=0 #-- record wall time of script + functions
 timestamp() { echo "ELAPSED TIME> $SECONDS seconds"; }
 
 SECONDS=0 #-- use builtin shell var to record function times
 WALLTIME=0 #-- record wall time of script
-functiontimer() {
-
+functiontimer()
+{
         echo "Function $1 took $SECONDS seconds";
         let WALLTIME+=$SECONDS
         SECONDS=0
@@ -57,10 +62,10 @@ functiontimer() {
 setup_shares()
 {
 	mkdir -p $DATAFS
-	mkdir -p $SCRATCHFS
+#	mkdir -p $SCRATCHFS
 	mkdir -p $CLUSTERMAPFS
 	chmod -R 777 $DATAFS
-	chmod -R 777 $SCRATCHFS
+#	chmod -R 777 $SCRATCHFS
 	chmod -R 777 $CLUSTERMAPFS
 
 	functiontimer "setup_shares()"
@@ -76,12 +81,12 @@ setup_system_centos72()
         echo "* hard memlock unlimited" >> /etc/security/limits.conf
         echo "* soft memlock unlimited" >> /etc/security/limits.conf
 
-	yum install -y -q nfs-utils
+	yum install -y -q nfs-utils autofs
 
 	ln -s /opt/intel/impi/5.1.3.181/intel64/bin/ /opt/intel/impi/5.1.3.181/bin
 	ln -s /opt/intel/impi/5.1.3.181/lib64/ /opt/intel/impi/5.1.3.181/lib
 
-        yum install -y -q sshpass nmap htop sysstat
+        yum install -y -q sshpass nmap htop sysstat lsscsi
         yum install -y -q libibverb-utils infiniband-diags
         yum install -y -q environment-modules
 
@@ -224,7 +229,16 @@ setup_nfs_client()
 	#-- setup nfsv3 automounter for /home
 	echo "/home /etc/auto.home" >> /etc/auto.master
 	echo "* $SHARE_HOME/&" > /etc/auto.home
-	service autofs restart
+
+	#-- restart autofs and enable it at system startup
+	if [ $PUBLISHER == "Canonical" ]; then
+		service autofs restart
+		update-rc.d autofs defaults
+	else 
+		systemctl restart autofs
+		systemctl enable autofs 
+	fi 
+	#-- probe the autofs mount
 	ls -lR /home/$HPC_ADMIN
 
 	functiontimer "setup_nfs_client()"

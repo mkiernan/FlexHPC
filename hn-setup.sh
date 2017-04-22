@@ -38,11 +38,11 @@ SHARE_ROOT=/share
 SHARE_DATA=/share/data
 SHARE_HOME=/share/home
 SHARE_CLUSTERMAP=/share/clustermap
-LOCAL_SCRATCH=/mnt/resource
+#LOCAL_SCRATCH=/mnt/resource
 
 # Local filesystem to map shares to
 DATAFS=/data
-SCRATCHFS=/scratch_local
+#SCRATCHFS=/scratch_local
 CLUSTERMAPFS=/clustermap
 
 IP=`ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'`
@@ -52,8 +52,8 @@ echo User is: $HPC_ADMIN
 
 SECONDS=0 #-- use builtin shell var to record function times
 WALLTIME=0 #-- record wall time of script
-functiontimer() {
-
+functiontimer()
+{
         echo "Function $1 took $SECONDS seconds";
         let WALLTIME+=$SECONDS
         SECONDS=0
@@ -64,16 +64,15 @@ setup_shares()
 {
 	mkdir -p $SHARE_DATA
 	mkdir -p $SHARE_HOME
-	mkdir -p $SCRATCHFS
+#	mkdir -p $SCRATCHFS
 	mkdir -p $SHARE_CLUSTERMAP
 	chmod -R 777 $SHARE_HOME
 	chmod -R 777 $SHARE_DATA
-	chmod -R 777 $SCRATCHFS
+#	chmod -R 777 $SCRATCHFS
 	chmod -R 777 $SHARE_CLUSTERMAP
 	echo "$SHARE_DATA $localip.*(rw,sync,no_root_squash,no_all_squash,no_subtree_check)" | tee -a /etc/exports
 	echo "$SHARE_HOME $localip.*(rw,sync,no_root_squash,no_all_squash,no_subtree_check)" | tee -a /etc/exports
 	echo "$SHARE_CLUSTERMAP $localip.*(rw,sync,no_root_squash,no_all_squash,no_subtree_check)" | tee -a /etc/exports
-#	echo "$LOCAL_SCRATCH $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports
 	exportfs -a
 	functiontimer "setup_shares()"
 
@@ -108,7 +107,7 @@ setup_system_centos72()
 	rpm -ivh epel-release-7-9.noarch.rpm
 #-verify
 
-	yum install -y -q sshpass nmap htop sysstat
+	yum install -y -q sshpass nmap htop sysstat lsscsi
 	yum install -y -q libibverb-utils infiniband-diags
 	yum install -y -q environment-modules
 	#yum groupinstall -y "X Window System"
@@ -268,7 +267,8 @@ setup_diskpack()
 	rootDevice=`mount | grep "on / type" | awk '{print $1}' | sed 's/[0-9]//g'`
 
 	# Get the TMP disk so we know which device and can ignore it later
-	tmpDevice=`mount | grep "on /mnt type" | awk '{print $1}' | sed 's/[0-9]//g'`
+	#tmpDevice=`mount | grep "on /mnt type" | awk '{print $1}' | sed 's/[0-9]//g'`
+	tmpDevice=`mount | grep "on /mnt" | awk '{print $1}' | sed 's/[0-9]//g'`
 
 	createdPartitions=""
 	storageDiskSize=`fdisk -l | grep '^Disk /dev/' | grep -v $rootDevice | grep -v $tmpDevice | awk '{print $3}' | sort -n | tail -1`
