@@ -9,7 +9,7 @@ Modular HPC deployment template, with options for standalone NFS server, Fat nod
 <li>Azure <a href="https://azure.microsoft.com/en-us/services/virtual-machine-scale-sets/">scale sets</a></li>
 <li>Azure <a href="https://azure.microsoft.com/en-us/services/managed-disks/">managed disks</a></li></li>
 <br>
-1. Deploy Complete Cluster
+## 1. Deploy Complete Cluster
 This will deploy the complete cluster with Head Node + NFS Server Combined, and a Scale Set cluster. 
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmkiernan%2FFlexHPC%2Fmaster%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
@@ -17,22 +17,28 @@ This will deploy the complete cluster with Head Node + NFS Server Combined, and 
 NOTES: 
 Deployment takes around 12 minutes. Login is disable during deployment. 
 Beware: CentOS 6.5 can take upwards of 30 minutes as mkfs is very slow for the NFS server. 
+===
 
 Everything below here is work in progress. 
 
-2. Module Deployment 
+## 2. Module Deployment 
 This section allows you to deploy the cluster step-by-step so you can have the NFS server & Head node permanently deployed and then tear-up and down compute nodes (Fat Nodes & Scale Sets) as you require. 
-a. Deploy Standalone NFS Server
+  a. Deploy Standalone NFS Server
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmkiernan%2FFlexHPC%2Fmaster%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
-b. Deploy Standalone Head Node
-c. Deploy Combined NFS Server + Head Node
-d. Deploy Scale Set
-e. Deploy Fat Node(s) with optional storage attached. 
+===
+  b. Deploy Standalone Head Node
+===
+  c. Deploy Combined NFS Server + Head Node
+===
+  d. Deploy Scale Set
+===
+  e. Deploy Fat Node(s) with optional storage attached. 
+===
 
 <br><br>
-<b>Image Support Matrix</b>
+## Image Support Matrix
 
 It is recommended to use the same node type & linux version on your head node & scalesets. The NFS server and Fat/standalone nodes however, can run different hardware or linux versions than your head node & scalesets. 
 <br>
