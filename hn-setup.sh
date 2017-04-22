@@ -131,7 +131,7 @@ setup_system_ubuntu1604()
 
 	#apt install -y pip
 	#pip install --upgrade-pip
-	apt-get install -y -q sshpass nmap htop wget sysstat
+	apt-get install -y -q sshpass nmap htop wget sysstat lsscsi
 	apt-get install -y -q infiniband-diags
 	#apt-get install -y -q environment-modules
 
@@ -139,15 +139,12 @@ setup_system_ubuntu1604()
 
 } #--- end of setup_system_ubuntu1604() ---#
 
-
 setup_system()
 {
         if [[ $PUBLISHER == "Canonical" && $OFFER == "UbuntuServer" && $SKU == "16.04-LTS" ]]; then
                 setup_system_ubuntu1604
-                setup_gpus_ubuntu1604
         elif [[ $PUBLISHER == "Canonical" && $OFFER == "UbuntuServer" && $SKU == "16.10" ]]; then
                 setup_system_ubuntu1604
-                setup_gpus_ubuntu1604
         elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS-HPC" && $SKU == "6.5" ]]; then
                 setup_system_centos72
         elif [[ $PUBLISHER == "OpenLogic" && $OFFER == "CentOS" && $SKU == "6.8" ]]; then

@@ -41,12 +41,6 @@ SHARE_HOME="$IPHEADNODE:/share/home"
 CLUSTERMAP="$IPHEADNODE:/share/clustermap"
 LOCAL_SCRATCH=/mnt/resource
 
-# Local filesystem to map shares to 
-HOMEDIR=/home/$HPC_ADMIN
-DATAFS=/data
-SCRATCHFS=/scratch
-CLUSTERMAPFS=/clustermap
-
 SECONDS=0 #-- record wall time of script + functions
 timestamp() { echo "ELAPSED TIME> $SECONDS seconds"; }
 
@@ -105,7 +99,7 @@ setup_system_ubuntu1604()
         apt-get -y upgrade
 
         apt-get install -y -q nfs-common autofs
-        apt-get install -y -q sshpass nmap htop wget sysstat
+        apt-get install -y -q sshpass nmap htop wget sysstat lsscsi
         apt-get install -y -q infiniband-diags
         #apt-get install -y -q environment-modules
 
