@@ -1,6 +1,6 @@
 #!/bin/bash
 HPC_USER=`whoami`
-CLUSTERMAPFS=/cluster
+CLUSTERMAPFS=/clustermap
 NAMES=`ls $CLUSTERMAPFS/hosts`
 echo "launching $1"
 for NAME in $NAMES; do

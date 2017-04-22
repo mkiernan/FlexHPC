@@ -50,6 +50,9 @@ localip=`echo $IP | cut --delimiter='.' -f -3`
 
 echo User is: $HPC_ADMIN
 
+SECONDS=0 #-- record wall time of script + functions
+timestamp() { echo "ELAPSED TIME> $SECONDS seconds"; }
+
 setup_shares()
 {
 	mkdir -p $SHARE_DATA
@@ -65,6 +68,7 @@ setup_shares()
 	echo "$SHARE_CLUSTERMAP $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports
 #	echo "$LOCAL_SCRATCH $localip.*(rw,sync,no_root_squash,no_all_squash)" | tee -a /etc/exports
 	exportfs -a
+	timestamp
 
 } #--- end of setup_disks() ---#
 
@@ -102,6 +106,7 @@ setup_system_centos72()
 	yum install -y -q environment-modules
 	#yum groupinstall -y "X Window System"
 	#npm install -g azure-cli
+	timestamp
 
 } #--- end of setup_system_centos72() ---#
 
@@ -122,6 +127,7 @@ setup_system_ubuntu1604()
 	apt-get install -y -q sshpass nmap htop wget sysstat
 	apt-get install -y -q infiniband-diags
 	#apt-get install -y -q environment-modules
+	timestamp
 
 } #--- end of setup_system_ubuntu1604() ---#
 
@@ -152,6 +158,7 @@ setup_system()
                 echo "***** IMAGE $PUBLISHER:$OFFER:$VERSION NOT SUPPORTED *****"
                 exit -1
         fi
+	timestamp
 
 } #--- end of setup_system() ---#
 
@@ -166,7 +173,7 @@ setup_user()
 	# automount will pick this up at the /share/home location and map it back to /home
 	# purpose of this is to have plenty of space in the homedir and keep it off the os disk. 
 	mv /home/$HPC_ADMIN $SHARE_HOME
-	#usermod -d $SHARE_HOME/$HPC_ADMIN $HPC_ADMIN
+	usermod -d $SHARE_HOME/$HPC_ADMIN $HPC_ADMIN
 
 	# Don't require password for HPC user sudo
 	echo "$HPC_ADMIN ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
@@ -195,12 +202,7 @@ setup_user()
 	chmod 644 $SHARE_HOME/$HPC_ADMIN/.ssh/authorized_keys
 	chmod 600 $SHARE_HOME/$HPC_ADMIN/.ssh/id_rsa
 	chmod 644 $SHARE_HOME/$HPC_ADMIN/.ssh/id_rsa.pub
-
-       	#-- setup nfsv3 automounter for /home
-        echo "/home /etc/auto.home" >> /etc/auto.master
-        echo "* $SHARE_HOME/&" > /etc/auto.home
-        service autofs restart
-        ls -lR /home/$HPC_ADMIN
+	timestamp
 
 } #--- end of setup_user() ---#
 
@@ -230,6 +232,8 @@ setup_utilities()
 #	for NAME in `cat $SHARE_HOME/$HPC_ADMIN/bin/nodeips.txt`; do sudo -u $HPC_ADMIN -s ssh -o ConnectTimeout=2 $HPC_ADMIN@$NAME 'hostname' >> $SHARE_HOME/$HPC_ADMIN/bin/nodenames.txt;done
 #	NAMES=`ls $SHARE_HOME/$HPC_ADMIN/hosts`
 #	for NAME in $NAMES; do echo $NAME >> $SHARE_HOME/$HPC_ADMIN/bin/nodenames.txt; done
+
+	timestamp
 
 } #--- end of setup_utilities() ---#
 
@@ -305,13 +309,13 @@ EOF
 		# Backup mdadm config to its config file. (optional)
 		mdadm --verbose --detail --scan >> /etc/mdadm.conf
         fi
+	timestamp
 
 } #--- end of setup_diskpack() ---#
 
 echo "##################################################"
 echo "############### Head Node Setup ##################"
 echo "##################################################"
-date
 #passwd -l $HPC_ADMIN #-- lock account to prevent conflicts during install
 echo "Deploying $PUBLISHER, $OFFER, $SKU....."
 setup_system
@@ -320,8 +324,7 @@ setup_shares
 setup_user
 setup_utilities
 #passwd -u $HPC_ADMIN #-- unlock account
-date
 #reboot #--- not really necessary, just to be 100% sure storage devices persist before users put data here. 
-
+echo "Script ran for $SECONDS seconds."
 #chmod +x custom_extras.sh 
 #source custom_extras.sh $USER

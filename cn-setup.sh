@@ -47,6 +47,9 @@ DATAFS=/data
 SCRATCHFS=/scratch
 CLUSTERMAPFS=/clustermap
 
+SECONDS=0 #-- record wall time of script + functions
+timestamp() { echo "ELAPSED TIME> $SECONDS seconds"; }
+
 setup_shares()
 {
 	mkdir -p $DATAFS
@@ -55,6 +58,7 @@ setup_shares()
 	chmod -R 777 $DATAFS
 	chmod -R 777 $SCRATCHFS
 	chmod -R 777 $CLUSTERMAPFS
+	timestamp
 
 } #--- end of setup_disks() ---# 
 
@@ -75,6 +79,7 @@ setup_system_centos72()
         yum install -y -q sshpass nmap htop sysstat
         yum install -y -q libibverb-utils infiniband-diags
         yum install -y -q environment-modules
+	timestamp
 
 } #--- end of setup_system_centos72() ---#
 
@@ -94,6 +99,7 @@ setup_system_ubuntu1604()
         apt-get install -y -q sshpass nmap htop wget sysstat
         apt-get install -y -q infiniband-diags
         #apt-get install -y -q environment-modules
+	timestamp
 
 } #--- end of setup_system_ubuntu1604() ---#
 
@@ -125,6 +131,7 @@ setup_gpus_ubuntu1604()
 	echo "export PATH=$PATH:/usr/local/cuda-8.0/bin/" >> ~/.bashrc
 	source ~/.bashrc
 	nvidia-smi
+	timestamp
 
 } #--- end of setup_gpus_ubuntu1604() ---#
 
@@ -154,6 +161,7 @@ setup_system()
 	        echo "***** IMAGE $PUBLISHER:$OFFER:$VERSION NOT SUPPORTED *****"
 	        exit -1
 	fi
+	timestamp
 
 } #--- end of setup_system() ---#
 
@@ -165,6 +173,7 @@ setup_env()
 	echo export I_MPI_DAPL_PROVIDER=ofa-v2-ib0 >> $HOMEDIR/.bashrc
 	echo export I_MPI_ROOT=/opt/intel/compilers_and_libraries_2016.2.181/linux/mpi >> $HOMEDIR/.bashrc
 	echo export I_MPI_DYNAMIC_CONNECTION=0 >> $HOMEDIR/.bashrc
+	timestamp
 
 } #--- end of setup_env() ---#
 
@@ -183,6 +192,7 @@ setup_user()
 
         # Disable tty requirement for sudo
         sed -i 's/^Defaults[ ]*requiretty/# Defaults requiretty/g' /etc/sudoers
+	timestamp
 
 } #--- end of setup_user() ---#
 
@@ -209,6 +219,7 @@ setup_nfs_client()
 	echo "* $SHARE_HOME/&" > /etc/auto.home
 	service autofs restart
 	ls -lR /home/$HPC_ADMIN
+	timestamp
 
 } #--- end of setup_nfs_client() ---#
 
@@ -216,7 +227,6 @@ setup_nfs_client()
 echo "##################################################"
 echo "############# Compute Node Setup #################"
 echo "##################################################"
-date
 #passwd -l $HPC_ADMIN #-- lock account to prevent conflicts during install
 echo "Deploying $PUBLISHER, $OFFER, $SKU....."
 setup_system
@@ -224,5 +234,5 @@ setup_shares
 setup_user
 setup_nfs_client
 setup_env
-date
 #passwd -u $HPC_ADMIN #-- unlock account
+echo "Script ran for $SECONDS seconds."
