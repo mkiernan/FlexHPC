@@ -113,6 +113,7 @@ setup_system_centos72()
 	yum install -y -q environment-modules
 	#yum groupinstall -y "X Window System"
 	#npm install -g azure-cli
+
 	functiontimer "setup_system_centos72()"
 
 } #--- end of setup_system_centos72() ---#
@@ -123,12 +124,11 @@ setup_system_ubuntu1604()
         echo "* hard memlock unlimited" >> /etc/security/limits.conf
         echo "* soft memlock unlimited" >> /etc/security/limits.conf
 
-	# do this before rpm's or too slow for the scaleset mounts
+	apt-get -y update
+	apt-get -y upgrade
 	apt-get install -y -q nfs-common rpcbind nfs-kernel-server autofs
 	systemctl start nfs-kernel-server.service
 
-	apt-get -y update
-	apt-get -y upgrade
 	#apt install -y pip
 	#pip install --upgrade-pip
 	apt-get install -y -q sshpass nmap htop wget sysstat
@@ -212,7 +212,7 @@ setup_user()
 	chmod 644 $SHARE_HOME/$HPC_ADMIN/.ssh/id_rsa.pub
 
 	functiontimer "setup_user()"
-_
+
 } #--- end of setup_user() ---#
 
 setup_utilities()

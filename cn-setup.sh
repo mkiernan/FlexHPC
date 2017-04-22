@@ -101,13 +101,10 @@ setup_system_ubuntu1604()
         echo "* hard memlock unlimited" >> /etc/security/limits.conf
         echo "* soft memlock unlimited" >> /etc/security/limits.conf
 
-        # do this before rpm's or too slow for the scaleset mounts
-        #apt-get install -y -q rpcbind nfs-kernel-server nfs-common
-        apt-get install -y -q nfs-common autofs
-        #systemctl start nfs-kernel-server.service
-
         apt-get -y update
         apt-get -y upgrade
+
+        apt-get install -y -q nfs-common autofs
         apt-get install -y -q sshpass nmap htop wget sysstat
         apt-get install -y -q infiniband-diags
         #apt-get install -y -q environment-modules
