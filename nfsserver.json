@@ -1,0 +1,514 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01-preview/deploymentTemplate.json",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vmSku": {
+            "defaultValue": "DS14_v2",
+            "allowedValues": [
+                "DS5_v2",
+                "DS14_v2",
+                "DS15_v2"
+            ],
+            "type": "String",
+            "metadata": {
+                "description": "Which machine type would you like to deploy to? Not all VMs are available in all regions"
+            }
+        },
+        "image": {
+            "type": "string",
+            "defaultValue": "OpenLogic:CentOS-HPC:7.1",
+            "allowedValues": [
+                "Canonical:UbuntuServer:16.04-LTS",
+                "Canonical:UbuntuServer:16.10",
+                "OpenLogic:CentOS-HPC:6.5",
+                "OpenLogic:CentOS:6.8",
+                "OpenLogic:CentOS-HPC:7.1",
+                "OpenLogic:CentOS:7.2",
+                "OpenLogic:CentOS:7.3",
+                "RedHat:RHEL:7.3",
+                "SUSE:SLES-HPC:12-SP1"
+            ],
+            "metadata": {
+                "description": "OS version to deploy. -HPC suffixed images include the RDMA drivers for compute-to-compute MPI InfiniBand on A8, A9, H16r & H16mr VM sizes. Non *-HPC images need the RDMA drivers to be installed manually, or deploy without infiniband."
+            }
+        },
+        "serverName": {
+            "maxLength": 10,
+            "type": "String",
+            "metadata": {
+                "description": "NFS Server Name (this will be the hostname)."
+            }
+        },
+        "VNETName": {
+            "maxLength": 10,
+            "type": "String",
+            "metadata": {
+                "description": "This is the VNET to which the NFS server will be deployed Specify the same VNET when creating other resources in your cluster."
+            }
+        },
+        "adminUsername": {
+            "type": "String",
+            "metadata": {
+                "description": "Admin username on all VMs."
+            }
+        },
+        "adminPassword": {
+            "type": "SecureString",
+            "metadata": {
+                "description": "Admin password on all VMs."
+            }
+        }
+    },
+    "variables": {
+        "NFSServerName": "[toLower(parameters('serverName'))]",
+        "NFSServerIPConfigName": "[concat(variables('NFSServerName'), 'ipconfig')]",
+        "NFSServerNicName": "[concat(variables('NFSServerName'), 'nic')]",
+        "addressPrefix": "10.0.0.0/16",
+        "subnetPrefix": "10.0.0.0/24",
+        "virtualNetworkName": "[parameters('VNETName')]",
+        "subnetName": "[concat(variables('NFSServerName'), 'subnet')]",
+        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
+        "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+        "publicIPAddressName": "[concat(variables('NFSServerName'), 'pip')]",
+        "nicName": "[concat(variables('NFSServerName'), 'nic')]",
+        "ipConfigName": "[concat(variables('NFSServerName'), 'ipconfig')]",
+        "scriptUrl": "https://raw.githubusercontent.com/mkiernan/FlexHPC/master/",
+        "imageReference_Canonical:UbuntuServer:16.04-LTS": {
+            "publisher": "Canonical",
+            "offer": "UbuntuServer",
+            "sku": "16.04-LTS",
+            "version": "latest"
+        },
+        "imageReference_Canonical:UbuntuServer:16.10": {
+            "publisher": "Canonical",
+            "offer": "UbuntuServer",
+            "sku": "16.10",
+            "version": "latest"
+        },
+        "imageReference_OpenLogic:CentOS-HPC:6.5": {
+            "publisher": "OpenLogic",
+            "offer": "CentOS-HPC",
+            "sku": "6.5",
+            "version": "latest"
+        },
+        "imageReference_OpenLogic:CentOS:6.8": {
+            "publisher": "OpenLogic",
+            "offer": "CentOS",
+            "sku": "6.8",
+            "version": "latest"
+        },
+        "imageReference_OpenLogic:CentOS-HPC:7.1": {
+            "publisher": "OpenLogic",
+            "offer": "CentOS-HPC",
+            "sku": "7.1",
+            "version": "latest"
+        },
+        "imageReference_OpenLogic:CentOS:7.2": {
+            "publisher": "OpenLogic",
+            "offer": "CentOS",
+            "sku": "7.2",
+            "version": "latest"
+        },
+        "imageReference_OpenLogic:CentOS:7.3": {
+            "publisher": "OpenLogic",
+            "offer": "CentOS",
+            "sku": "7.3",
+            "version": "latest"
+        },
+        "imageReference_RedHat:RHEL:7.3": {
+            "publisher": "RedHat",
+            "offer": "RHEL",
+            "sku": "7.3",
+            "version": "latest"
+        },
+        "imageReference_SUSE:SLES-HPC:12-SP1": {
+            "publisher": "SUSE",
+            "offer": "SLES-HPC",
+            "sku": "12-SP1",
+            "version": "latest"
+        },
+        "imageReference": "[variables(concat('imageReference_',parameters('image')))]",
+        "vmScripts": {
+            "scriptsToDownload": [
+                "[concat(variables('scriptUrl'), 'hn-setup.sh')]",
+            ],
+            "commandToExecute": "",
+        },
+        "computeApiVersion": "2016-04-30-preview",
+        "networkApiVersion": "2016-06-01",
+        "storageApiVersion": "2015-06-15"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[variables('virtualNetworkName')]",
+            "apiVersion": "[variables('networkApiVersion')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('addressPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "[variables('subnetPrefix')]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[variables('publicIPAddressName')]",
+            "apiVersion": "[variables('networkApiVersion')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('NFSServerName')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[variables('NFSServerNicName')]",
+            "apiVersion": "[variables('networkApiVersion')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "[variables('NFSServerIPConfigName')]",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+                            },
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            }
+                        }
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
+                "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Compute/disks",
+            "name": "disk0",
+            "apiVersion": "2016-04-30-preview",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "creationData": {
+                    "createOption": "Empty"
+                },
+                "accountType": "Standard_LRS",
+                "diskSizeGB": 1023
+            }
+        },
+        {
+            "type": "Microsoft.Compute/disks",
+            "name": "disk1",
+            "apiVersion": "2016-04-30-preview",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "creationData": {
+                    "createOption": "Empty"
+                },
+                "accountType": "Standard_LRS",
+                "diskSizeGB": 1023
+            }
+        },
+        {
+            "type": "Microsoft.Compute/disks",
+            "name": "disk2",
+            "apiVersion": "2016-04-30-preview",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "creationData": {
+                    "createOption": "Empty"
+                },
+                "accountType": "Standard_LRS",
+                "diskSizeGB": 1023
+            }
+        },
+        {
+            "type": "Microsoft.Compute/disks",
+            "name": "disk3",
+            "apiVersion": "2016-04-30-preview",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "creationData": {
+                    "createOption": "Empty"
+                },
+                "accountType": "Standard_LRS",
+                "diskSizeGB": 1023
+            }
+        },
+        {
+            "type": "Microsoft.Compute/disks",
+            "name": "disk4",
+            "apiVersion": "2016-04-30-preview",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "creationData": {
+                    "createOption": "Empty"
+                },
+                "accountType": "Standard_LRS",
+                "diskSizeGB": 1023
+            }
+        },
+        {
+            "type": "Microsoft.Compute/disks",
+            "name": "disk5",
+            "apiVersion": "2016-04-30-preview",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "creationData": {
+                    "createOption": "Empty"
+                },
+                "accountType": "Standard_LRS",
+                "diskSizeGB": 1023
+            }
+        },
+        {
+            "type": "Microsoft.Compute/disks",
+            "name": "disk6",
+            "apiVersion": "2016-04-30-preview",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "creationData": {
+                    "createOption": "Empty"
+                },
+                "accountType": "Standard_LRS",
+                "diskSizeGB": 1023
+            }
+        },
+        {
+            "type": "Microsoft.Compute/disks",
+            "name": "disk7",
+            "apiVersion": "2016-04-30-preview",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "creationData": {
+                    "createOption": "Empty"
+                },
+                "accountType": "Standard_LRS",
+                "diskSizeGB": 1023
+            }
+        },
+        {
+            "type": "Microsoft.Compute/disks",
+            "name": "disk8",
+            "apiVersion": "2016-04-30-preview",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "creationData": {
+                    "createOption": "Empty"
+                },
+                "accountType": "Standard_LRS",
+                "diskSizeGB": 1023
+            }
+        },
+        {
+            "type": "Microsoft.Compute/disks",
+            "name": "disk9",
+            "apiVersion": "2016-04-30-preview",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "creationData": {
+                    "createOption": "Empty"
+                },
+                "accountType": "Standard_LRS",
+                "diskSizeGB": 1023
+            }
+        },
+        {
+            "type": "Microsoft.Compute/disks",
+            "name": "disk10",
+            "apiVersion": "2016-04-30-preview",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "creationData": {
+                    "createOption": "Empty"
+                },
+                "accountType": "Standard_LRS",
+                "diskSizeGB": 1023
+            }
+        },
+        {
+            "type": "Microsoft.Compute/disks",
+            "name": "disk11",
+            "apiVersion": "2016-04-30-preview",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "creationData": {
+                    "createOption": "Empty"
+                },
+                "accountType": "Standard_LRS",
+                "diskSizeGB": 1023
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[variables('NFSServerName')]",
+            "apiVersion": "[variables('computeApiVersion')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSku')]"
+                },
+                "osProfile": {
+                    "computerName": "[variables('NFSServerName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "storageProfile": {
+                    "imageReference": "[variables('imageReference')]",
+                    "osDisk": {
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    },
+                    "dataDisks": [
+                        {
+                            "lun": 0,
+                            "createOption": "Attach",
+                            "caching": "ReadWrite",
+                            "managedDisk": {
+                                "id": "[resourceId('Microsoft.Compute/disks', 'disk0')]"
+                            }
+                        },
+                        {
+                            "lun": 1,
+                            "createOption": "Attach",
+                            "caching": "ReadWrite",
+                            "managedDisk": {
+                                "id": "[resourceId('Microsoft.Compute/disks', 'disk1')]"
+                            }
+                        },
+                        {
+                            "lun": 2,
+                            "createOption": "Attach",
+                            "caching": "ReadWrite",
+                            "managedDisk": {
+                                "id": "[resourceId('Microsoft.Compute/disks', 'disk2')]"
+                            }
+                        },
+                        {
+                            "lun": 3,
+                            "createOption": "Attach",
+                            "caching": "ReadWrite",
+                            "managedDisk": {
+                                "id": "[resourceId('Microsoft.Compute/disks', 'disk3')]"
+                            }
+                        },
+                        {
+                            "lun": 4,
+                            "createOption": "Attach",
+                            "caching": "ReadWrite",
+                            "managedDisk": {
+                                "id": "[resourceId('Microsoft.Compute/disks', 'disk4')]"
+                            }
+                        },
+                        {
+                            "lun": 5,
+                            "createOption": "Attach",
+                            "caching": "ReadWrite",
+                            "managedDisk": {
+                                "id": "[resourceId('Microsoft.Compute/disks', 'disk5')]"
+                            }
+                        },
+                        {
+                            "lun": 6,
+                            "createOption": "Attach",
+                            "caching": "ReadWrite",
+                            "managedDisk": {
+                                "id": "[resourceId('Microsoft.Compute/disks', 'disk6')]"
+                            }
+                        },
+                        {
+                            "lun": 7,
+                            "createOption": "Attach",
+                            "caching": "ReadWrite",
+                            "managedDisk": {
+                                "id": "[resourceId('Microsoft.Compute/disks', 'disk7')]"
+                            }
+                        },
+                        {
+                            "lun": 8,
+                            "createOption": "Attach",
+                            "caching": "ReadWrite",
+                            "managedDisk": {
+                                "id": "[resourceId('Microsoft.Compute/disks', 'disk8')]"
+                            }
+                        },
+                        {
+                            "lun": 9,
+                            "createOption": "Attach",
+                            "caching": "ReadWrite",
+                            "managedDisk": {
+                                "id": "[resourceId('Microsoft.Compute/disks', 'disk9')]"
+                            }
+                        },
+                        {
+                            "lun": 10,
+                            "createOption": "Attach",
+                            "caching": "ReadWrite",
+                            "managedDisk": {
+                                "id": "[resourceId('Microsoft.Compute/disks', 'disk10')]"
+                            }
+                        },
+                        {
+                            "lun": 11,
+                            "createOption": "Attach",
+                            "caching": "ReadWrite",
+                            "managedDisk": {
+                                "id": "[resourceId('Microsoft.Compute/disks', 'disk11')]"
+                            }
+                        }
+                    ]
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('NFSServerNicName'))]"
+                        }
+                    ]
+                }
+            },
+            "resources": [
+                {
+                    "type": "extensions",
+                    "name": "masterExtension",
+                    "apiVersion": "[variables('storageApiVersion')]",
+                    "location": "[resourceGroup().location]",
+                    "tags": {
+                        "displayName": "masterExtension"
+                    },
+                    "properties": {
+                        "publisher": "Microsoft.OSTCExtensions",
+                        "type": "CustomScriptForLinux",
+                        "typeHandlerVersion": "1.5",
+                        "autoUpgradeMinorVersion": true,
+                        "settings": {
+                            "fileUris": "[variables('vmScripts').scriptsToDownload]",
+                            "commandToExecute": "[concat('bash ', 'hn-setup.sh ',parameters('adminUsername'),' ',parameters('image')) ]",
+                            "timestamp": 4
+                        }
+                    },
+                    "dependsOn": [
+                        "[concat('Microsoft.Compute/virtualMachines/', variables('NFSServerName'))]"
+                    ]
+                }
+            ],
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', variables('NFSServerNicName'))]"
+            ]
+        }
+    ]
+}
