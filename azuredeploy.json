@@ -14,9 +14,9 @@
 				"Standard_A8",
 				"Standard_A9",
 				"Basic_A4",
-				"DS5_v2",
-				"DS14_v2",
-				"DS15_v2"
+				"Standard_DS5_v2",
+				"Standard_DS14_v2",
+				"Standard_DS15_v2"
 			],
 			"type": "String",
 			"metadata": {
