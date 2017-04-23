@@ -80,9 +80,9 @@
         "longNamingInfix": "[toLower(parameters('vmssName'))]",
         "addressPrefix": "10.0.0.0/16",
         "subnetPrefix": "10.0.0.0/24",
-        "virtualNetworkName": "[parameters('VNETName')]",
-        "existingSubnetResourceId": "/subscriptions/cf385b17-bfe0-4a92-8b27-5a2ac02848d2/resourceGroups/flegrp63/providers/Microsoft.Network/virtualNetworks/vnet01/flexsubnet",
         "subnetName": "flexsubnet",
+        "virtualNetworkName": "[parameters('VNETName')]",
+        "existingSubnetResourceId": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'), '/subnets/', variables('subnetName'))]",
         "nicName": "[concat(variables('namingInfix'), 'nic')]",
         "ipConfigName": "[concat(variables('namingInfix'), 'ipconfig')]",
         "scriptUrl": "https://raw.githubusercontent.com/mkiernan/FlexHPC/master/",
@@ -219,10 +219,7 @@
                         ]
                     }
                 }
-            },
-            "dependsOn": [
-                "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
-            ]
+            }
         }
     ]
 }
