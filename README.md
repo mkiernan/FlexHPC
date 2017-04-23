@@ -38,7 +38,7 @@ Example usage of this is so that you can setup a "permanent" NFS server & Head n
 ### 2a. Deploy a Standalone Linux NFS Server
 
 You can treat this system purely as a standalone NFS server, or as a combined NFS server & Head/Master node. This template will also create the main VNET and Subnet for the cluster, so deploy this template first.
-<br> 
+<br><br>
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmkiernan%2FFlexHPC%2Fmaster%2Fnfsserver.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
@@ -48,8 +48,7 @@ You can treat this system purely as a standalone NFS server, or as a combined NF
 ### 2b. Deploy a Scale Set of Linux Compute Nodes
 
 Deploy a scale set with N nodes into the same existing VNET as your NFS Server + Head Node. 
-<br>
-
+<br><br>
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmkiernan%2FFlexHPC%2Fmaster%2Fscaleset.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
