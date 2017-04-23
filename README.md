@@ -24,52 +24,60 @@ This template deploys a complete cluster composed of a head node + nfs server (c
 </a>
 <br>
 <i>
-* Deployment takes around 12 minutes. Login is disabled during deployment.
-* CentOS 6.5 can take upwards of 30 minutes as mkfs is extremely slow for the NFS server.
+* Deployment takes around 12 minutes. Login is disabled during deployment to prevent conflicts. Patience is a virtue. 
 * Head node & Compute nodes will be the same VM type (use the below modular template if you don't want this)
 </i>
 
 ***
-Everything below here is work in progress. 
 
 ## 2. Modular Step-by-Step Deployment 
 This section allows you to deploy the cluster infrastructure step-by-step. You will need to deploy the components of your infrastructure into the same VNET in order for them to connect to each other. 
 
 Example usage of this is so that you can setup a "permanent" NFS server & Head node with your application software and data stored safely, and then tear-up and down compute nodes (Fat Nodes & Scale Sets) as you require. 
-### 2a. Deploy Standalone NFS Server
+### 2a. Deploy a Standalone Linux NFS Server
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmkiernan%2FFlexHPC%2Fmaster%2Fnfsserver.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 
-### 2b. Deploy Scale Set (Connects to NFS Server / Head Node)
+### 2b. Deploy a Scale Set of Linux Compute Nodes
 
-Deploy a scale set with N nodes into the same VNET as your NFS Server + Head Node. 
+Deploy a scale set with N nodes into the same existing VNET as your NFS Server + Head Node. 
 <br>
 
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmkiernan%2FFlexHPC%2Fmaster%2Fscaleset.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 <br>
+
 <i>
-* Ensure your NFS server is deployed first as per the step above. 
+* Ensure your NFS server is deployed first as per the step 2a above. 
 * The scale set install scripts will mount the home directory and other shares from the NFS server automatically. 
 * The NFS server is currently assumed to be 10.0.0.4. 
-* The scale set instances will record their hostnames & IP addresses into the /clustermap mount on the NFS server. 
+* The scale set instances will record their hostnames and IP addresses into the /clustermap mount on the NFS server.
+* VM scaleset overprovisioning is disabled in this version for now to keep things predictable. 
 </i>
 
 ### 2c. Deploy Standalone Head Node (No NFS Server)
+TBD
 
-### 2d. Deploy Combined NFS Server + Head Node
-
-### 2e. Deploy Fat Node(s) with optional storage attached. 
-
-<br>
+### 2d. Deploy Fat Node(s) VM(s) with optional storage attached. 
+TBD
 
 ***
 
-## Image Support Matrix
+## 3. Cluster Access Instructions
 
-It is recommended to use the same node type & linux version on your head node & scalesets. The NFS server and Fat/standalone nodes however, can run different hardware or linux versions than your head node & scalesets. 
+* To ssh into the headnode or NFS server after deployment: **ssh username@headnode-public-ip-address**
+* **username** is the username you entered into the template when you deployed. 
+* The ssh keys are stored for your user in /share/home/username/.ssh. 
+* The homedirectory is NFS automounted from the headnode onto all the compute nodes in the scale set.
+* You will  find the private IP addresses for the scaleset nodes in /share/clustermap/hosts (head nodes) or /clustermap/hosts (compute nodes).
+
+***
+
+## Linux Image Support Matrix
+
+You can mix and match VM sku types & linux versions on your head node, NFS server, scaleset compute nodes and fat nodes. 
 <br>
 The table below documents the hardware support with the various Linux distributions & versions. YES means the relevant RDMA or GPU drivers are included in the image or added dynamically during deployment by this template.
 <br>
@@ -92,6 +100,8 @@ The table below documents the hardware support with the various Linux distributi
 
 (*added by the installation scripts from this template at time of deployment)
 
+***
+
 <b>Quickstart</b>
 
 	1) Deploy the ARM Template: 
@@ -112,24 +122,7 @@ The table below documents the hardware support with the various Linux distributi
 
 <img src="https://github.com/tanewill/5clickTemplates/blob/master/images/hpc_vmss_architecture.png"  align="middle" width="395" height="274"  alt="hpc_vmss_architecture" border="1"/> <br></br>
 
-This skeleton template deploys a Linux VM Scale Set (VMSS) along with a Head Node (+ NFS server in the same VM) in the same virtual network. No HPC applications are installed. You can connect to the headnode via the public IP address (look into the resource group in the portal and look for the VM called "flexheadnode"), then connect from there to VMs in the scale set via private IP addresses. To ssh into the headnode, use the following command:
 
-ssh {username}@{headnode-public-ip-address}
 
-The ssh keys are stored for your user in /share/home/username/.ssh. The homedirectory is NFS mounted from the headnode onto all the compute nodes in the scale set.
 
-To ssh into one of the VMs in the scale set, go to resources.azure.com to find the private IP address of the VM, make sure you are ssh'ed into the headnode, then execute the following command:
-
-ssh {username}@{vm-private-ip-address}
-
-You will also find the private IP addresses in /share/home/username/bin/nodeips.txt
-
-Notes:
-a. VM scaleset overprovisioning is disabled in this version for now to keep things predictable. 
-b. To prevent configuration conflicts, the user account is locked out from ssh access until the configuration script has terminated. Patience is a virtue. 
-
-<b>Adding & Removing Nodes</b>
-
-TBD. 
-
-<i>Credit: Taylor Newill & Xavier Pillons for original base templates.</i>
+<i>Credit: Taylor Newill, Xavier Pillons & Thomas Varlet for original base templates.</i>
