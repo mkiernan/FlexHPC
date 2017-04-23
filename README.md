@@ -14,6 +14,7 @@ Modular Microsoft Azure HPC infrastructure deployment ARM template.
 <i>
 If you find a problem, please report it <a href="https://github.com/mkiernan/FlexHPC/issues/new">here.</a>
 </i>
+
 ***
 ## 1. Deploy a Complete Cluster with Head Node & NFS Server. 
 This template deploys a complete cluster composed of a head node + nfs server (combined on the same VM), and a cluster of a selectable number of nodes (1-100), built as a scale-set. 
@@ -37,7 +38,7 @@ This section allows you to deploy the cluster infrastructure step-by-step. You w
 
 Example usage of this is so that you can setup a "permanent" NFS server & Head node with your application software and data stored safely, and then tear-up and down compute nodes (Fat Nodes & Scale Sets) as you require. 
 ### 2a. Deploy Standalone NFS Server
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmkiernan%2FFlexHPC%2Fmaster%2Fazuredeploy.json" target="_blank">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmkiernan%2FFlexHPC%2Fmaster%2Fnfsserver.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 
