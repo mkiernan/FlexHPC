@@ -1,0 +1,223 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01-preview/deploymentTemplate.json",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"vmSku": {
+			"defaultValue": "Standard_H16r",
+			"allowedValues": [
+				"Standard_H16r",
+				"Standard_H16mr",
+				"Standard_NC6",
+				"Standard_NC12",
+				"Standard_NC24",
+				"Standard_NC24r",
+				"Standard_A8",
+				"Standard_A9",
+				"Basic_A4",
+				"Standard_DS5_v2",
+				"Standard_DS14_v2",
+				"Standard_DS15_v2"
+			],
+			"type": "String",
+			"metadata": {
+				"description": "Which machine type would you like to deploy to? Not all VMs are available in all regions"
+			}
+		},		
+		"instanceCount": {
+			"maxValue": 100,
+			"type": "Int",
+			"metadata": {
+				"description": "Number of compute nodes to deploy in the cluster (100 or less)."
+			}
+		},
+		"image": {
+			"type": "string",
+			"defaultValue": "OpenLogic:CentOS-HPC:7.1",
+			"allowedValues": [
+				"Canonical:UbuntuServer:16.04-LTS",
+				"Canonical:UbuntuServer:16.10",
+				"OpenLogic:CentOS-HPC:6.5",
+				"OpenLogic:CentOS:6.8",
+				"OpenLogic:CentOS-HPC:7.1",
+				"OpenLogic:CentOS:7.2",
+				"OpenLogic:CentOS:7.3",
+				"RedHat:RHEL:7.3",
+				"SUSE:SLES-HPC:12-SP1"
+			],
+			"metadata": {
+				"description": "OS version to deploy. -HPC suffixed images include the RDMA drivers for compute-to-compute MPI InfiniBand on A8, A9, H16r & H16mr VM sizes. Non *-HPC images need the RDMA drivers to be installed manually, or deploy without infiniband."
+			}
+		}, 
+		"vmssName": {
+			"maxLength": 10,
+			"type": "String",
+			"metadata": {
+				"description": "String used as a base for naming resources. Must be 3-10 characters in length and globally unique across Azure. A hash is prepended to this string for some resources, and resource-specific information is appended."
+			}
+		},
+        "VNETName": {
+            "maxLength": 10,
+            "type": "String",
+            "metadata": {
+                "description": "This is the VNET to which the scale set will be deployed. The VNET & 10.0.0/24 subnet must exist already."
+            }
+        },
+		"adminUsername": {
+			"type": "String",
+			"metadata": {
+				"description": "Admin username on all VMs."
+			}
+		},
+		"adminPassword": {
+			"type": "SecureString",
+			"metadata": {
+				"description": "Admin password on all VMs."
+			}
+		}
+	},
+	"variables": {
+		"namingInfix": "[toLower(substring(concat(parameters('vmssName'), uniqueString(resourceGroup().id)), 0, 9))]",
+		"longNamingInfix": "[toLower(parameters('vmssName'))]",
+		"addressPrefix": "10.0.0.0/16",
+		"subnetPrefix": "10.0.0.0/24",
+        "virtualNetworkName": "[parameters('VNETName')]",
+		"subnetName": "flexsubnet",
+		"vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
+		"subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+		"nicName": "[concat(variables('namingInfix'), 'nic')]",
+		"ipConfigName": "[concat(variables('namingInfix'), 'ipconfig')]",
+		"scriptUrl": "https://raw.githubusercontent.com/mkiernan/FlexHPC/master/",
+		"imageReference_Canonical:UbuntuServer:16.04-LTS": {
+     		 "publisher": "Canonical",
+    		  "offer": "UbuntuServer",
+ 		     "sku": "16.04-LTS",
+  		     "version": "latest"
+    	},
+		"imageReference_Canonical:UbuntuServer:16.10": {
+			"publisher": "Canonical",
+			"offer": "UbuntuServer",
+			"sku": "16.10",
+			"version": "latest"
+		},
+		"imageReference_OpenLogic:CentOS-HPC:6.5": {
+			"publisher": "OpenLogic",
+			"offer": "CentOS-HPC",
+			"sku": "6.5",
+			"version": "latest"
+		},
+		"imageReference_OpenLogic:CentOS:6.8": {
+			"publisher": "OpenLogic",
+			"offer": "CentOS",
+			"sku": "6.8",
+			"version": "latest"
+		},
+		"imageReference_OpenLogic:CentOS-HPC:7.1": {
+			"publisher": "OpenLogic",
+			"offer": "CentOS-HPC",
+			"sku": "7.1",
+			"version": "latest"
+		},
+		"imageReference_OpenLogic:CentOS:7.2": {
+			"publisher": "OpenLogic",
+			"offer": "CentOS",
+			"sku": "7.2",
+			"version": "latest"
+		},
+		"imageReference_OpenLogic:CentOS:7.3": {
+			"publisher": "OpenLogic",
+			"offer": "CentOS",
+			"sku": "7.3",
+			"version": "latest"
+		},
+		"imageReference_RedHat:RHEL:7.3": {
+			"publisher": "RedHat",
+			"offer": "RHEL",
+			"sku": "7.3",
+			"version": "latest"
+		},
+		"imageReference_SUSE:SLES-HPC:12-SP1": {
+			"publisher": "SUSE",
+			"offer": "SLES-HPC",
+			"sku": "12-SP1",
+			"version": "latest"
+		},
+	    "imageReference": "[variables(concat('imageReference_',parameters('image')))]",
+		"vmssScript": {
+			"scriptToDownload": [
+				"[concat(variables('scriptUrl'), 'cn-setup.sh')]"
+			],
+			"commandToExecute": "[concat('bash ', 'cn-setup.sh ',parameters('adminUsername'),' ',parameters('image')) ]",
+		},
+		"computeApiVersion": "2016-04-30-preview",
+		"networkApiVersion": "2016-06-01",
+		"storageApiVersion": "2015-06-15"
+	},
+	"resources": [{
+		"type": "Microsoft.Compute/virtualMachineScaleSets",
+		"sku": {
+			"name": "[parameters('vmSku')]",
+			"tier": "Standard",
+			"capacity": "[parameters('instanceCount')]"
+		},
+		"name": "[variables('namingInfix')]",
+		"apiVersion": "[variables('computeApiVersion')]",
+		"location": "[resourceGroup().location]",
+		"properties": {
+			"overprovision": "false",
+			"upgradePolicy": {
+				"mode": "Manual"
+			},
+			"virtualMachineProfile": {
+				"storageProfile": {
+					"osDisk": {
+					"caching": "ReadWrite",
+					"createOption": "FromImage"
+					},
+					"imageReference": "[variables('imageReference')]"
+				},
+				"osProfile": {
+					"computerNamePrefix": "[variables('namingInfix')]",
+					"adminUsername": "[parameters('adminUsername')]",
+					"adminPassword": "[parameters('adminPassword')]"
+				},
+				"networkProfile": {
+					"networkInterfaceConfigurations": [{
+						"name": "[variables('nicName')]",
+						"properties": {
+							"primary": "true",
+							"ipConfigurations": [{
+								"name": "[variables('ipConfigName')]",
+								"properties": {
+									"subnet": {
+										"id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'), '/subnets/', variables('subnetName'))]"
+									}
+								}
+							}]
+						}
+					}]
+				},
+				"extensionProfile": {
+					"extensions": [
+						{
+							"name": "installCN",
+							"properties": {
+								"publisher": "Microsoft.Azure.Extensions",
+								"type": "CustomScript",
+								"typeHandlerVersion": "2.0",
+								"autoUpgradeMinorVersion": true,
+								"settings": {
+									"fileUris": "[variables('vmssScript').scriptToDownload]",
+									"commandToExecute": "[variables('vmssScript').commandToExecute]",
+									"timestamp": 12345
+								}
+							}
+						}
+					]
+				}
+			}
+		},
+		"dependsOn": [
+			"[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+	  ]
+	}]
+}

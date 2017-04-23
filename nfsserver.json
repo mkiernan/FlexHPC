@@ -5,7 +5,6 @@
         "vmSku": {
             "defaultValue": "Standard_DS14v2",
             "allowedValues": [
-                "Standard_DS10_v2",
                 "Standard_DS11_v2",
                 "Standard_DS12_v2",
                 "Standard_DS13_v2",
@@ -70,7 +69,7 @@
         "addressPrefix": "10.0.0.0/16",
         "subnetPrefix": "10.0.0.0/24",
         "virtualNetworkName": "[parameters('VNETName')]",
-        "subnetName": "[concat(variables('NFSServerName'), 'subnet')]",
+        "subnetName": "flexsubnet",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
         "publicIPAddressName": "[concat(variables('NFSServerName'), 'pip')]",

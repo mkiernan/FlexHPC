@@ -28,7 +28,6 @@ This template deploys a complete cluster composed of a head node + nfs server (c
 * CentOS 6.5 can take upwards of 30 minutes as mkfs is extremely slow for the NFS server.
 * Head node & Compute nodes will be the same VM type (use the below modular template if you don't want this)
 </i>
-<br>
 
 ***
 Everything below here is work in progress. 
@@ -42,17 +41,24 @@ Example usage of this is so that you can setup a "permanent" NFS server & Head n
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 
-### 2b. Deploy Standalone Head Node (No NFS Server)
+### 2b. Deploy Scale Set 
 
-### 2c. Deploy Combined NFS Server + Head Node
+Deploy a scale set with N nodes into the same VNET as your NFS Server + Head Node. 
+<br>
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmkiernan%2FFlexHPC%2Fmaster%2Fscaleset.json" target="_blank">
+    <img src="http://azuredeploy.net/deploybutton.png"/>
+</a>
 
-### 2d. Deploy Scale Set
+### 2c. Deploy Standalone Head Node (No NFS Server)
+
+### 2d. Deploy Combined NFS Server + Head Node
 
 ### 2e. Deploy Fat Node(s) with optional storage attached. 
 
-
 <br>
+
 ***
+
 ## Image Support Matrix
 
 It is recommended to use the same node type & linux version on your head node & scalesets. The NFS server and Fat/standalone nodes however, can run different hardware or linux versions than your head node & scalesets. 
