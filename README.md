@@ -50,6 +50,7 @@ Deploy a scale set with N nodes into the same VNET as your NFS Server + Head Nod
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 <i>
+<br>
 * Ensure your NFS server is deployed first as per step 2a.
 * The scale set install scripts will mount the home directory and other shares from the NFS server automatically. 
 * The NFS server is currently assumed to be 10.0.0.4. 
