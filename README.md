@@ -23,10 +23,8 @@ This template deploys a complete cluster composed of a head node + nfs server (c
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 <br>
-<i>
-* Deployment takes around 12 minutes. Login is disabled during deployment to prevent conflicts. Patience is a virtue. 
-* Head node & Compute nodes will be the same VM type (use the below modular template if you don't want this)
-</i>
+* *Deployment takes around 12 minutes. Login is disabled during deployment to prevent conflicts. Patience is a virtue.*
+* *Head node & Compute nodes will be the same VM type (use the below modular template if you don't want this)*
 
 ***
 
@@ -34,10 +32,18 @@ This template deploys a complete cluster composed of a head node + nfs server (c
 This section allows you to deploy the cluster infrastructure step-by-step. You will need to deploy the components of your infrastructure into the same VNET in order for them to connect to each other. 
 
 Example usage of this is so that you can setup a "permanent" NFS server & Head node with your application software and data stored safely, and then tear-up and down compute nodes (Fat Nodes & Scale Sets) as you require. 
+
+***
+
 ### 2a. Deploy a Standalone Linux NFS Server
+
+You can treat this system purely as a standalone NFS server, or as a combined NFS server & Head/Master node. This template will also create the main VNET and Subnet for the cluster, so deploy this template first.
+<br> 
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmkiernan%2FFlexHPC%2Fmaster%2Fnfsserver.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
+
+***
 
 ### 2b. Deploy a Scale Set of Linux Compute Nodes
 
@@ -48,17 +54,18 @@ Deploy a scale set with N nodes into the same existing VNET as your NFS Server +
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 <br>
+* *Ensure your NFS server is deployed first as per the step 2a above.*
+* *The compute node install script will mount the home directory and other shares from the NFS server automatically.* 
+* *The NFS server is currently assumed to be 10.0.0.4.*
+* *The scale set instances will record their hostnames and IP addresses into the /clustermap mount on the NFS server.*
+* *VM scaleset overprovisioning is disabled in this version for now to keep things predictable.*
 
-<i>
-* Ensure your NFS server is deployed first as per the step 2a above. 
-* The scale set install scripts will mount the home directory and other shares from the NFS server automatically. 
-* The NFS server is currently assumed to be 10.0.0.4. 
-* The scale set instances will record their hostnames and IP addresses into the /clustermap mount on the NFS server.
-* VM scaleset overprovisioning is disabled in this version for now to keep things predictable. 
-</i>
+***
 
 ### 2c. Deploy Standalone Head Node (No NFS Server)
 TBD
+
+***
 
 ### 2d. Deploy Fat Node(s) VM(s) with optional storage attached. 
 TBD
@@ -68,10 +75,11 @@ TBD
 ## 3. Cluster Access Instructions
 
 * To ssh into the headnode or NFS server after deployment: **ssh username@headnode-public-ip-address**
-* **username** is the username you entered into the template when you deployed. 
+* **username** is the cluster admin username you entered into the template when you deployed. 
 * The ssh keys are stored for your user in /share/home/username/.ssh. 
 * The homedirectory is NFS automounted from the headnode onto all the compute nodes in the scale set.
 * You will  find the private IP addresses for the scaleset nodes in /share/clustermap/hosts (head nodes) or /clustermap/hosts (compute nodes).
+* Upload your data & applications to /share/data with scp or rsync. 
 
 ***
 
@@ -95,7 +103,7 @@ The table below documents the hardware support with the various Linux distributi
 	<tr><td>OpenLogic:CentOS:7.2</td><td>YES</td><td>TBD</td></tr>
 	<tr><td>OpenLogic:CentOS:7.3</td><td>YES</td><td>TBD</td></tr>
 	<tr><td>RedHat:RHEL:7.3</td><td>TBD</td><td>TBD</td></tr>
-	<tr><td>SUSE:SLES-HPC:12-SP2</td><td>YES</td><td>TBD</td></tr>
+	<tr><td>SUSE:SLES-HPC:12-SP2</td><td>YES*</td><td>TBD</td></tr>
 </table>
 
 (*added by the installation scripts from this template at time of deployment)
