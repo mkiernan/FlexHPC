@@ -41,13 +41,20 @@ Example usage of this is so that you can setup a "permanent" NFS server & Head n
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 
-### 2b. Deploy Scale Set 
+### 2b. Deploy Scale Set (Connects to NFS Server / Head Node)
 
 Deploy a scale set with N nodes into the same VNET as your NFS Server + Head Node. 
 <br>
+
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmkiernan%2FFlexHPC%2Fmaster%2Fscaleset.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
+<i>
+* Ensure your NFS server is deployed first as per step 2a.
+* The scale set install scripts will mount the home directory and other shares from the NFS server automatically. 
+* The NFS server is currently assumed to be 10.0.0.4. 
+* The scale set instances will record their hostnames & IP addresses into the /clustermap mount on the NFS server. 
+</i>
 
 ### 2c. Deploy Standalone Head Node (No NFS Server)
 
