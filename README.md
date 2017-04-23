@@ -1,43 +1,57 @@
 # Flexible HPC Cluster
 
-Modular HPC deployment template, with options for standalone NFS server, Fat nodes and additional scale sets. 
+Modular Microsoft Azure HPC infrastructure deployment ARM template.
 
-<b>Key Features</b>
-<li>Choice of CentOS, Ubuntu, SUSE or RedHat Linux Images of various versions</li>
-<li>RDMA (FDR, QDR Infinband) and GPU (K80) compute nodes supported. 
-<li>NFS Server with 10TB of Standard_LRS storage attached</li>
-<li>Azure <a href="https://azure.microsoft.com/en-us/services/virtual-machine-scale-sets/">scale sets</a></li>
-<li>Azure <a href="https://azure.microsoft.com/en-us/services/managed-disks/">managed disks</a></li></li>
-<br>
-## 1. Deploy Complete Cluster
-This will deploy the complete cluster with Head Node + NFS Server Combined, and a Scale Set cluster. 
+<b>Key Features of this ARM template collection</b>
+* Choose between multiple CentOS, Ubuntu, SUSE or RedHat Linux Images, or use your own image.
+* RDMA (FDR, QDR Infinband), GPU (NVIDIA K80) and CPU only compute nodes are all supported. 
+* All appropriate hardware drivers are installed and configured for you via the installation scripts. 
+* NFS Server with up to 32TB of Standard_LRS storage attached (defaults to 10TB) built with <a href="https://azure.microsoft.com/en-us/services/managed-disks/">azure managed disks</a>
+* Dynamically scalable/shrinkable cluster build with <a href="https://azure.microsoft.com/en-us/services/virtual-machine-scale-sets/">azure scale sets</a>.
+* Add Head nodes or fat nodes to your cluster(s), or simply build standalone nodes.
+* Append your own scripts to install applications or customize the nodes further. 
+<br><br>
+<i>
+If you find a problem, please report it <a href="https://github.com/mkiernan/FlexHPC/issues/new">here.</a>
+</i>
+***
+## 1. Deploy a Complete Cluster with Head Node & NFS Server. 
+This template deploys a complete cluster composed of a head node + nfs server (combined on the same VM), and a cluster of a selectable number of nodes (1-100), built as a scale-set. 
+<br><br>
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmkiernan%2FFlexHPC%2Fmaster%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
-NOTES: 
-Deployment takes around 12 minutes. Login is disable during deployment. 
-Beware: CentOS 6.5 can take upwards of 30 minutes as mkfs is very slow for the NFS server. 
-===
+<br>
+<i>
+* Deployment takes around 12 minutes. Login is disabled during deployment.
+* CentOS 6.5 can take upwards of 30 minutes as mkfs is extremely slow for the NFS server.
+* Head node & Compute nodes will be the same VM type (use the below modular template if you don't want this)
+</i>
+<br>
 
+***
 Everything below here is work in progress. 
 
-## 2. Module Deployment 
-This section allows you to deploy the cluster step-by-step so you can have the NFS server & Head node permanently deployed and then tear-up and down compute nodes (Fat Nodes & Scale Sets) as you require. 
-  a. Deploy Standalone NFS Server
+## 2. Modular Step-by-Step Deployment 
+This section allows you to deploy the cluster infrastructure step-by-step. You will need to deploy the components of your infrastructure into the same VNET in order for them to connect to each other. 
+
+Example usage of this is so that you can setup a "permanent" NFS server & Head node with your application software and data stored safely, and then tear-up and down compute nodes (Fat Nodes & Scale Sets) as you require. 
+### 2a. Deploy Standalone NFS Server
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmkiernan%2FFlexHPC%2Fmaster%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
-===
-  b. Deploy Standalone Head Node
-===
-  c. Deploy Combined NFS Server + Head Node
-===
-  d. Deploy Scale Set
-===
-  e. Deploy Fat Node(s) with optional storage attached. 
-===
 
-<br><br>
+### 2b. Deploy Standalone Head Node (No NFS Server)
+
+### 2c. Deploy Combined NFS Server + Head Node
+
+### 2d. Deploy Scale Set
+
+### 2e. Deploy Fat Node(s) with optional storage attached. 
+
+
+<br>
+***
 ## Image Support Matrix
 
 It is recommended to use the same node type & linux version on your head node & scalesets. The NFS server and Fat/standalone nodes however, can run different hardware or linux versions than your head node & scalesets. 
