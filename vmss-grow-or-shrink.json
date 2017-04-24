@@ -1,26 +1,49 @@
 {
-  "$schema": "http://schema.management.azure.com/schemas/2015-01-01-preview/deploymentTemplate.json",
-  "contentVersion": "1.0.0.0",
-  "parameters": {
-    "vmSSName": {
-      "type": "string"
-    },
-    "instanceCount": {
-      "type": "int",
-      "metadata": {
-        "description": "Number of VM instances"
-      }
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01-preview/deploymentTemplate.json",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vmSSName": {
+            "type": "string"
+        },
+        "instanceCount": {
+            "type": "int",
+            "metadata": {
+                "description": "Number of VM instances you want to change to in your scale set cluster."
+            }
+        },
+        "vmSku": {
+            "type": "string",
+            "defaultValue": "Standard_H16r",
+            "allowedValues": [
+                "Standard_H16r",
+                "Standard_H16mr",
+                "Standard_NC6",
+                "Standard_NC12",
+                "Standard_NC24",
+                "Standard_NC24r",
+                "Standard_A8",
+                "Standard_A9",
+                "Basic_A4",
+                "Standard_DS5_v2",
+                "Standard_DS14_v2",
+                "Standard_DS15_v2"
+            ],
+            "metadata": {
+                    "description": "Set this to the same VM size as the VM's in the existing scale set or it will fail."
+                }
+            }
+        },
+        "resources": [
+            {
+                "type": "Microsoft.Compute/virtualMachineScaleSets",
+                "apiVersion": "2016-04-30-preview",
+                "name": "[parameters('vmSSName')]",
+                "location": "[resourceGroup().location]",
+                "sku": {
+                    "name": "[parameters('vmSku')]",
+                    "tier": "Standard",
+                    "capacity": "[parameters('instanceCount')]"
+                }
+            }
+        ]
     }
-  },
-  "resources": [
-    {
-      "type": "Microsoft.Compute/virtualMachineScaleSets",
-      "apiVersion": "2016-04-30-preview",
-      "name": "[parameters('vmSSName')]",
-      "location": "[resourceGroup().location]",
-      "sku": {
-        "capacity": "[parameters('instanceCount')]"
-      }
-    }
-  ]
-}

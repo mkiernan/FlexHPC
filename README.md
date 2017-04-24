@@ -23,7 +23,7 @@ This template deploys a complete cluster composed of a head node + nfs server (c
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 <br>
-* *Deployment takes around 12 minutes. Login is disabled during deployment to prevent conflicts. Patience is a virtue.*
+* *Deployment takes around 12 minutes. Login is disabled during deployment to prevent conflicts.*
 * *Head node & Compute nodes will be the same VM type (use the below modular template if you don't want this)*
 
 ***
@@ -71,9 +71,9 @@ TBD
 
 ***
 
-## 3. Increase or Decrease The Number of Compute Nodes
+## 3. Manually Increase or Decrease The Number of Compute Nodes in a Scale Set Cluster
 
-The advantage of scale sets is that you can easily grow or shrink the amount of compute nodes as you need them. You can either do this automatically, or you can do this manually using this template - just enter the number of nodes you want to end up with (higher or lower than the current number). Additional nodes will be configured exactly the same as the existing compute nodes using the same installation script(s). 
+The advantage of scale sets is that you can easily grow or shrink the amount of compute nodes as you need them. You can either do this automatically, or you can do this manually using this template - just enter the number of nodes you want to end up with (higher or lower than the current number). Additional nodes will be configured exactly the same as the existing compute instances using the same installation script(s). 
 Do it here: 
 <br><br>
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmkiernan%2FFlexHPC%2Fmaster%2Fvmms-grow-or-shrink.json" target="_blank">
