@@ -97,7 +97,7 @@ setup_system_centosredhat()
 	yum install -y -q nfs-utils autofs
 
 	#-- Microsoft -HPC images should have this installed already
-        sudo rpm -v -i --nodeps /opt/intelMPI/intel_mpi_packages/*.rpm
+        rpm -v -i --nodeps /opt/intelMPI/intel_mpi_packages/*.rpm
 	ln -s /opt/intel/impi/5.1.3.181/intel64/bin/ /opt/intel/impi/5.1.3.181/bin
 	ln -s /opt/intel/impi/5.1.3.181/lib64/ /opt/intel/impi/5.1.3.181/lib
 
@@ -123,7 +123,7 @@ setup_system_suse()
         systemctl start autofs
 
 	# rdma pkgs not pre-installed on SLES so add them now.
-        sudo rpm -v -i --nodeps /opt/intelMPI/intel_mpi_packages/*.rpm
+        rpm -v -i --nodeps /opt/intelMPI/intel_mpi_packages/*.rpm
 	ln -s /opt/intel/impi/5.1.3.181/intel64/bin/ /opt/intel/impi/5.1.3.181/bin
 	ln -s /opt/intel/impi/5.1.3.181/lib64/ /opt/intel/impi/5.1.3.181/lib
         #disable kernel updates to prevent rdma issues; unlock with zypper rl
@@ -166,16 +166,16 @@ setup_gpus_ubuntu()
 
 	CUDA_REPO_PKG=cuda-repo-ubuntu1604_8.0.61-1_amd64.deb
 	wget -O /tmp/${CUDA_REPO_PKG} http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/${CUDA_REPO_PKG}
-	sudo dpkg -i /tmp/${CUDA_REPO_PKG}
+	dpkg -i /tmp/${CUDA_REPO_PKG}
 	rm -f /tmp/${CUDA_REPO_PKG}
 	#-- disable kernel updates to prevent nvidia driver issues for now:
-	for i in $(dpkg -l "*$(uname -r)*" | grep image | awk '{print $2}'); do echo $i hold | sudo dpkg --set-selections; done
+	for i in $(dpkg -l "*$(uname -r)*" | grep image | awk '{print $2}'); do echo $i hold | dpkg --set-selections; done
 	#-- you can remove reverse this with:
-	#for i in $(dpkg -l "*$(uname -r)*" | grep image | awk '{print $2}'); do echo $i install | sudo dpkg --set-selections; done
-	#sudo apt-get update
-	#sudo apt-get upgrade -y
-	sudo apt-get install cuda-drivers
-	sudo apt-get install cuda
+	#for i in $(dpkg -l "*$(uname -r)*" | grep image | awk '{print $2}'); do echo $i install | dpkg --set-selections; done
+	#apt-get update
+	#apt-get upgrade -y
+	apt-get install cuda-drivers
+	apt-get install cuda
 	echo "export PATH=$PATH:/usr/local/cuda-8.0/bin/" >> ~/.bashrc
 	source ~/.bashrc
 	nvidia-smi
