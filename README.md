@@ -76,7 +76,7 @@ TBD
 The advantage of scale sets is that you can easily grow or shrink the amount of compute nodes as you need them. You can either do this automatically, or you can do this manually using this template - just enter the number of nodes you want to end up with (higher or lower than the current number). Additional nodes will be configured exactly the same as the existing compute instances using the same installation script(s). 
 Do it here: 
 <br><br>
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmkiernan%2FFlexHPC%2Fmaster%2Fvmms-grow-or-shrink.json" target="_blank">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmkiernan%2FFlexHPC%2Fmaster%2Fvmssgrowshrink.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 <br>
