@@ -7,7 +7,7 @@ Modular Microsoft Azure HPC infrastructure deployment ARM template.
 * RDMA (FDR, QDR Infinband), GPU (NVIDIA K80) and CPU only compute nodes are all supported. 
 * All appropriate hardware drivers are installed and configured for you via the installation scripts. 
 * NFS Server with up to 32TB of Standard_LRS storage attached (defaults to 10TB) built with <a href="https://azure.microsoft.com/en-us/services/managed-disks/">azure managed disks</a>
-* Dynamically scalable/shrinkable cluster build with <a href="https://azure.microsoft.com/en-us/services/virtual-machine-scale-sets/">azure scale sets</a>.
+* Dynamically add or remove nodes from your cluster (built with <a href="https://azure.microsoft.com/en-us/services/virtual-machine-scale-sets/">azure scale sets</a>). 
 * Add Head nodes or fat nodes to your cluster(s), or simply build standalone nodes.
 * Append your own scripts to install applications or customize the nodes further. 
 <br><br>
@@ -73,7 +73,7 @@ TBD
 
 ## 3. Increase or Decrease The Number of Compute Nodes
 
-The advantage of scale sets is that you can easily grow or shrink the amount of compute nodes you ahve available as you need them. You can either do this automatically, or you can do this manually using this template - just enter the number of nodes you want to end up with (higher or lower than the current number). Additional nodes will be configured exactly the same as the existing compute nodes using the same installation script(s). 
+The advantage of scale sets is that you can easily grow or shrink the amount of compute nodes as you need them. You can either do this automatically, or you can do this manually using this template - just enter the number of nodes you want to end up with (higher or lower than the current number). Additional nodes will be configured exactly the same as the existing compute nodes using the same installation script(s). 
 Do it here: 
 <br><br>
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmkiernan%2FFlexHPC%2Fmaster%2Fvmms-grow-or-shrink.json" target="_blank">
@@ -121,27 +121,9 @@ The table below documents the hardware support with the various Linux distributi
 
 ***
 
-<b>Quickstart</b>
-
-	1) Deploy the ARM Template: 
-		a. Click on the "Deploy to Azure" button above.
-		b. Select the region to deploy (check where HPC Resources are available <a href="https://azure.microsoft.com/en-us/pricing/details/virtual-machines/linux/">here.</a>
-		c. Name your Resource Group - one per cluster is advisable. 
-		d. Select VM size (eg: H16m/H16mr or A8/A9) and quantity (make sure to have quota for it)
-		e. Name your user account - this is the account you will login and run jobs with.
-		f. Click "Purchase" and wait for deployment (typically around 5 minutes). 
-		g. Manually upload and configure your data + software on /share/data 
-		h. Configure any license server required. 
-		i. Run your Job
-	2) Customize the Template for Your Own Application / Requirements:
-		a. Clone this template into your own github. 
-		b. Edit the cn-setup.sh to install any additional software you need. 
-
-<b>Architecture</b>
+<b>Cluster Topology Overview</b>
 
 <img src="https://github.com/tanewill/5clickTemplates/blob/master/images/hpc_vmss_architecture.png"  align="middle" width="395" height="274"  alt="hpc_vmss_architecture" border="1"/> <br></br>
-
-
 
 
 <i>Credit: Taylor Newill, Xavier Pillons & Thomas Varlet for original base templates.</i>
