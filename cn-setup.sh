@@ -20,7 +20,8 @@ fi
 
 # Passed in user created by waagent
 HPC_ADMIN=$1
-#HPC_GROUP=$HPC_ADMIN
+HPC_GROUP=$HPC_ADMIN
+HPC_GID=1000
 
 # Linux distro detection remains a can of worms, just pass it in here:
 VMIMAGE=$2
@@ -229,9 +230,11 @@ setup_env()
 setup_user()
 {
         # Add User + Group
-#       groupadd -g $HPC_GID $HPC_GROUP
+        # waagent takes care of the user and group; except on SLES for some reason we still need to groupadd
+	# will fail harmlessly on all but SLES
+        groupadd -g $HPC_GID $HPC_GROUP
 #       useradd -c "HPC User" -g $HPC_GROUP -m -d $SHARE_HOME/$HPC_ADMIN -s /bin/bash -u $HPC_UID $HPC_ADMIN
-        # Undo the HOME setup done by waagent ossetup
+        # HOME setup done by waagent stays the same as we will automount to /home; just remove it. 
         #usermod -m -d $SHARE_HOME/$HPC_ADMIN $HPC_ADMIN
         #usermod -d $HOMEDIR $HPC_ADMIN 
 	rm -rf /home/$HPC_ADMIN
@@ -288,12 +291,12 @@ echo "##################################################"
 echo "############# Compute Node Setup #################"
 echo "##################################################"
 #comment out the password locks when testing.
-#passwd -l $HPC_ADMIN #-- lock account to prevent conflicts during install
+passwd -l $HPC_ADMIN #-- lock account to prevent conflicts during install
 echo "Deploying $PUBLISHER, $OFFER, $SKU....."
 setup_system
 setup_shares
 setup_user
 setup_nfs_client
 setup_env
-#passwd -u $HPC_ADMIN #-- unlock account
+passwd -u $HPC_ADMIN #-- unlock account
 echo "Script ran for $WALLTIME seconds."

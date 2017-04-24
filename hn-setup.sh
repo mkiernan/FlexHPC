@@ -21,6 +21,7 @@ fi
 # Passed in user created by waagent
 HPC_ADMIN=$1
 HPC_GROUP=$HPC_ADMIN
+HPC_GID=1000
 
 # Linux distro detection remains a can of worms, just pass it in here:
 VMIMAGE=$2 
@@ -214,8 +215,10 @@ setup_system()
 
 setup_user()
 {
-        # Add User + Group
-#	groupadd -g $HPC_GID $HPC_GROUP
+        # Add User + Group 
+	# waagent takes care of the user and group; except on SLES for some reason we still need to groupadd
+	# will fail harmlessly on all but SLES
+	groupadd -g $HPC_GID $HPC_GROUP
 #	useradd -c "HPC User" -g $HPC_GROUP -m -d $SHARE_HOME/$HPC_ADMIN -s /bin/bash -u $HPC_UID $HPC_ADMIN
 
 	# Undo the HOME setup done by waagent ossetup -> move it to NFS share
@@ -371,14 +374,14 @@ echo "##################################################"
 echo "############### Head Node Setup ##################"
 echo "##################################################"
 #comment out the password locks when testing. 
-#passwd -l $HPC_ADMIN #-- lock account to prevent conflicts during install
+passwd -l $HPC_ADMIN #-- lock account to prevent conflicts during install
 echo "Deploying $PUBLISHER, $OFFER, $SKU....."
 setup_system
 setup_diskpack
 setup_shares
 setup_user
 setup_utilities
-#passwd -u $HPC_ADMIN #-- unlock account
+passwd -u $HPC_ADMIN #-- unlock account
 #reboot #--- not really necessary, just to be 100% sure storage devices persist before users put data here. 
 echo "Script ran for $WALLTIME seconds."
 #chmod +x custom_extras.sh 

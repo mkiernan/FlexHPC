@@ -87,8 +87,8 @@ Do it here:
 
 * To ssh into the headnode or NFS server after deployment: **ssh username@headnode-public-ip-address**
 * **username** is the cluster admin username you entered into the template when you deployed. 
-* The ssh keys are stored for your user in /share/home/username/.ssh. 
 * The homedirectory is NFS automounted from the headnode onto all the compute nodes in the scale set.
+* The ssh keys are stored for your user in /share/home/username/.ssh, so passwordless ssh works across the cluster. 
 * You will  find the private IP addresses for the scaleset nodes in /share/clustermap/hosts (head nodes) or /clustermap/hosts (compute nodes).
 * Upload your data & applications to /share/data with scp or rsync. 
 
