@@ -2,13 +2,13 @@
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01-preview/deploymentTemplate.json",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "vmSSName": {
+        "vmscalesetNameName": {
             "type": "string"
         },
         "instanceCount": {
             "type": "int",
             "metadata": {
-                "description": "Number of VM instances you want to change to in your scale set cluster."
+                "description": "Actual number of VM instances you want to change to in your scale set cluster."
             }
         },
         "vmSku": {
@@ -37,7 +37,7 @@
             {
                 "type": "Microsoft.Compute/virtualMachineScaleSets",
                 "apiVersion": "2016-04-30-preview",
-                "name": "[parameters('vmSSName')]",
+                "name": "[parameters('vmscalesetNameName')]",
                 "location": "[resourceGroup().location]",
                 "sku": {
                     "name": "[parameters('vmSku')]",

@@ -73,7 +73,7 @@ TBD
 
 ## 3. Manually Increase or Decrease The Number of Compute Nodes in a Scale Set Cluster
 
-The advantage of scale sets is that you can easily grow or shrink the amount of compute nodes as you need them. You can either do this automatically, or you can do this manually using this template - just enter the number of nodes you want to end up with (higher or lower than the current number). Additional nodes will be configured exactly the same as the existing compute instances using the same installation script(s). 
+The advantage of scale sets is that you can easily grow or shrink the amount of compute nodes as you need them. You can either do this automatically, or you can do this manually using this template - just enter the number of nodes you want to end up with (higher or lower than the current number). Additional compute instances will be configured exactly the same as the existing compute instances using the same cn-setup.sh installation script. 
 Do it here: 
 <br><br>
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmkiernan%2FFlexHPC%2Fmaster%2Fvmssgrowshrink.json" target="_blank">
