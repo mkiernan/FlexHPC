@@ -5,24 +5,117 @@
 		"vmSku": {
 			"defaultValue": "Standard_H16r",
 			"allowedValues": [
+				"Standard_DS1",
+				"Standard_DS2",
+				"Standard_DS3",
+				"Standard_DS4",
+				"Standard_DS11",
+				"Standard_DS12",
+				"Standard_DS13",
+				"Standard_DS14",
+				"Standard_A0",
+				"Standard_A1",
+				"Standard_A2",
+				"Standard_A3",
+				"Standard_A5",
+				"Standard_A4",
+				"Standard_A6",
+				"Standard_A7",
+				"Basic_A0",
+				"Basic_A1",
+				"Basic_A2",
+				"Basic_A3",
+				"Basic_A4",
+				"Standard_D1_v2",
+				"Standard_D2_v2",
+				"Standard_D3_v2",
+				"Standard_D4_v2",
+				"Standard_D5_v2",
+				"Standard_D11_v2",
+				"Standard_D12_v2",
+				"Standard_D13_v2",
+				"Standard_D14_v2",
+				"Standard_D15_v2",
+				"Standard_D2_v2_Promo",
+				"Standard_D3_v2_Promo",
+				"Standard_D4_v2_Promo",
+				"Standard_D5_v2_Promo",
+				"Standard_D11_v2_Promo",
+				"Standard_D12_v2_Promo",
+				"Standard_D13_v2_Promo",
+				"Standard_D14_v2_Promo",
+				"Standard_F1",
+				"Standard_F2",
+				"Standard_F4",
+				"Standard_F8",
+				"Standard_F16",
+				"Standard_A1_v2",
+				"Standard_A2m_v2",
+				"Standard_A2_v2",
+				"Standard_A4m_v2",
+				"Standard_A4_v2",
+				"Standard_A8m_v2",
+				"Standard_A8_v2",
+				"Standard_D1",
+				"Standard_D2",
+				"Standard_D3",
+				"Standard_D4",
+				"Standard_D11",
+				"Standard_D12",
+				"Standard_D13",
+				"Standard_D14",
+				"Standard_DS1_v2",
+				"Standard_DS2_v2",
+				"Standard_DS3_v2",
+				"Standard_DS4_v2",
+				"Standard_DS5_v2",
+				"Standard_DS11_v2",
+				"Standard_DS12_v2",
+				"Standard_DS13_v2",
+				"Standard_DS14_v2",
+				"Standard_DS15_v2",
+				"Standard_DS2_v2_Promo",
+				"Standard_DS3_v2_Promo",
+				"Standard_DS4_v2_Promo",
+				"Standard_DS5_v2_Promo",
+				"Standard_DS11_v2_Promo",
+				"Standard_DS12_v2_Promo",
+				"Standard_DS13_v2_Promo",
+				"Standard_DS14_v2_Promo",
+				"Standard_F1s",
+				"Standard_F2s",
+				"Standard_F4s",
+				"Standard_F8s",
+				"Standard_F16s",
+				"Standard_H8",
+				"Standard_H16",
+				"Standard_H8m",
+				"Standard_H16m",
 				"Standard_H16r",
 				"Standard_H16mr",
-				"Standard_NC6",
-				"Standard_NC12",
-				"Standard_NC24",
-				"Standard_NC24r",
+				"Standard_G1",
+				"Standard_G2",
+				"Standard_G3",
+				"Standard_G4",
+				"Standard_G5",
+				"Standard_GS1",
+				"Standard_GS2",
+				"Standard_GS3",
+				"Standard_GS4",
+				"Standard_GS5",
 				"Standard_A8",
 				"Standard_A9",
-				"Basic_A4",
-				"Standard_DS5_v2",
-				"Standard_DS14_v2",
-				"Standard_DS15_v2"
+				"Standard_A10",
+				"Standard_A11",
+				"Standard_NV6",
+				"Standard_NV12",
+				"Standard_NV24"
 			],
 			"type": "String",
 			"metadata": {
 				"description": "Which machine type would you like to deploy to? Not all VMs are available in all regions"
 			}
-		},		
+		},
 		"instanceCount": {
 			"maxValue": 100,
 			"type": "Int",
@@ -47,7 +140,7 @@
 			"metadata": {
 				"description": "OS version to deploy. -HPC suffixed images include the RDMA drivers for compute-to-compute MPI InfiniBand on A8, A9, H16r & H16mr VM sizes. Non *-HPC images need the RDMA drivers to be installed manually, or deploy without infiniband."
 			}
-		}, 
+		},
 		"vmssName": {
 			"maxLength": 10,
 			"type": "String",
@@ -85,11 +178,11 @@
 		"ipConfigName": "[concat(variables('namingInfix'), 'ipconfig')]",
 		"scriptUrl": "https://raw.githubusercontent.com/mkiernan/FlexHPC/master/",
 		"imageReference_Canonical:UbuntuServer:16.04-LTS": {
-     		 "publisher": "Canonical",
-    		  "offer": "UbuntuServer",
- 		     "sku": "16.04-LTS",
-  		     "version": "latest"
-    	},
+			"publisher": "Canonical",
+			"offer": "UbuntuServer",
+			"sku": "16.04-LTS",
+			"version": "latest"
+		},
 		"imageReference_Canonical:UbuntuServer:16.10": {
 			"publisher": "Canonical",
 			"offer": "UbuntuServer",
@@ -138,7 +231,7 @@
 			"sku": "12-SP1",
 			"version": "latest"
 		},
-	    "imageReference": "[variables(concat('imageReference_',parameters('image')))]",
+		"imageReference": "[variables(concat('imageReference_',parameters('image')))]",
 		"vmssScript": {
 			"scriptToDownload": [
 				"[concat(variables('scriptUrl'), 'cn-setup.sh')]"
@@ -152,426 +245,456 @@
 				"[concat(variables('scriptUrl'), 'pingpong.sh')]",
 				"[concat(variables('scriptUrl'), 'clusRun.sh')]"
 			],
-            "commandToExecute": "",
+			"commandToExecute": "",
 		},
 		"computeApiVersion": "2016-04-30-preview",
 		"networkApiVersion": "2016-06-01",
 		"storageApiVersion": "2015-06-15"
 	},
-	"resources": [{
-		"type": "Microsoft.Network/virtualNetworks",
-		"name": "[variables('virtualNetworkName')]",
-		"apiVersion": "[variables('networkApiVersion')]",
-		"location": "[resourceGroup().location]",
-		"properties": {
-			"addressSpace": {
-				"addressPrefixes": [
-					"[variables('addressPrefix')]"
+	"resources": [
+		{
+			"type": "Microsoft.Network/virtualNetworks",
+			"name": "[variables('virtualNetworkName')]",
+			"apiVersion": "[variables('networkApiVersion')]",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"addressSpace": {
+					"addressPrefixes": [
+						"[variables('addressPrefix')]"
+					]
+				},
+				"subnets": [
+					{
+						"name": "[variables('subnetName')]",
+						"properties": {
+							"addressPrefix": "[variables('subnetPrefix')]"
+						}
+					}
+				]
+			}
+		},
+		{
+			"type": "Microsoft.Network/publicIPAddresses",
+			"name": "[variables('publicIPAddressName')]",
+			"apiVersion": "[variables('networkApiVersion')]",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"publicIPAllocationMethod": "Dynamic",
+				"dnsSettings": {
+					"domainNameLabel": "[variables('longNamingInfix')]"
+				}
+			}
+		},
+		{
+			"type": "Microsoft.Network/networkInterfaces",
+			"name": "[variables('HeadNodeNicName')]",
+			"apiVersion": "[variables('networkApiVersion')]",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"ipConfigurations": [
+					{
+						"name": "[variables('HeadNodeIPConfigName')]",
+						"properties": {
+							"privateIPAllocationMethod": "Dynamic",
+							"publicIPAddress": {
+								"id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+							},
+							"subnet": {
+								"id": "[variables('subnetRef')]"
+							}
+						}
+					}
 				]
 			},
-			"subnets": [{
-				"name": "[variables('subnetName')]",
-				"properties": {
-					"addressPrefix": "[variables('subnetPrefix')]"
-				}
-			}]
-		}
-	}, {
-		"type": "Microsoft.Network/publicIPAddresses",
-		"name": "[variables('publicIPAddressName')]",
-		"apiVersion": "[variables('networkApiVersion')]",
-		"location": "[resourceGroup().location]",
-		"properties": {
-			"publicIPAllocationMethod": "Dynamic",
-			"dnsSettings": {
-				"domainNameLabel": "[variables('longNamingInfix')]"
-			}
-		}
-	}, {
-		"type": "Microsoft.Network/networkInterfaces",
-		"name": "[variables('HeadNodeNicName')]",
-		"apiVersion": "[variables('networkApiVersion')]",
-		"location": "[resourceGroup().location]",
-		"properties": {
-			"ipConfigurations": [{
-				"name": "[variables('HeadNodeIPConfigName')]",
-				"properties": {
-					"privateIPAllocationMethod": "Dynamic",
-					"publicIPAddress": {
-						"id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
-					},
-					"subnet": {
-						"id": "[variables('subnetRef')]"
-					}
-				}
-			}]
-		},
-		"dependsOn": [
-			"[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
-			"[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
-		]
-	}, {
-		"type": "Microsoft.Compute/disks",
-		"name": "disk0",
-		"apiVersion": "2016-04-30-preview",
-		"location": "[resourceGroup().location]",
-		"properties": {
-			"creationData": {
-				"createOption": "Empty"
-			},
-			"accountType": "Standard_LRS",
-			"diskSizeGB": 1023
-		}
-	}, { 
-		"type": "Microsoft.Compute/disks",
-		"name": "disk1",
-		"apiVersion": "2016-04-30-preview",
-		"location": "[resourceGroup().location]",
-		"properties": {
-			"creationData": {
-				"createOption": "Empty"
-			},
-			"accountType": "Standard_LRS",
-			"diskSizeGB": 1023
-		}
-	}, { 
-		"type": "Microsoft.Compute/disks",
-		"name": "disk2",
-		"apiVersion": "2016-04-30-preview",
-		"location": "[resourceGroup().location]",
-		"properties": {
-			"creationData": {
-				"createOption": "Empty"
-			},
-			"accountType": "Standard_LRS",
-			"diskSizeGB": 1023
-		}
-	}, { 
-		"type": "Microsoft.Compute/disks",
-		"name": "disk3",
-		"apiVersion": "2016-04-30-preview",
-		"location": "[resourceGroup().location]",
-		"properties": {
-			"creationData": {
-				"createOption": "Empty"
-			},
-			"accountType": "Standard_LRS",
-			"diskSizeGB": 1023
-		}
-	}, { 
-		"type": "Microsoft.Compute/disks",
-		"name": "disk4",
-		"apiVersion": "2016-04-30-preview",
-		"location": "[resourceGroup().location]",
-		"properties": {
-			"creationData": {
-				"createOption": "Empty"
-			},
-			"accountType": "Standard_LRS",
-			"diskSizeGB": 1023
-		}
-	}, { 
-		"type": "Microsoft.Compute/disks",
-		"name": "disk5",
-		"apiVersion": "2016-04-30-preview",
-		"location": "[resourceGroup().location]",
-		"properties": {
-			"creationData": {
-				"createOption": "Empty"
-			},
-			"accountType": "Standard_LRS",
-			"diskSizeGB": 1023
-		}
-	}, { 
-		"type": "Microsoft.Compute/disks",
-		"name": "disk6",
-		"apiVersion": "2016-04-30-preview",
-		"location": "[resourceGroup().location]",
-		"properties": {
-			"creationData": {
-				"createOption": "Empty"
-			},
-			"accountType": "Standard_LRS",
-			"diskSizeGB": 1023
-		}
-	}, { 
-		"type": "Microsoft.Compute/disks",
-		"name": "disk7",
-		"apiVersion": "2016-04-30-preview",
-		"location": "[resourceGroup().location]",
-		"properties": {
-			"creationData": {
-				"createOption": "Empty"
-			},
-			"accountType": "Standard_LRS",
-			"diskSizeGB": 1023
-		}
-	}, { 
-		"type": "Microsoft.Compute/disks",
-		"name": "disk8",
-		"apiVersion": "2016-04-30-preview",
-		"location": "[resourceGroup().location]",
-		"properties": {
-			"creationData": {
-				"createOption": "Empty"
-			},
-			"accountType": "Standard_LRS",
-			"diskSizeGB": 1023
-		}
-	}, { 
-		"type": "Microsoft.Compute/disks",
-		"name": "disk9",
-		"apiVersion": "2016-04-30-preview",
-		"location": "[resourceGroup().location]",
-		"properties": {
-			"creationData": {
-				"createOption": "Empty"
-			},
-			"accountType": "Standard_LRS",
-			"diskSizeGB": 1023
-		}
-	}, { 
-		"type": "Microsoft.Compute/disks",
-		"name": "disk10",
-		"apiVersion": "2016-04-30-preview",
-		"location": "[resourceGroup().location]",
-		"properties": {
-			"creationData": {
-				"createOption": "Empty"
-			},
-			"accountType": "Standard_LRS",
-			"diskSizeGB": 1023
-		}
-	}, { 
-		"type": "Microsoft.Compute/disks",
-		"name": "disk11",
-		"apiVersion": "2016-04-30-preview",
-		"location": "[resourceGroup().location]",
-		"properties": {
-			"creationData": {
-				"createOption": "Empty"
-			},
-			"accountType": "Standard_LRS",
-			"diskSizeGB": 1023
-		}
-	}, { 
-		"type": "Microsoft.Compute/virtualMachines",
-		"name": "[variables('HeadNodeName')]",
-		"apiVersion": "[variables('computeApiVersion')]",
-		"location": "[resourceGroup().location]",
-		"properties": {
-			"hardwareProfile": {
-				"vmSize": "[parameters('vmSku')]"
-			},
-			"osProfile": {
-				"computerName": "[variables('HeadNodeName')]",
-				"adminUsername": "[parameters('adminUsername')]",
-				"adminPassword": "[parameters('adminPassword')]"
-			},
-			"storageProfile": {
-				"imageReference": "[variables('imageReference')]",
-				"osDisk": {
-					"caching": "ReadWrite",
-					"createOption": "FromImage"
-				},
-           		"dataDisks": [
-             		{
-						"lun": 0,
-						"createOption": "Attach",
-						"caching": "ReadWrite",
-						"managedDisk": {
-							"id": "[resourceId('Microsoft.Compute/disks', 'disk0')]"
-						}
-			 		},
-					{
-						"lun": 1,
-						"createOption": "Attach",
-						"caching": "ReadWrite",
-						"managedDisk": {
-							"id": "[resourceId('Microsoft.Compute/disks', 'disk1')]"
-						}
-			 		},
-             		{
-						"lun": 2,
-						"createOption": "Attach",
-						"caching": "ReadWrite",
-						"managedDisk": {
-							"id": "[resourceId('Microsoft.Compute/disks', 'disk2')]"
-						}
-			 		},
-	        		{
-						"lun": 3,
-						"createOption": "Attach",
-						"caching": "ReadWrite",
-						"managedDisk": {
-							"id": "[resourceId('Microsoft.Compute/disks', 'disk3')]"
-						}
-			 		},
-             		{
-						"lun": 4,
-						"createOption": "Attach",
-						"caching": "ReadWrite",
-						"managedDisk": {
-							"id": "[resourceId('Microsoft.Compute/disks', 'disk4')]"
-						}
-			 		},
-             		{
-						"lun": 5,
-						"createOption": "Attach",
-						"caching": "ReadWrite",
-						"managedDisk": {
-							"id": "[resourceId('Microsoft.Compute/disks', 'disk5')]"
-						}
-			 		},	
-	            	{
-						"lun": 6,
-						"createOption": "Attach",
-						"caching": "ReadWrite",
-						"managedDisk": {
-							"id": "[resourceId('Microsoft.Compute/disks', 'disk6')]"
-						}
-			 		},
-             		{
-						"lun": 7,
-						"createOption": "Attach",
-						"caching": "ReadWrite",
-						"managedDisk": {
-							"id": "[resourceId('Microsoft.Compute/disks', 'disk7')]"
-						}
-			 		},
-	           		{
-						"lun": 8,
-						"createOption": "Attach",
-						"caching": "ReadWrite",
-						"managedDisk": {
-							"id": "[resourceId('Microsoft.Compute/disks', 'disk8')]"
-						}
-			 		},	
-             		{
-						"lun": 9,
-						"createOption": "Attach",
-						"caching": "ReadWrite",
-						"managedDisk": {
-							"id": "[resourceId('Microsoft.Compute/disks', 'disk9')]"
-						}
-			 		},
-             		{
-						"lun": 10,
-						"createOption": "Attach",
-						"caching": "ReadWrite",
-						"managedDisk": {
-							"id": "[resourceId('Microsoft.Compute/disks', 'disk10')]"
-						}
-			 		},	
-             		{
-						"lun": 11,
-						"createOption": "Attach",
-						"caching": "ReadWrite",
-						"managedDisk": {
-							"id": "[resourceId('Microsoft.Compute/disks', 'disk11')]"
-						}
-			 		}	
-				 ]
-			},
- 			"networkProfile": {
-				"networkInterfaces": [{
-					"id": "[resourceId('Microsoft.Network/networkInterfaces',variables('HeadNodeNicName'))]"
-				}]
-			}
-		},
-		"resources": [{
-			"type": "extensions",
-			"name": "masterExtension",
-			"apiVersion": "[variables('storageApiVersion')]",
-		        "location": "[resourceGroup().location]",
-			"tags": {
-				"displayName": "masterExtension"
-			},
-			"properties": {
-				"publisher": "Microsoft.OSTCExtensions",
-				"type": "CustomScriptForLinux",
-				"typeHandlerVersion": "1.5",
-				"autoUpgradeMinorVersion": true,
-				"settings": {
-					"fileUris": "[variables('vmScripts').scriptsToDownload]",
-					"commandToExecute": "[concat('bash ', 'hn-setup.sh ',parameters('adminUsername'),' ',parameters('image')) ]",
-					"timestamp": 4
-				}
-			},
 			"dependsOn": [
-				"[concat('Microsoft.Compute/virtualMachines/', variables('HeadNodeName'))]"
+				"[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
+				"[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
 			]
-		}],
-		"dependsOn": [
-			"[concat('Microsoft.Network/networkInterfaces/', variables('HeadNodeNicName'))]"
-		]
-	}, {
-		"type": "Microsoft.Compute/virtualMachineScaleSets",
-		"sku": {
-			"name": "[parameters('vmSku')]",
-			"tier": "Standard",
-			"capacity": "[parameters('instanceCount')]"
 		},
-		"name": "[variables('namingInfix')]",
-		"apiVersion": "[variables('computeApiVersion')]",
-		"location": "[resourceGroup().location]",
-		"properties": {
-			"overprovision": "false",
-			"upgradePolicy": {
-				"mode": "Manual"
-			},
-			"virtualMachineProfile": {
-				"storageProfile": {
-					"osDisk": {
-					"caching": "ReadWrite",
-					"createOption": "FromImage"
-					},
-					"imageReference": "[variables('imageReference')]"
+		{
+			"type": "Microsoft.Compute/disks",
+			"name": "disk0",
+			"apiVersion": "2016-04-30-preview",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"creationData": {
+					"createOption": "Empty"
+				},
+				"accountType": "Standard_LRS",
+				"diskSizeGB": 1023
+			}
+		},
+		{
+			"type": "Microsoft.Compute/disks",
+			"name": "disk1",
+			"apiVersion": "2016-04-30-preview",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"creationData": {
+					"createOption": "Empty"
+				},
+				"accountType": "Standard_LRS",
+				"diskSizeGB": 1023
+			}
+		},
+		{
+			"type": "Microsoft.Compute/disks",
+			"name": "disk2",
+			"apiVersion": "2016-04-30-preview",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"creationData": {
+					"createOption": "Empty"
+				},
+				"accountType": "Standard_LRS",
+				"diskSizeGB": 1023
+			}
+		},
+		{
+			"type": "Microsoft.Compute/disks",
+			"name": "disk3",
+			"apiVersion": "2016-04-30-preview",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"creationData": {
+					"createOption": "Empty"
+				},
+				"accountType": "Standard_LRS",
+				"diskSizeGB": 1023
+			}
+		},
+		{
+			"type": "Microsoft.Compute/disks",
+			"name": "disk4",
+			"apiVersion": "2016-04-30-preview",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"creationData": {
+					"createOption": "Empty"
+				},
+				"accountType": "Standard_LRS",
+				"diskSizeGB": 1023
+			}
+		},
+		{
+			"type": "Microsoft.Compute/disks",
+			"name": "disk5",
+			"apiVersion": "2016-04-30-preview",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"creationData": {
+					"createOption": "Empty"
+				},
+				"accountType": "Standard_LRS",
+				"diskSizeGB": 1023
+			}
+		},
+		{
+			"type": "Microsoft.Compute/disks",
+			"name": "disk6",
+			"apiVersion": "2016-04-30-preview",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"creationData": {
+					"createOption": "Empty"
+				},
+				"accountType": "Standard_LRS",
+				"diskSizeGB": 1023
+			}
+		},
+		{
+			"type": "Microsoft.Compute/disks",
+			"name": "disk7",
+			"apiVersion": "2016-04-30-preview",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"creationData": {
+					"createOption": "Empty"
+				},
+				"accountType": "Standard_LRS",
+				"diskSizeGB": 1023
+			}
+		},
+		{
+			"type": "Microsoft.Compute/disks",
+			"name": "disk8",
+			"apiVersion": "2016-04-30-preview",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"creationData": {
+					"createOption": "Empty"
+				},
+				"accountType": "Standard_LRS",
+				"diskSizeGB": 1023
+			}
+		},
+		{
+			"type": "Microsoft.Compute/disks",
+			"name": "disk9",
+			"apiVersion": "2016-04-30-preview",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"creationData": {
+					"createOption": "Empty"
+				},
+				"accountType": "Standard_LRS",
+				"diskSizeGB": 1023
+			}
+		},
+		{
+			"type": "Microsoft.Compute/disks",
+			"name": "disk10",
+			"apiVersion": "2016-04-30-preview",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"creationData": {
+					"createOption": "Empty"
+				},
+				"accountType": "Standard_LRS",
+				"diskSizeGB": 1023
+			}
+		},
+		{
+			"type": "Microsoft.Compute/disks",
+			"name": "disk11",
+			"apiVersion": "2016-04-30-preview",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"creationData": {
+					"createOption": "Empty"
+				},
+				"accountType": "Standard_LRS",
+				"diskSizeGB": 1023
+			}
+		},
+		{
+			"type": "Microsoft.Compute/virtualMachines",
+			"name": "[variables('HeadNodeName')]",
+			"apiVersion": "[variables('computeApiVersion')]",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"hardwareProfile": {
+					"vmSize": "[parameters('vmSku')]"
 				},
 				"osProfile": {
-					"computerNamePrefix": "[variables('namingInfix')]",
+					"computerName": "[variables('HeadNodeName')]",
 					"adminUsername": "[parameters('adminUsername')]",
 					"adminPassword": "[parameters('adminPassword')]"
 				},
-				"networkProfile": {
-					"networkInterfaceConfigurations": [{
-						"name": "[variables('nicName')]",
-						"properties": {
-							"primary": "true",
-							"ipConfigurations": [{
-								"name": "[variables('ipConfigName')]",
-								"properties": {
-									"subnet": {
-										"id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'), '/subnets/', variables('subnetName'))]"
-									}
-								}
-							}]
-						}
-					}]
-				},
-				"extensionProfile": {
-					"extensions": [
+				"storageProfile": {
+					"imageReference": "[variables('imageReference')]",
+					"osDisk": {
+						"caching": "ReadWrite",
+						"createOption": "FromImage"
+					},
+					"dataDisks": [
 						{
-							"name": "installCN",
-							"properties": {
-								"publisher": "Microsoft.Azure.Extensions",
-								"type": "CustomScript",
-								"typeHandlerVersion": "2.0",
-								"autoUpgradeMinorVersion": true,
-								"settings": {
-									"fileUris": "[variables('vmssScript').scriptToDownload]",
-									"commandToExecute": "[variables('vmssScript').commandToExecute]",
-									"timestamp": 12345
-								}
+							"lun": 0,
+							"createOption": "Attach",
+							"caching": "ReadWrite",
+							"managedDisk": {
+								"id": "[resourceId('Microsoft.Compute/disks', 'disk0')]"
+							}
+						},
+						{
+							"lun": 1,
+							"createOption": "Attach",
+							"caching": "ReadWrite",
+							"managedDisk": {
+								"id": "[resourceId('Microsoft.Compute/disks', 'disk1')]"
+							}
+						},
+						{
+							"lun": 2,
+							"createOption": "Attach",
+							"caching": "ReadWrite",
+							"managedDisk": {
+								"id": "[resourceId('Microsoft.Compute/disks', 'disk2')]"
+							}
+						},
+						{
+							"lun": 3,
+							"createOption": "Attach",
+							"caching": "ReadWrite",
+							"managedDisk": {
+								"id": "[resourceId('Microsoft.Compute/disks', 'disk3')]"
+							}
+						},
+						{
+							"lun": 4,
+							"createOption": "Attach",
+							"caching": "ReadWrite",
+							"managedDisk": {
+								"id": "[resourceId('Microsoft.Compute/disks', 'disk4')]"
+							}
+						},
+						{
+							"lun": 5,
+							"createOption": "Attach",
+							"caching": "ReadWrite",
+							"managedDisk": {
+								"id": "[resourceId('Microsoft.Compute/disks', 'disk5')]"
+							}
+						},
+						{
+							"lun": 6,
+							"createOption": "Attach",
+							"caching": "ReadWrite",
+							"managedDisk": {
+								"id": "[resourceId('Microsoft.Compute/disks', 'disk6')]"
+							}
+						},
+						{
+							"lun": 7,
+							"createOption": "Attach",
+							"caching": "ReadWrite",
+							"managedDisk": {
+								"id": "[resourceId('Microsoft.Compute/disks', 'disk7')]"
+							}
+						},
+						{
+							"lun": 8,
+							"createOption": "Attach",
+							"caching": "ReadWrite",
+							"managedDisk": {
+								"id": "[resourceId('Microsoft.Compute/disks', 'disk8')]"
+							}
+						},
+						{
+							"lun": 9,
+							"createOption": "Attach",
+							"caching": "ReadWrite",
+							"managedDisk": {
+								"id": "[resourceId('Microsoft.Compute/disks', 'disk9')]"
+							}
+						},
+						{
+							"lun": 10,
+							"createOption": "Attach",
+							"caching": "ReadWrite",
+							"managedDisk": {
+								"id": "[resourceId('Microsoft.Compute/disks', 'disk10')]"
+							}
+						},
+						{
+							"lun": 11,
+							"createOption": "Attach",
+							"caching": "ReadWrite",
+							"managedDisk": {
+								"id": "[resourceId('Microsoft.Compute/disks', 'disk11')]"
 							}
 						}
 					]
+				},
+				"networkProfile": {
+					"networkInterfaces": [
+						{
+							"id": "[resourceId('Microsoft.Network/networkInterfaces',variables('HeadNodeNicName'))]"
+						}
+					]
 				}
-			}
+			},
+			"resources": [
+				{
+					"type": "extensions",
+					"name": "masterExtension",
+					"apiVersion": "[variables('storageApiVersion')]",
+					"location": "[resourceGroup().location]",
+					"tags": {
+						"displayName": "masterExtension"
+					},
+					"properties": {
+						"publisher": "Microsoft.OSTCExtensions",
+						"type": "CustomScriptForLinux",
+						"typeHandlerVersion": "1.5",
+						"autoUpgradeMinorVersion": true,
+						"settings": {
+							"fileUris": "[variables('vmScripts').scriptsToDownload]",
+							"commandToExecute": "[concat('bash ', 'hn-setup.sh ',parameters('adminUsername'),' ',parameters('image')) ]",
+							"timestamp": 4
+						}
+					},
+					"dependsOn": [
+						"[concat('Microsoft.Compute/virtualMachines/', variables('HeadNodeName'))]"
+					]
+				}
+			],
+			"dependsOn": [
+				"[concat('Microsoft.Network/networkInterfaces/', variables('HeadNodeNicName'))]"
+			]
 		},
-		"dependsOn": [
-			"[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-			"[concat('Microsoft.Compute/virtualMachines/', variables('HeadNodeName'), '/extensions/MasterExtension')]"
-	  ]
-	}]
+		{
+			"type": "Microsoft.Compute/virtualMachineScaleSets",
+			"sku": {
+				"name": "[parameters('vmSku')]",
+				"tier": "Standard",
+				"capacity": "[parameters('instanceCount')]"
+			},
+			"name": "[variables('namingInfix')]",
+			"apiVersion": "[variables('computeApiVersion')]",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"overprovision": "false",
+				"upgradePolicy": {
+					"mode": "Manual"
+				},
+				"virtualMachineProfile": {
+					"storageProfile": {
+						"osDisk": {
+							"caching": "ReadWrite",
+							"createOption": "FromImage"
+						},
+						"imageReference": "[variables('imageReference')]"
+					},
+					"osProfile": {
+						"computerNamePrefix": "[variables('namingInfix')]",
+						"adminUsername": "[parameters('adminUsername')]",
+						"adminPassword": "[parameters('adminPassword')]"
+					},
+					"networkProfile": {
+						"networkInterfaceConfigurations": [
+							{
+								"name": "[variables('nicName')]",
+								"properties": {
+									"primary": "true",
+									"ipConfigurations": [
+										{
+											"name": "[variables('ipConfigName')]",
+											"properties": {
+												"subnet": {
+													"id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'), '/subnets/', variables('subnetName'))]"
+												}
+											}
+										}
+									]
+								}
+							}
+						]
+					},
+					"extensionProfile": {
+						"extensions": [
+							{
+								"name": "installCN",
+								"properties": {
+									"publisher": "Microsoft.Azure.Extensions",
+									"type": "CustomScript",
+									"typeHandlerVersion": "2.0",
+									"autoUpgradeMinorVersion": true,
+									"settings": {
+										"fileUris": "[variables('vmssScript').scriptToDownload]",
+										"commandToExecute": "[variables('vmssScript').commandToExecute]",
+										"timestamp": 12345
+									}
+								}
+							}
+						]
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+				"[concat('Microsoft.Compute/virtualMachines/', variables('HeadNodeName'), '/extensions/MasterExtension')]"
+			]
+		}
+	]
 }
