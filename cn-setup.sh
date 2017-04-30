@@ -173,7 +173,7 @@ setup_gpus_ubuntu()
 	dpkg -i /tmp/${CUDA_REPO_PKG}
 	rm -f /tmp/${CUDA_REPO_PKG}
 	#-- disable kernel updates to prevent nvidia driver issues for now:
-	for i in $(dpkg -l "*$(uname -r)*" | grep image | awk '{print $2}'); do echo $i hold | dpkg --set-selections; done
+	#for i in $(dpkg -l "*$(uname -r)*" | grep image | awk '{print $2}'); do echo $i hold | dpkg --set-selections; done
 	#-- you can remove reverse this with:
 	#for i in $(dpkg -l "*$(uname -r)*" | grep image | awk '{print $2}'); do echo $i install | dpkg --set-selections; done
 	#apt-get update
