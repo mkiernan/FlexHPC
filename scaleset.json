@@ -109,7 +109,11 @@
                 "Standard_A11",
                 "Standard_NV6",
                 "Standard_NV12",
-                "Standard_NV24"
+                "Standard_NV24",
+                "Standard_NC6",
+                "Standard_NC12",
+                "Standard_NC24",
+                "Standard_NC24r"                
             ],
             "type": "String",
             "metadata": {
