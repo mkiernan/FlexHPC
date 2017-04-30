@@ -104,6 +104,8 @@ setup_system_centosredhat()
         yum install -y -q sshpass nmap htop sysstat lsscsi
         yum install -y -q libibverb-utils infiniband-diags
         yum install -y -q environment-modules
+	yum install -y -q openmpi-bin openmpi-common openmpi-dev openmpi-doc
+        yum install -y -q gcc g++ kernel-devel
 
 	functiontimer "setup_system_centosredhat()"
 
@@ -145,6 +147,8 @@ setup_system_ubuntu()
         apt-get install -y -q nfs-common autofs
         apt-get install -y -q sshpass nmap htop wget sysstat lsscsi
         apt-get install -y -q infiniband-diags
+	apt-get install -y -q build-essential
+        apt-get install -y -q openmpi-bin openmpi-common openmpi-dev openmpi-doc
         #apt-get install -y -q environment-modules
 
 	functiontimer "setup_system_ubuntu()"

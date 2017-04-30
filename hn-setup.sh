@@ -125,6 +125,8 @@ setup_system_centosredhat()
 	yum install -y -q sshpass nmap htop sysstat lsscsi
 	yum install -y -q libibverb-utils infiniband-diags
 	yum install -y -q environment-modules
+	yum install -y -q openmpi-bin openmpi-common openmpi-dev openmpi-doc
+	yum install -y -q gcc g++ kernel-devel
 	#yum groupinstall -y "X Window System"
 	#npm install -g azure-cli
 
@@ -173,6 +175,8 @@ setup_system_ubuntu()
 	apt-get -y update
 	apt-get -y upgrade
 	apt-get install -y -q nfs-common rpcbind nfs-kernel-server autofs
+	apt-get install -y -q build-essential
+	apt-get install -y -q openmpi-bin openmpi-common openmpi-dev openmpi-doc
 	systemctl start nfs-kernel-server.service
 
 	#apt install -y pip
