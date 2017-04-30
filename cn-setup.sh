@@ -22,6 +22,7 @@ fi
 HPC_ADMIN=$1
 HPC_GROUP=$HPC_ADMIN
 HPC_GID=1000
+HOMEDIR="/home/$HPC_ADMIN"
 
 # Linux distro detection remains a can of worms, just pass it in here:
 VMIMAGE=$2
@@ -176,11 +177,12 @@ setup_gpus_ubuntu()
 	#for i in $(dpkg -l "*$(uname -r)*" | grep image | awk '{print $2}'); do echo $i hold | dpkg --set-selections; done
 	#-- you can remove reverse this with:
 	#for i in $(dpkg -l "*$(uname -r)*" | grep image | awk '{print $2}'); do echo $i install | dpkg --set-selections; done
-	#apt-get update
-	#apt-get upgrade -y
-	apt-get install cuda-drivers
-	apt-get install cuda
+	apt-get update -y -q
+	apt-get upgrade -y -q
+	apt-get install -y -q cuda-drivers
+	apt-get install -y -q cuda
 	echo "export PATH=$PATH:/usr/local/cuda-8.0/bin/" >> ~/.bashrc
+	echo "export PATH=$PATH:/usr/local/cuda-8.0/bin/" >> $HOMEDIR/.bashrc
 	source ~/.bashrc
 	nvidia-smi
 
