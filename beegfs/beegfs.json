@@ -1,0 +1,470 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01-preview/deploymentTemplate.json",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "adminUsername": {
+            "type": "String",
+            "metadata": {
+                "description": "Admin username on all VMs."
+            }
+        },
+        "adminPassword": {
+            "type": "SecureString",
+            "metadata": {
+                "description": "Admin password on all VMs."
+            }
+        },
+        "VMsku": {
+            "defaultValue": "Standard_DS14v2",
+            "allowedValues": [
+                "Standard_DS13_v2",
+                "Standard_DS14_v2",
+                "Standard_DS15_v2"
+            ],
+            "type": "String",
+            "metadata": {
+                "description": "Size of the storage nodes. The instance must allow at least 16 data disks."
+            }
+        },
+        "image": {
+            "type": "string",
+            "defaultValue": "OpenLogic:CentOS-HPC:7.1",
+            "allowedValues": [
+                "Canonical:UbuntuServer:16.04-LTS",
+                "Canonical:UbuntuServer:16.10",
+                "OpenLogic:CentOS-HPC:6.5",
+                "OpenLogic:CentOS:6.8",
+                "OpenLogic:CentOS-HPC:7.1",
+                "OpenLogic:CentOS:7.2",
+                "OpenLogic:CentOS:7.3",
+                "RedHat:RHEL:7.3",
+                "SUSE:SLES-HPC:12-SP1"
+            ],
+            "metadata": {
+                "description": "OS version to deploy on Storage Nodes."
+            }
+        },
+        "metadataNodeCount": {
+            "type": "int",
+            "defaultValue": 1,
+            "metadata": {
+                "description": "This template creates N metadata nodes. Use metadataNodeCount to specify that N."
+            }
+        },
+        "metadataDiskSize": {
+            "type": "string",
+            "defaultValue": "P10",
+            "allowedValues": [
+                "P10",
+                "P20",
+                "P30",
+                "P40",
+                "P50"
+            ],
+            "metadata": {
+                "description": "P10=128GB P20=512GB P30=1TB P40=2TB P50=4TB: RAID0 Volume will be created across the drives"
+            }
+        },
+        "metadataDiskCount": {
+            "type": "int",
+            "defaultValue": 2,
+            "minValue": 2,
+            "maxValue": 6,
+            "metadata": {
+                "description": "Number of beeGFS metadata disks"
+            }
+        },
+        "storageNodeCount": {
+            "type": "int",
+            "defaultValue": 4,
+            "metadata": {
+                "description": "Number of beeGFS storage nodes."
+            }
+        },
+        "storageDiskSize": {
+            "type": "string",
+            "defaultValue": "P10",
+            "allowedValues": [
+                "P10",
+                "P20",
+                "P30",
+                "P40",
+                "P50"
+            ],
+            "metadata": {
+                "description": "P10=128GB P20=512GB P30=1TB P40=2TB P50=4TB: RAID0 Volume will be created across the drives"
+            }
+        },
+        "storageDiskCount": {
+            "type": "int",
+            "defaultValue": 8,
+            "minValue": 2,
+            "maxValue": 16,
+            "metadata": {
+                "description": "Number of storage disks"
+            }
+        },
+        "storageAccountType": {
+            "type": "string",
+            "defaultValue": "Premium_LRS",
+            "allowedValues": [
+                "Standard_LRS",
+                "Premium_LRS"
+            ],
+            "metadata": {
+                "description": "If you care about performance: Premium_LRS is **STRONGLY** recommended."
+            }
+        },
+        "VNETName": {
+            "maxLength": 10,
+            "type": "String",
+            "metadata": {
+                "description": "This is the VNET to which the beeGFS server will be deployed. Please specify the same VNET when creating other resources in your cluster."
+            }
+        }
+    },
+    "variables": {
+        "virtualNetworkName": "[parameters('VNETName')]",
+        "subnetName": "storageSubnet",
+        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
+        "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+        "scriptUrl": "https://raw.githubusercontent.com/mkiernan/FlexHPC/beegfs/",
+        "StorageMap": {
+            "P10": {
+                "size": 128
+            },
+            "P20": {
+                "size": 512
+            },
+            "P30": {
+                "size": 1023
+            },
+            "P40": {
+                "size": 2048
+            },
+            "P50": {
+                "size": 4095
+            }
+        },
+        "storageDiskSize": "[variables('StorageMap')[parameters('storageDiskSize')].size]",
+        "numStorageDisks": "[parameters('storageDiskCount')]",
+        "metadataDiskSize": "[variables('StorageMap')[parameters('metadataDiskSize')].size]",
+        "numMetadataDisks": "[parameters('metadataDiskCount')]",
+        "imageReference_Canonical:UbuntuServer:16.04-LTS": {
+            "publisher": "Canonical",
+            "offer": "UbuntuServer",
+            "sku": "16.04-LTS",
+            "version": "latest"
+        },
+        "imageReference_Canonical:UbuntuServer:16.10": {
+            "publisher": "Canonical",
+            "offer": "UbuntuServer",
+            "sku": "16.10",
+            "version": "latest"
+        },
+        "imageReference_OpenLogic:CentOS-HPC:6.5": {
+            "publisher": "OpenLogic",
+            "offer": "CentOS-HPC",
+            "sku": "6.5",
+            "version": "latest"
+        },
+        "imageReference_OpenLogic:CentOS:6.8": {
+            "publisher": "OpenLogic",
+            "offer": "CentOS",
+            "sku": "6.8",
+            "version": "latest"
+        },
+        "imageReference_OpenLogic:CentOS-HPC:7.1": {
+            "publisher": "OpenLogic",
+            "offer": "CentOS-HPC",
+            "sku": "7.1",
+            "version": "latest"
+        },
+        "imageReference_OpenLogic:CentOS:7.2": {
+            "publisher": "OpenLogic",
+            "offer": "CentOS",
+            "sku": "7.2",
+            "version": "latest"
+        },
+        "imageReference_OpenLogic:CentOS:7.3": {
+            "publisher": "OpenLogic",
+            "offer": "CentOS",
+            "sku": "7.3",
+            "version": "latest"
+        },
+        "imageReference_RedHat:RHEL:7.3": {
+            "publisher": "RedHat",
+            "offer": "RHEL",
+            "sku": "7.3",
+            "version": "latest"
+        },
+        "imageReference_SUSE:SLES-HPC:12-SP1": {
+            "publisher": "SUSE",
+            "offer": "SLES-HPC",
+            "sku": "12-SP1",
+            "version": "latest"
+        },
+        "imageReference": "[variables(concat('imageReference_',parameters('image')))]",
+        "vmScripts": {
+            "scriptsToDownload": [
+                "[concat(variables('scriptUrl'), 'beegfs-setup.sh')]"
+            ],
+            "commandToExecute": "[concat('bash ', 'beegfs-setup.sh ',parameters('adminUsername'),' ',parameters('image')) ]"
+        },
+        "metadataDiskArray": [
+            {
+                "lun": 0,
+                "caching": "ReadWrite",
+                "diskSizeGB": "[variables('metadataDiskSize')]",
+                "managedDisk": {
+                    "storageAccountType": "[parameters('storageAccountType')]"
+                }
+            },
+            {
+                "lun": 1,
+                "caching": "ReadWrite",
+                "diskSizeGB": "[variables('metadataDiskSize')]",
+                "managedDisk": {
+                    "storageAccountType": "[parameters('storageAccountType')]"
+                }
+            },
+            {
+                "lun": 2,
+                "caching": "ReadWrite",
+                "diskSizeGB": "[variables('metadataDiskSize')]",
+                "managedDisk": {
+                    "storageAccountType": "[parameters('storageAccountType')]"
+                }
+            },
+            {
+                "lun": 3,
+                "caching": "ReadWrite",
+                "diskSizeGB": "[variables('metadataDiskSize')]",
+                "managedDisk": {
+                    "storageAccountType": "[parameters('storageAccountType')]"
+                }
+            },
+            {
+                "lun": 4,
+                "caching": "ReadWrite",
+                "diskSizeGB": "[variables('metadataDiskSize')]",
+                "managedDisk": {
+                    "storageAccountType": "[parameters('storageAccountType')]"
+                }
+            },
+            {
+                "lun": 5,
+                "caching": "ReadWrite",
+                "diskSizeGB": "[variables('metadataDiskSize')]",
+                "managedDisk": {
+                    "storageAccountType": "[parameters('storageAccountType')]"
+                }
+            }
+        ],
+        "storageDiskArray": [
+            {
+                "lun": "[add(variables('numStorageDisks'), 0)]",
+                "caching": "ReadWrite",
+                "diskSizeGB": "[variables('storageDiskSize')]",
+                "managedDisk": {
+                    "storageAccountType": "[parameters('storageAccountType')]"
+                }
+            },
+            {
+                "lun": "[add(variables('numStorageDisks'), 1)]",
+                "caching": "ReadWrite",
+                "diskSizeGB": "[variables('storageDiskSize')]",
+                "managedDisk": {
+                    "storageAccountType": "[parameters('storageAccountType')]"
+                }
+            },
+            {
+                "lun": "[add(variables('numStorageDisks'), 2)]",
+                "caching": "ReadWrite",
+                "diskSizeGB": "[variables('storageDiskSize')]",
+                "managedDisk": {
+                    "storageAccountType": "[parameters('storageAccountType')]"
+                }
+            },
+            {
+                "lun": "[add(variables('numStorageDisks'), 3)]",
+                "caching": "ReadWrite",
+                "diskSizeGB": "[variables('storageDiskSize')]",
+                "managedDisk": {
+                    "storageAccountType": "[parameters('storageAccountType')]"
+                }
+            },
+            {
+                "lun": "[add(variables('numStorageDisks'), 4)]",
+                "caching": "ReadWrite",
+                "diskSizeGB": "[variables('storageDiskSize')]",
+                "managedDisk": {
+                    "storageAccountType": "[parameters('storageAccountType')]"
+                }
+            },
+            {
+                "lun": "[add(variables('numStorageDisks'), 5)]",
+                "caching": "ReadWrite",
+                "diskSizeGB": "[variables('storageDiskSize')]",
+                "managedDisk": {
+                    "storageAccountType": "[parameters('storageAccountType')]"
+                }
+            },
+            {
+                "lun": "[add(variables('numStorageDisks'), 6)]",
+                "caching": "ReadWrite",
+                "diskSizeGB": "[variables('storageDiskSize')]",
+                "managedDisk": {
+                    "storageAccountType": "[parameters('storageAccountType')]"
+                }
+            },
+            {
+                "lun": "[add(variables('numStorageDisks'), 7)]",
+                "caching": "ReadWrite",
+                "diskSizeGB": "[variables('storageDiskSize')]",
+                "managedDisk": {
+                    "storageAccountType": "[parameters('storageAccountType')]"
+                }
+            },
+            {
+                "lun": "[add(variables('numStorageDisks'), 8)]",
+                "caching": "ReadWrite",
+                "diskSizeGB": "[variables('storageDiskSize')]",
+                "managedDisk": {
+                    "storageAccountType": "[parameters('storageAccountType')]"
+                }
+            },
+            {
+                "lun": "[add(variables('numStorageDisks'), 9)]",
+                "caching": "ReadWrite",
+                "diskSizeGB": "[variables('storageDiskSize')]",
+                "managedDisk": {
+                    "storageAccountType": "[parameters('storageAccountType')]"
+                }
+            },
+            {
+                "lun": "[add(variables('numStorageDisks'), 10)]",
+                "caching": "ReadWrite",
+                "diskSizeGB": "[variables('storageDiskSize')]",
+                "managedDisk": {
+                    "storageAccountType": "[parameters('storageAccountType')]"
+                }
+            },
+            {
+                "lun": "[add(variables('numStorageDisks'), 11)]",
+                "caching": "ReadWrite",
+                "diskSizeGB": "[variables('storageDiskSize')]",
+                "managedDisk": {
+                    "storageAccountType": "[parameters('storageAccountType')]"
+                }
+            },
+            {
+                "lun": "[add(variables('numStorageDisks'), 12)]",
+                "caching": "ReadWrite",
+                "diskSizeGB": "[variables('storageDiskSize')]",
+                "managedDisk": {
+                    "storageAccountType": "[parameters('storageAccountType')]"
+                }
+            },
+            {
+                "lun": "[add(variables('numStorageDisks'), 13)]",
+                "caching": "ReadWrite",
+                "diskSizeGB": "[variables('storageDiskSize')]",
+                "managedDisk": {
+                    "storageAccountType": "[parameters('storageAccountType')]"
+                }
+            },
+            {
+                "lun": "[add(variables('numStorageDisks'), 14)]",
+                "caching": "ReadWrite",
+                "diskSizeGB": "[variables('storageDiskSize')]",
+                "managedDisk": {
+                    "storageAccountType": "[parameters('storageAccountType')]"
+                }
+            },
+            {
+                "lun": "[add(variables('numStorageDisks'), 15)]",
+                "caching": "ReadWrite",
+                "diskSizeGB": "[variables('storageDiskSize')]",
+                "managedDisk": {
+                    "storageAccountType": "[parameters('storageAccountType')]"
+                }
+            }
+        ],
+        "computeApiVersion": "2016-04-30-preview",
+        "networkApiVersion": "2016-06-01",
+        "storageApiVersion": "2015-06-15"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Compute/virtualMachineScaleSets",
+            "name": "BeeGFS",
+            "apiVersion": "[variables('computeApiVersion')]",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "[parameters('VMsku')]",
+                "tier": "Standard",
+                "capacity": "[parameters('storageNodeCount')]"
+            },
+            "properties": {
+                "overprovision": "false",
+                "upgradePolicy": {
+                    "mode": "Manual"
+                },
+                "virtualMachineProfile": {
+                    "networkProfile": {
+                        "networkInterfaceConfigurations": [
+                            {
+                                "name": "nic",
+                                "properties": {
+                                    "primary": "true",
+                                    "ipConfigurations": [
+                                        {
+                                            "name": "ipconfig",
+                                            "properties": {
+                                                "subnet": {
+                                                    "id": "[variables('subnetRef')]"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                },
+                "osProfile": {
+                    "computerNamePrefix": "beegfs",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "storageProfile": {
+                    "imageReference": "[variables('imageReference')]",
+                    "osDisk": {
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    },
+                    "dataDisks": "[concat(take(variables('storageDiskArray'),variables('numStorageDisks')), take(variables('metadataDiskArray'),variables('numMetadataDisks'))]"
+                },
+                "extensionProfile": {
+                    "extensions": [
+                        {
+                            "name": "installBeeGFS",
+                            "properties": {
+                                "publisher": "Microsoft.Azure.Extensions",
+                                "type": "CustomScript",
+                                "typeHandlerVersion": "2.0",
+                                "autoUpgradeMinorVersion": true,
+                                "settings": {
+                                    "fileUris": "[variables('vmScripts').scriptsToDownload]",
+                                    "commandToExecute": "[variables('vmScripts').commandToExecute]",
+                                    "timestamp": 1
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}
