@@ -35,17 +35,31 @@ Example usage of this is so that you can setup a "permanent" NFS server & Head n
 
 ***
 
-### 2a. Deploy a Standalone Linux NFS Server
+### 2a. [Mandatory] Create the Network Infrastructure & Head Node
 
-You can treat this system purely as a standalone NFS server, or as a combined NFS server & Head/Master node. This template will also create the main VNET and Subnet for the cluster, so deploy this template first.
+TBD
+This template will create the main VNET & Subnet for the cluster - deploy this template first. 
+You can treat this system purely as a standalone Head/Master/JumpBox node, or as a combined NFS server & Head/MasterJumpBox node.
+
+### 2b. [Optional] Deploy a Standalone Linux NFS Server 
+
+Standalone Linux NFS Server
 <br><br>
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmkiernan%2FFlexHPC%2Fmaster%2Fnfsserver.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 
+### 2c. [Optional] Deploy a Standalone BeeGFS Storage Cluster
+
+This template deploys a BeeGFS Storage Cluster with mixed data + metadata capability on each node. Number of storage/metadata nodes are configurable, as is the size and number of disks to attach. Premium_LRS storage is recommended. 
+<br><br>
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmkiernan%2FFlexHPC%2Fmaster%2Fbeegfs%2Fbeegfs.json" target="_blank">
+    <img src="http://azuredeploy.net/deploybutton.png"/>
+</a>
+
 ***
 
-### 2b. Deploy a Scale Set of Linux Compute Nodes
+### 2d. Deploy a Scale Set of Linux Compute Nodes
 
 Deploy a scale set with N nodes into the same existing VNET as your NFS Server + Head Node. 
 <br><br>
@@ -53,16 +67,11 @@ Deploy a scale set with N nodes into the same existing VNET as your NFS Server +
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 <br>
-* *Ensure your NFS server is deployed first as per the step 2a above.*
-* *The compute node install script will mount the home directory and other shares from the NFS server automatically.* 
+* *Ensure your Headnode & Network is deployed first as per the step 2a above.*
+* *The compute node install script will mount the home directory and other shares from the head node automatically.* 
 * *The NFS server is currently assumed to be 10.0.0.4.*
 * *The scale set instances will record their hostnames and IP addresses into the /clustermap mount on the NFS server.*
 * *VM scaleset overprovisioning is disabled in this version for now to keep things predictable.*
-
-***
-
-### 2c. Deploy Standalone Head Node (No NFS Server)
-TBD
 
 ***
 
