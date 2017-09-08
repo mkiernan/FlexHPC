@@ -76,7 +76,7 @@
         },
         "storageNodeCount": {
             "type": "int",
-            "defaultValue": 4,
+            "defaultValue": 2,
             "metadata": {
                 "description": "Number of beeGFS storage nodes."
             }
@@ -218,7 +218,8 @@
                 "diskSizeGB": "[variables('metadataDiskSize')]",
                 "managedDisk": {
                     "storageAccountType": "[parameters('storageAccountType')]"
-                }
+                },
+                "createOption": "Empty"
             },
             {
                 "lun": 1,
@@ -226,7 +227,8 @@
                 "diskSizeGB": "[variables('metadataDiskSize')]",
                 "managedDisk": {
                     "storageAccountType": "[parameters('storageAccountType')]"
-                }
+                },
+                "createOption": "Empty"
             },
             {
                 "lun": 2,
@@ -234,7 +236,8 @@
                 "diskSizeGB": "[variables('metadataDiskSize')]",
                 "managedDisk": {
                     "storageAccountType": "[parameters('storageAccountType')]"
-                }
+                },
+                "createOption": "Empty"
             },
             {
                 "lun": 3,
@@ -242,7 +245,8 @@
                 "diskSizeGB": "[variables('metadataDiskSize')]",
                 "managedDisk": {
                     "storageAccountType": "[parameters('storageAccountType')]"
-                }
+                },
+                "createOption": "Empty"
             },
             {
                 "lun": 4,
@@ -250,7 +254,8 @@
                 "diskSizeGB": "[variables('metadataDiskSize')]",
                 "managedDisk": {
                     "storageAccountType": "[parameters('storageAccountType')]"
-                }
+                },
+                "createOption": "Empty"
             },
             {
                 "lun": 5,
@@ -258,7 +263,8 @@
                 "diskSizeGB": "[variables('metadataDiskSize')]",
                 "managedDisk": {
                     "storageAccountType": "[parameters('storageAccountType')]"
-                }
+                },
+                "createOption": "Empty"
             }
         ],
         "storageDiskArray": [
@@ -268,7 +274,8 @@
                 "diskSizeGB": "[variables('storageDiskSize')]",
                 "managedDisk": {
                     "storageAccountType": "[parameters('storageAccountType')]"
-                }
+                },
+                "createOption": "Empty"
             },
             {
                 "lun": "[add(variables('numStorageDisks'), 1)]",
@@ -276,7 +283,8 @@
                 "diskSizeGB": "[variables('storageDiskSize')]",
                 "managedDisk": {
                     "storageAccountType": "[parameters('storageAccountType')]"
-                }
+                },
+                "createOption": "Empty"
             },
             {
                 "lun": "[add(variables('numStorageDisks'), 2)]",
@@ -284,7 +292,8 @@
                 "diskSizeGB": "[variables('storageDiskSize')]",
                 "managedDisk": {
                     "storageAccountType": "[parameters('storageAccountType')]"
-                }
+                },
+                "createOption": "Empty"
             },
             {
                 "lun": "[add(variables('numStorageDisks'), 3)]",
@@ -292,7 +301,8 @@
                 "diskSizeGB": "[variables('storageDiskSize')]",
                 "managedDisk": {
                     "storageAccountType": "[parameters('storageAccountType')]"
-                }
+                },
+                "createOption": "Empty"
             },
             {
                 "lun": "[add(variables('numStorageDisks'), 4)]",
@@ -300,7 +310,8 @@
                 "diskSizeGB": "[variables('storageDiskSize')]",
                 "managedDisk": {
                     "storageAccountType": "[parameters('storageAccountType')]"
-                }
+                },
+                "createOption": "Empty"
             },
             {
                 "lun": "[add(variables('numStorageDisks'), 5)]",
@@ -308,7 +319,8 @@
                 "diskSizeGB": "[variables('storageDiskSize')]",
                 "managedDisk": {
                     "storageAccountType": "[parameters('storageAccountType')]"
-                }
+                },
+                "createOption": "Empty"
             },
             {
                 "lun": "[add(variables('numStorageDisks'), 6)]",
@@ -316,7 +328,8 @@
                 "diskSizeGB": "[variables('storageDiskSize')]",
                 "managedDisk": {
                     "storageAccountType": "[parameters('storageAccountType')]"
-                }
+                },
+                "createOption": "Empty"
             },
             {
                 "lun": "[add(variables('numStorageDisks'), 7)]",
@@ -324,7 +337,8 @@
                 "diskSizeGB": "[variables('storageDiskSize')]",
                 "managedDisk": {
                     "storageAccountType": "[parameters('storageAccountType')]"
-                }
+                },
+                "createOption": "Empty"
             },
             {
                 "lun": "[add(variables('numStorageDisks'), 8)]",
@@ -332,7 +346,8 @@
                 "diskSizeGB": "[variables('storageDiskSize')]",
                 "managedDisk": {
                     "storageAccountType": "[parameters('storageAccountType')]"
-                }
+                },
+                "createOption": "Empty"
             },
             {
                 "lun": "[add(variables('numStorageDisks'), 9)]",
@@ -340,7 +355,8 @@
                 "diskSizeGB": "[variables('storageDiskSize')]",
                 "managedDisk": {
                     "storageAccountType": "[parameters('storageAccountType')]"
-                }
+                },
+                "createOption": "Empty"
             },
             {
                 "lun": "[add(variables('numStorageDisks'), 10)]",
@@ -348,7 +364,8 @@
                 "diskSizeGB": "[variables('storageDiskSize')]",
                 "managedDisk": {
                     "storageAccountType": "[parameters('storageAccountType')]"
-                }
+                },
+                "createOption": "Empty"
             },
             {
                 "lun": "[add(variables('numStorageDisks'), 11)]",
@@ -356,7 +373,8 @@
                 "diskSizeGB": "[variables('storageDiskSize')]",
                 "managedDisk": {
                     "storageAccountType": "[parameters('storageAccountType')]"
-                }
+                },
+                "createOption": "Empty"
             },
             {
                 "lun": "[add(variables('numStorageDisks'), 12)]",
@@ -364,7 +382,8 @@
                 "diskSizeGB": "[variables('storageDiskSize')]",
                 "managedDisk": {
                     "storageAccountType": "[parameters('storageAccountType')]"
-                }
+                },
+                "createOption": "Empty"
             },
             {
                 "lun": "[add(variables('numStorageDisks'), 13)]",
@@ -372,7 +391,8 @@
                 "diskSizeGB": "[variables('storageDiskSize')]",
                 "managedDisk": {
                     "storageAccountType": "[parameters('storageAccountType')]"
-                }
+                },
+                "createOption": "Empty"
             },
             {
                 "lun": "[add(variables('numStorageDisks'), 14)]",
@@ -380,7 +400,8 @@
                 "diskSizeGB": "[variables('storageDiskSize')]",
                 "managedDisk": {
                     "storageAccountType": "[parameters('storageAccountType')]"
-                }
+                },
+                "createOption": "Empty"
             },
             {
                 "lun": "[add(variables('numStorageDisks'), 15)]",
@@ -388,7 +409,8 @@
                 "diskSizeGB": "[variables('storageDiskSize')]",
                 "managedDisk": {
                     "storageAccountType": "[parameters('storageAccountType')]"
-                }
+                },
+                "createOption": "Empty"
             }
         ],
         "computeApiVersion": "2016-04-30-preview",
