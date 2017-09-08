@@ -15,7 +15,7 @@
             }
         },
         "VMsku": {
-            "defaultValue": "Standard_DS14v2",
+            "defaultValue": "Standard_DS14_v2",
             "allowedValues": [
                 "Standard_DS13_v2",
                 "Standard_DS14_v2",
@@ -431,38 +431,38 @@
                                 }
                             }
                         ]
-                    }
-                },
-                "osProfile": {
-                    "computerNamePrefix": "beegfs",
-                    "adminUsername": "[parameters('adminUsername')]",
-                    "adminPassword": "[parameters('adminPassword')]"
-                },
-                "storageProfile": {
-                    "imageReference": "[variables('imageReference')]",
-                    "osDisk": {
-                        "caching": "ReadWrite",
-                        "createOption": "FromImage"
                     },
-                    "dataDisks": "[concat(take(variables('storageDiskArray'),variables('numStorageDisks')), take(variables('metadataDiskArray'),variables('numMetadataDisks')))]"
-                },
-                "extensionProfile": {
-                    "extensions": [
-                        {
-                            "name": "installBeeGFS",
-                            "properties": {
-                                "publisher": "Microsoft.Azure.Extensions",
-                                "type": "CustomScript",
-                                "typeHandlerVersion": "2.0",
-                                "autoUpgradeMinorVersion": true,
-                                "settings": {
-                                    "fileUris": "[variables('vmScripts').scriptsToDownload]",
-                                    "commandToExecute": "[variables('vmScripts').commandToExecute]",
-                                    "timestamp": 1
+                    "osProfile": {
+                        "computerNamePrefix": "beegfs",
+                        "adminUsername": "[parameters('adminUsername')]",
+                        "adminPassword": "[parameters('adminPassword')]"
+                    },
+                    "storageProfile": {
+                        "imageReference": "[variables('imageReference')]",
+                        "osDisk": {
+                            "caching": "ReadWrite",
+                            "createOption": "FromImage"
+                        },
+                        "dataDisks": "[concat(take(variables('storageDiskArray'),variables('numStorageDisks')), take(variables('metadataDiskArray'),variables('numMetadataDisks')))]"
+                    },
+                    "extensionProfile": {
+                        "extensions": [
+                            {
+                                "name": "installBeeGFS",
+                                "properties": {
+                                    "publisher": "Microsoft.Azure.Extensions",
+                                    "type": "CustomScript",
+                                    "typeHandlerVersion": "2.0",
+                                    "autoUpgradeMinorVersion": true,
+                                    "settings": {
+                                        "fileUris": "[variables('vmScripts').scriptsToDownload]",
+                                        "commandToExecute": "[variables('vmScripts').commandToExecute]",
+                                        "timestamp": 1
+                                    }
                                 }
                             }
-                        }
-                    ]
+                        ]
+                    }
                 }
             }
         }
