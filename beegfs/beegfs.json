@@ -444,7 +444,7 @@
                         "caching": "ReadWrite",
                         "createOption": "FromImage"
                     },
-                    "dataDisks": "[concat(take(variables('storageDiskArray'),variables('numStorageDisks')), take(variables('metadataDiskArray'),variables('numMetadataDisks'))]"
+                    "dataDisks": "[concat(take(variables('storageDiskArray'),variables('numStorageDisks')), take(variables('metadataDiskArray'),variables('numMetadataDisks')))]"
                 },
                 "extensionProfile": {
                     "extensions": [
