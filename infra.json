@@ -187,7 +187,7 @@
 		"HeadNodeNicName": "[concat(variables('HeadNodeName'), 'nic')]",
 		"addressPrefix": "10.0.0.0/16",
 		"subnetPrefix": "10.0.0.0/24",
-		"virtualNetworkName": "parameters('VNETName')",
+		"virtualNetworkName": "[parameters('VNETName')]",
 		"subnetName": "[concat(variables('namingInfix'), 'subnet')]",
 		"vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
 		"subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
