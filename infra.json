@@ -171,8 +171,7 @@
 				"description": "Admin password on all VMs."
 			}
 		},
-		"VNETName": {
-            "maxLength": 10,
+		"vnetName": {
             "type": "String",
             "metadata": {
                 "description": "This is the VNET to which all cluster resources will be deployed. Please specify the same VNET when creating other resources in your cluster."
@@ -187,7 +186,7 @@
 		"HeadNodeNicName": "[concat(variables('HeadNodeName'), 'nic')]",
 		"addressPrefix": "10.0.0.0/16",
 		"subnetPrefix": "10.0.0.0/24",
-		"virtualNetworkName": "[parameters('VNETName')]",
+		"virtualNetworkName": "[parameters('vnetName')]",
 		"subnetName": "[concat(variables('namingInfix'), 'subnet')]",
 		"vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
 		"subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
