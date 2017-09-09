@@ -193,7 +193,6 @@ install_beegfs()
 
 	# setup metata data
 	yum install -y beegfs-meta
-
 	$BEEGFS_SBIN/beegfs-setup-meta -p $BEEGFS_METADATA -m $MGMT_HOSTNAME -f
 	tune_meta
 	systemctl daemon-reload
@@ -201,7 +200,6 @@ install_beegfs()
 		
 	# setup storage
 	yum install -y beegfs-storage
-
 	$BEEGFS_SBIN/beegfs-setup-storage -p $BEEGFS_STORAGE -m $MGMT_HOSTNAME
 	tune_storage
 	systemctl daemon-reload
