@@ -14,7 +14,7 @@
                 "description": "Admin password on all VMs."
             }
         },
-        "VMsku": {
+        "vmSku": {
             "defaultValue": "Standard_DS14_v2",
             "allowedValues": [
                 "Standard_DS13_v2",
@@ -425,7 +425,7 @@
             "apiVersion": "[variables('computeApiVersion')]",
             "location": "[resourceGroup().location]",
             "sku": {
-                "name": "[parameters('VMsku')]",
+                "name": "[parameters('vmSku')]",
                 "tier": "Standard",
                 "capacity": "[parameters('storageNodeCount')]"
             },
