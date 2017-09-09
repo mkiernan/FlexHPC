@@ -44,11 +44,11 @@
                 "description": "OS version to deploy on Storage Nodes."
             }
         },
-        "metadataNodeCount": {
+        "storageNodeCount": {
             "type": "int",
-            "defaultValue": 1,
+            "defaultValue": 2,
             "metadata": {
-                "description": "This template creates N metadata nodes. Use metadataNodeCount to specify that N."
+                "description": "Number of beeGFS storage nodes."
             }
         },
         "metadataDiskSize": {
@@ -72,13 +72,6 @@
             "maxValue": 6,
             "metadata": {
                 "description": "Number of beeGFS metadata disks"
-            }
-        },
-        "storageNodeCount": {
-            "type": "int",
-            "defaultValue": 2,
-            "metadata": {
-                "description": "Number of beeGFS storage nodes."
             }
         },
         "storageDiskSize": {
@@ -128,7 +121,7 @@
         "subnetName": "StorageSubnet",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
-        "scriptUrl": "https://raw.githubusercontent.com/mkiernan/FlexHPC/beegfs/",
+        "scriptUrl": "https://raw.githubusercontent.com/mkiernan/FlexHPC/master/beegfs/",
         "StorageMap": {
             "P10": {
                 "size": 128
