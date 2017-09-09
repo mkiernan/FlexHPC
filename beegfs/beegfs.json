@@ -118,7 +118,7 @@
         "vnetName": {
             "maxLength": 10,
             "type": "String",
-            "defaultVault": "vnethpc",            
+            "defaultValue": "vnethpc",            
             "metadata": {
                 "description": "This is the VNET to which the beeGFS server will be deployed. Please specify the same VNET when creating other resources in your cluster."
             }
