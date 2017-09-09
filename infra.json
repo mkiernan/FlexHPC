@@ -186,16 +186,15 @@
 		"HeadNodeIPConfigName": "[concat(variables('HeadNodeName'), 'ipconfig')]",
 		"HeadNodeNicName": "[concat(variables('HeadNodeName'), 'nic')]",
 		"addressPrefix": "10.0.0.0/16",
-		"infrasubnetName": "Infra",
+		"infrasubnetName": "InfraSubnet",
 		"infrasubnetPrefix": "10.0.0.0/24",
-		"computesubnetName": "Compute",
+		"computesubnetName": "ComputeSubnet",
 		"computesubnetPrefix": "10.0.5.0/24",
-		"storagesubnetName": "Storage",
+		"storagesubnetName": "StorageSubnet",
 		"storagesubnetPrefix": "10.0.10.0/24",
 		"virtualNetworkName": "[parameters('vnetName')]",
-		"subnetName": "[concat(variables('namingInfix'), 'subnet')]",
 		"vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
-		"subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+		"infrasubnetRef": "[concat(variables('vnetID'),'/subnets/',variables('infrasubnetName'))]",
 		"publicIPAddressName": "[concat(variables('namingInfix'), 'pip')]",
 		"scriptUrl": "https://raw.githubusercontent.com/mkiernan/FlexHPC/master/",
 		"imageReference_Canonical:UbuntuServer:16.04-LTS": {
@@ -327,7 +326,7 @@
 								"id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
 							},
 							"subnet": {
-								"id": "[variables('subnetRef')]"
+								"id": "[variables('infrasubnetRef')]"
 							}
 						}
 					}
