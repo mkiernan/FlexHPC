@@ -202,7 +202,7 @@
             "scriptsToDownload": [
                 "[concat(variables('scriptUrl'), 'beegfs-setup.sh')]"
             ],
-            "commandToExecute": "[concat('bash ', 'beegfs-setup.sh ',parameters('adminUsername'),' ',parameters('image')) ]"
+            "commandToExecute": "[concat('bash ', 'beegfs-setup.sh ',parameters('adminUsername'),' ',parameters('image'),' ',parameters('metadataDiskCount'))]"
         },
         "metadataDiskArray": [
             {

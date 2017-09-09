@@ -26,6 +26,9 @@ HPC_GROUP=$HPC_ADMIN
 HPC_GID=1000
 HOMEDIR="/home/$HPC_ADMIN"
 
+# Number of Metadata & Storage Disks Passed in From Template
+NMETADATADISKS=$3
+
 # Linux distro detection remains a can of worms, just pass it in here:
 VMIMAGE=$2
 # Or uncomment one of these if running this script by hand.
@@ -135,64 +138,47 @@ EOF
 
 setup_disks()
 {      
-    # Dump the current disk config for debugging
-    fdisk -l
+	# Dump the current disk config for debugging
+	fdisk -l
     
-    # Dump the scsi config
-    lsscsi
+	# Dump the scsi config
+	lsscsi
     
-    # Get the root/OS disk so we know which device it uses and can ignore it later
-    rootDevice=`mount | grep "on / type" | awk '{print $1}' | sed 's/[0-9]//g'`
+	# Get the root/OS disk so we know which device it uses and can ignore it later
+	rootDevice=`mount | grep "on / type" | awk '{print $1}' | sed 's/[0-9]//g'`
     
-    # Get the TMP disk so we know which device and can ignore it later
-    tmpDevice=`mount | grep "on /mnt/resource type" | awk '{print $1}' | sed 's/[0-9]//g'`
+	# Get the TMP disk so we know which device and can ignore it later
+	tmpDevice=`mount | grep "on /mnt/resource type" | awk '{print $1}' | sed 's/[0-9]//g'`
 
-    # Get the metadata and storage disk sizes from fdisk, we ignore the disks above
-    metadataDiskSize=`fdisk -l | grep '^Disk /dev/' | grep -v $rootDevice | grep -v $tmpDevice | awk '{print $3}' | sort -n -r | tail -1`
-    storageDiskSize=`fdisk -l | grep '^Disk /dev/' | grep -v $rootDevice | grep -v $tmpDevice | awk '{print $3}' | sort -n | tail -1`
+	# Get the metadata and storage disk sizes from fdisk, we ignore the disks above
+	metadataDiskSize=`fdisk -l | grep '^Disk /dev/' | grep -v $rootDevice | grep -v $tmpDevice | awk '{print $3}' | sort -n -r | tail -1`
+	storageDiskSize=`fdisk -l | grep '^Disk /dev/' | grep -v $rootDevice | grep -v $tmpDevice | awk '{print $3}' | sort -n | tail -1`
 
-    if [ "$metadataDiskSize" == "$storageDiskSize" ]; then
-	
+	if [ "$metadataDiskSize" == "$storageDiskSize" ]; then
 		# Compute number of disks
 		nbDisks=`fdisk -l | grep '^Disk /dev/' | grep -v $rootDevice | grep -v $tmpDevice | wc -l`
 		echo "nbDisks=$nbDisks"
-		let nbMetadaDisks=nbDisks
-		let nbStorageDisks=nbDisks
-			
-		if is_convergednode; then
-			# If metadata and storage disks are the same size, we grab 1/3 for meta, 2/3 for storage
-			
-			# minimum number of disks has to be 2
-			let nbMetadaDisks=nbDisks/3
-			if [ $nbMetadaDisks -lt 2 ]; then
-				let nbMetadaDisks=2
-			fi
-			
-			let nbStorageDisks=nbDisks-nbMetadaDisks
-		fi
-		
+		let nbMetadaDisks=$NMETADATADISKS
+		let nbStorageDisks=nbDisks-$nbMetadaDisks
+	        let nbStorageDisks=nbDisks-nbMetadaDisks
 		echo "nbMetadaDisks=$nbMetadaDisks nbStorageDisks=$nbStorageDisks"			
 		
 		metadataDevices="`fdisk -l | grep '^Disk /dev/' | grep $metadataDiskSize | awk '{print $2}' | awk -F: '{print $1}' | sort | head -$nbMetadaDisks | tr '\n' ' ' | sed 's|/dev/||g'`"
 		storageDevices="`fdisk -l | grep '^Disk /dev/' | grep $storageDiskSize | awk '{print $2}' | awk -F: '{print $1}' | sort | tail -$nbStorageDisks | tr '\n' ' ' | sed 's|/dev/||g'`"
-    else
-        # Based on the known disk sizes, grab the meta and storage devices
-        metadataDevices="`fdisk -l | grep '^Disk /dev/' | grep $metadataDiskSize | awk '{print $2}' | awk -F: '{print $1}' | sort | tr '\n' ' ' | sed 's|/dev/||g'`"
-        storageDevices="`fdisk -l | grep '^Disk /dev/' | grep $storageDiskSize | awk '{print $2}' | awk -F: '{print $1}' | sort | tr '\n' ' ' | sed 's|/dev/||g'`"
-    fi
+		else
+		# Based on the known disk sizes, grab the meta and storage devices
+		metadataDevices="`fdisk -l | grep '^Disk /dev/' | grep $metadataDiskSize | awk '{print $2}' | awk -F: '{print $1}' | sort | tr '\n' ' ' | sed 's|/dev/||g'`"
+		storageDevices="`fdisk -l | grep '^Disk /dev/' | grep $storageDiskSize | awk '{print $2}' | awk -F: '{print $1}' | sort | tr '\n' ' ' | sed 's|/dev/||g'`"
+	fi
 
-    if is_storagenode; then
-		mkdir -p $BEEGFS_STORAGE
-		setup_data_disks $BEEGFS_STORAGE "xfs" "$storageDevices" "md10"
-	fi
-	
-    if is_metadatanode; then
-		mkdir -p $BEEGFS_METADATA    
-		setup_data_disks $BEEGFS_METADATA "ext4" "$metadataDevices" "md20"
-	fi
-	
-    mount -a
-       functiontimer "setup_disks()"
+	mkdir -p $BEEGFS_STORAGE
+	setup_data_disks $BEEGFS_STORAGE "xfs" "$storageDevices" "md10"
+	mkdir -p $BEEGFS_METADATA    
+	setup_data_disks $BEEGFS_METADATA "ext4" "$metadataDevices" "md20"
+
+	mount -a
+
+	functiontimer "setup_disks()"
 
 } #-- end of setup_disks() --#
 
@@ -206,9 +192,9 @@ install_beegfs_repo()
 	wget -O /etc/yum.repos.d/beegfs-rhel7.repo https://www.beegfs.io/release/latest-stable/dists/beegfs-rhel7.repo
 
     #rpm --import http://www.beegfs.com/release/beegfs_2015.03/gpg/RPM-GPG-KEY-beegfs
-    rpm --import http://www.beegfs.com/release/beegfs_6/gpg/RPM-GPG-KEY-beegfs
+	rpm --import http://www.beegfs.com/release/beegfs_6/gpg/RPM-GPG-KEY-beegfs
 
-       functiontimer "install_beegfs_repo()"
+	functiontimer "install_beegfs_repo()"
 
 } #-- end of install_beegfs_repo() --#
 
