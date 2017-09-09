@@ -116,11 +116,10 @@
             }
         },
         "vnetName": {
-            "maxLength": 10,
             "type": "String",
-            "defaultValue": "vnethpc",            
+            "defaultValue": "vnethpc",
             "metadata": {
-                "description": "This is the VNET to which the beeGFS server will be deployed. Please specify the same VNET when creating other resources in your cluster."
+                "description": "This is the VNET to which all cluster resources will be deployed. Please specify this same VNET when creating other resources in your cluster."
             }
         }
     },

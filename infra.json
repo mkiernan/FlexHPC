@@ -173,11 +173,12 @@
 			}
 		},
 		"vnetName": {
-            "type": "String",
-            "metadata": {
-                "description": "This is the VNET to which all cluster resources will be deployed. Please specify this same VNET when creating other resources in your cluster."
-            }
-        }
+			"type": "String",
+			"defaultValue": "vnethpc",
+			"metadata": {
+				"description": "This is the VNET to which all cluster resources will be deployed. Please specify this same VNET when creating other resources in your cluster."
+			}
+		}
 	},
 	"variables": {
 		"namingInfix": "[toLower(substring(concat(parameters('HeadNodeName'), uniqueString(resourceGroup().id)), 0, 9))]",
