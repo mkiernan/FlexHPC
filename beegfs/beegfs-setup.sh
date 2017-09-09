@@ -4,10 +4,11 @@
 # BeeGFS Scaleset Installation Script
 #
 # Tested On:
-# Ubuntu 16.04-LTS, 16.10
+# CentOS 7.2
 #
 # Not yet on: 
 # CentOS HPC:6.5, 6.8, HPC:7.1, 7.2, 7.3
+# Ubuntu 16.04-LTS, 16.10
 # RedHat 7.3
 # SUSE SLES-HPC:12-SP1
 #
@@ -51,6 +52,8 @@ OSVERS=`echo $VMIMAGE| awk -F ":" '{print $4}'`
 SHARE_HOME=/share/home
 SHARE_SCRATCH=/share/beegfs
 
+# BeeGFS Management Node
+MGMT_HOSTNAME="headnode"
 # BeeGFS 
 BEEGFS_SBIN=/opt/beegfs/sbin
 BEEGFS_METADATA=/data/meta
@@ -182,65 +185,29 @@ setup_disks()
 
 } #-- end of setup_disks() --#
 
-install_beegfs_repo()
-{
-    # Install BeeGFS repo
-    #wget -O beegfs-rhel7.repo http://www.beegfs.com/release/beegfs_2015.03/dists/beegfs-rhel7.repo
-    #wget -O beegfs-rhel7.repo http://www.beegfs.com/release/beegfs_6/dists/beegfs-rhel7.repo
-    #mv beegfs-rhel7.repo /etc/yum.repos.d/beegfs.repo
-
-	wget -O /etc/yum.repos.d/beegfs-rhel7.repo https://www.beegfs.io/release/latest-stable/dists/beegfs-rhel7.repo
-
-    #rpm --import http://www.beegfs.com/release/beegfs_2015.03/gpg/RPM-GPG-KEY-beegfs
-	rpm --import http://www.beegfs.com/release/beegfs_6/gpg/RPM-GPG-KEY-beegfs
-
-	functiontimer "install_beegfs_repo()"
-
-} #-- end of install_beegfs_repo() --#
-
 install_beegfs()
 {
-       
+	# Install BeeGFS repo
+	wget -O /etc/yum.repos.d/beegfs-rhel7.repo https://www.beegfs.io/release/latest-stable/dists/beegfs-rhel7.repo
+	rpm --import http://www.beegfs.com/release/beegfs_6/gpg/RPM-GPG-KEY-beegfs
+
 	# setup metata data
-		yum install -y beegfs-meta
+	yum install -y beegfs-meta
 
-		$BEEGFS_SBIN/beegfs-setup-meta -p $BEEGFS_METADATA -m $MGMT_HOSTNAME -f
-
-		#sed -i 's|^storeMetaDirectory.*|storeMetaDirectory = '$BEEGFS_METADATA'|g' /etc/beegfs/beegfs-meta.conf
-		#sed -i 's/^sysMgmtdHost.*/sysMgmtdHost = '$MGMT_HOSTNAME'/g' /etc/beegfs/beegfs-meta.conf
-
-		tune_meta
-
-		systemctl daemon-reload
-		systemctl enable beegfs-meta.service
+	$BEEGFS_SBIN/beegfs-setup-meta -p $BEEGFS_METADATA -m $MGMT_HOSTNAME -f
+	tune_meta
+	systemctl daemon-reload
+	systemctl enable beegfs-meta.service
 		
 	# setup storage
-		yum install -y beegfs-storage
+	yum install -y beegfs-storage
 
-		$BEEGFS_SBIN/beegfs-setup-storage -p $BEEGFS_STORAGE -m $MGMT_HOSTNAME
+	$BEEGFS_SBIN/beegfs-setup-storage -p $BEEGFS_STORAGE -m $MGMT_HOSTNAME
+	tune_storage
+	systemctl daemon-reload
+	systemctl enable beegfs-storage.service
 
-		#sed -i 's|^storeStorageDirectory.*|storeStorageDirectory = '$BEEGFS_STORAGE'|g' /etc/beegfs/beegfs-storage.conf
-		#sed -i 's/^sysMgmtdHost.*/sysMgmtdHost = '$MGMT_HOSTNAME'/g' /etc/beegfs/beegfs-storage.conf
-
-		tune_storage
-
-		systemctl daemon-reload
-		systemctl enable beegfs-storage.service
-
-	# setup management
-		yum install -y beegfs-mgmtd beegfs-helperd beegfs-utils beegfs-admon
-        
-		# Install management server and admon
-		mkdir -p $BEEGFS_MGMT
-		$BEEGFS_SBIN/beegfs-setup-mgmtd -p $BEEGFS_MGMT
-
-		#sed -i 's|^storeMgmtdDirectory.*|storeMgmtdDirectory = '$BEEGFS_MGMT'|g' /etc/beegfs/beegfs-mgmtd.conf
-		sed -i 's/^sysMgmtdHost.*/sysMgmtdHost = '$MGMT_HOSTNAME'/g' /etc/beegfs/beegfs-admon.conf
-		systemctl daemon-reload
-		systemctl enable beegfs-mgmtd.service
-		systemctl enable beegfs-admon.service
-
-       functiontimer "install_beegfs()"
+	functiontimer "install_beegfs()"
 
 } #-- end of install_beegfs() --#
 
@@ -345,7 +312,6 @@ install_pkgs
 setup_disks
 tune_tcp
 setup_domain
-install_beegfs_repo
 install_beegfs
 
 # Create marker file so we know we're configured

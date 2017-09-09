@@ -152,14 +152,6 @@
 				"description": "OS version to deploy for the headnode. Only deploy -HPC images on RDMA capable nodes."
 			}
 		},
-		"HeadNodeName": {
-			"maxLength": 10,
-			"type": "String",
-			"defaultValue": "headnode",
-			"metadata": {
-				"description": "String used as a base for naming resources. Must be 3-10 characters in length and globally unique across Azure. A hash is prepended to this string for some resources, and resource-specific information is appended."
-			}
-		},
 		"adminUsername": {
 			"type": "String",
 			"metadata": {
@@ -181,9 +173,8 @@
 		}
 	},
 	"variables": {
-		"namingInfix": "[toLower(substring(concat(parameters('HeadNodeName'), uniqueString(resourceGroup().id)), 0, 9))]",
-		"longNamingInfix": "[toLower(parameters('HeadNodeName'))]",
-		"HeadNodeName": "[variables('longNamingInfix')]",
+		"HeadNodeName": "headnode",
+		"namingInfix": "[toLower(substring(concat(variables('HeadNodeName'), uniqueString(resourceGroup().id)), 0, 9))]",
 		"HeadNodeIPConfigName": "[concat(variables('HeadNodeName'), 'ipconfig')]",
 		"HeadNodeNicName": "[concat(variables('HeadNodeName'), 'nic')]",
 		"addressPrefix": "10.0.0.0/16",

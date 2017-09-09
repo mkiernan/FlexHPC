@@ -135,6 +135,9 @@ setup_system_centosredhat()
 	ln -s /opt/intel/impi/5.1.3.181/intel64/bin/ /opt/intel/impi/5.1.3.181/bin
 	ln -s /opt/intel/impi/5.1.3.181/lib64/ /opt/intel/impi/5.1.3.181/lib
 
+	#--- Setup BeeGFS Management Node
+	setup_beegfs_mgmt_centos()
+
 	functiontimer "setup_system_centosredhat()"
 
 } #--- end of setup_system_centosredhat() ---#
@@ -373,6 +376,32 @@ EOF
 	functiontimer "setup_diskpack()"
 
 } #--- end of setup_diskpack() ---#
+
+#-- currently this is CentOS specific
+setup_beegfs_mgmt_centos()
+{
+	MGMT_HOSTNAME=`hostname`
+	# BeeGFS 
+	BEEGFS_SBIN=/opt/beegfs/sbin
+	BEEGFS_MGMT=/var/beegfs/mgmt
+
+	wget -O /etc/yum.repos.d/beegfs-rhel7.repo https://www.beegfs.io/release/latest-stable/dists/beegfs-rhel7.repo
+	rpm --import http://www.beegfs.com/release/beegfs_6/gpg/RPM-GPG-KEY-beegfs
+	yum install -y beegfs-mgmtd beegfs-helperd beegfs-utils beegfs-admon
+        
+	# Install management server and admon
+	mkdir -p $BEEGFS_MGMT
+	$BEEGFS_SBIN/beegfs-setup-mgmtd -p $BEEGFS_MGMT
+
+	#sed -i 's|^storeMgmtdDirectory.*|storeMgmtdDirectory = '$BEEGFS_MGMT'|g' /etc/beegfs/beegfs-mgmtd.conf
+	sed -i 's/^sysMgmtdHost.*/sysMgmtdHost = '$MGMT_HOSTNAME'/g' /etc/beegfs/beegfs-admon.conf
+	systemctl daemon-reload
+	systemctl enable beegfs-mgmtd.service
+	systemctl enable beegfs-admon.service
+
+	functiontimer "setup_beegfs_mgmt()"
+
+} #--- end of setup_beegfs_mgmt() ---#
 
 echo "##################################################"
 echo "############### Head Node Setup ##################"

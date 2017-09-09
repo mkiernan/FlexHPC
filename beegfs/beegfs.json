@@ -48,7 +48,7 @@
             "type": "int",
             "defaultValue": 2,
             "metadata": {
-                "description": "Number of beeGFS storage nodes."
+                "description": "Number of beeGFS storage nodes (combined metadata + storage on same node)."
             }
         },
         "metadataDiskSize": {
