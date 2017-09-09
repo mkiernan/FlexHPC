@@ -136,7 +136,7 @@
 		},
 		"image": {
 			"type": "string",
-			"defaultValue": "OpenLogic:CentOS-HPC:7.1",
+			"defaultValue": "OpenLogic:CentOS:7.2",
 			"allowedValues": [
 				"Canonical:UbuntuServer:16.04-LTS",
 				"Canonical:UbuntuServer:16.10",
@@ -149,7 +149,7 @@
 				"SUSE:SLES-HPC:12-SP1"
 			],
 			"metadata": {
-				"description": "OS version to deploy for the headnode."
+				"description": "OS version to deploy for the headnode. Only deploy -HPC images on RDMA capable nodes."
 			}
 		},
 		"HeadNodeName": {
@@ -175,18 +175,23 @@
 		"vnetName": {
             "type": "String",
             "metadata": {
-                "description": "This is the VNET to which all cluster resources will be deployed. Please specify the same VNET when creating other resources in your cluster."
+                "description": "This is the VNET to which all cluster resources will be deployed. Please specify this same VNET when creating other resources in your cluster."
             }
         }
 	},
 	"variables": {
 		"namingInfix": "[toLower(substring(concat(parameters('HeadNodeName'), uniqueString(resourceGroup().id)), 0, 9))]",
 		"longNamingInfix": "[toLower(parameters('HeadNodeName'))]",
-		"HeadNodeName": "[concat(variables('longNamingInfix'),'headnode')]",
+		"HeadNodeName": "[variables('longNamingInfix')]",
 		"HeadNodeIPConfigName": "[concat(variables('HeadNodeName'), 'ipconfig')]",
 		"HeadNodeNicName": "[concat(variables('HeadNodeName'), 'nic')]",
 		"addressPrefix": "10.0.0.0/16",
-		"subnetPrefix": "10.0.0.0/24",
+		"infrasubnetName": "Infra",
+		"infrasubnetPrefix": "10.0.0.0/24",
+		"computesubnetName": "Compute",
+		"computesubnetPrefix": "10.0.5.0/24",
+		"storagesubnetName": "Storage",
+		"storagesubnetPrefix": "10.0.10.0/24",
 		"virtualNetworkName": "[parameters('vnetName')]",
 		"subnetName": "[concat(variables('namingInfix'), 'subnet')]",
 		"vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
@@ -275,9 +280,21 @@
 				},
 				"subnets": [
 					{
-						"name": "[variables('subnetName')]",
+						"name": "[variables('infrasubnetName')]",
 						"properties": {
-							"addressPrefix": "[variables('subnetPrefix')]"
+							"addressPrefix": "[variables('infrasubnetPrefix')]"
+						}
+					},
+					{
+						"name": "[variables('computesubnetName')]",
+						"properties": {
+							"addressPrefix": "[variables('computesubnetPrefix')]"
+						}
+					},
+					{
+						"name": "[variables('storagesubnetName')]",
+						"properties": {
+							"addressPrefix": "[variables('storagesubnetPrefix')]"
 						}
 					}
 				]
@@ -331,7 +348,7 @@
 					"createOption": "Empty"
 				},
 				"accountType": "Standard_LRS",
-				"diskSizeGB": 1023
+				"diskSizeGB": 512
 			}
 		},
 		{
@@ -344,7 +361,7 @@
 					"createOption": "Empty"
 				},
 				"accountType": "Standard_LRS",
-				"diskSizeGB": 1023
+				"diskSizeGB": 512
 			}
 		},
 		{
