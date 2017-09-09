@@ -46,6 +46,7 @@ SHARE_ROOT=/share
 SHARE_DATA=/share/data
 SHARE_HOME=/share/home
 SHARE_CLUSTERMAP=/share/clustermap
+SHARE_SCRATCH=/share/beegfs
 #LOCAL_SCRATCH=/mnt/resource
 
 # Local filesystem to map shares to
@@ -387,17 +388,27 @@ setup_beegfs_mgmt_centos()
 
 	wget -O /etc/yum.repos.d/beegfs-rhel7.repo https://www.beegfs.io/release/latest-stable/dists/beegfs-rhel7.repo
 	rpm --import http://www.beegfs.com/release/beegfs_6/gpg/RPM-GPG-KEY-beegfs
-	yum install -y beegfs-mgmtd beegfs-helperd beegfs-utils beegfs-admon
+	yum install -y beegfs-mgmtd beegfs-helperd beegfs-utils beegfs-admon beegfs-utils beegfs-client
         
 	# Install management server and admon
 	mkdir -p $BEEGFS_MGMT
 	$BEEGFS_SBIN/beegfs-setup-mgmtd -p $BEEGFS_MGMT
-
-	#sed -i 's|^storeMgmtdDirectory.*|storeMgmtdDirectory = '$BEEGFS_MGMT'|g' /etc/beegfs/beegfs-mgmtd.conf
 	sed -i 's/^sysMgmtdHost.*/sysMgmtdHost = '$MGMT_HOSTNAME'/g' /etc/beegfs/beegfs-admon.conf
 	systemctl daemon-reload
 	systemctl enable beegfs-mgmtd.service
 	systemctl enable beegfs-admon.service
+
+	# setup client
+	$BEEGFS_SBIN/beegfs-setup-client -m $MGMT_HOSTNAME
+	# disable RDMA
+	sed -i 's/^connUseRDMA.*/connUseRDMA = false/g' /etc/beegfs/beegfs-client.conf
+	# increase the timeout of mount check to 30s
+	sed -i 's/^sysMountSanityCheckMS.*/sysMountSanityCheckMS = 30000/g' /etc/beegfs/beegfs-client.conf
+	echo "$SHARE_SCRATCH /etc/beegfs/beegfs-client.conf" > /etc/beegfs/beegfs-mounts.conf
+
+	systemctl daemon-reload
+	systemctl enable beegfs-helperd.service
+	systemctl enable beegfs-client.service
 
 	functiontimer "setup_beegfs_mgmt()"
 
