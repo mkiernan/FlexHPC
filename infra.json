@@ -1,0 +1,427 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01-preview/deploymentTemplate.json",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"vmSku": {
+			"defaultValue": "Standard_DS4",
+			"allowedValues": [
+				"Standard_DS1_v2",
+				"Standard_DS2_v2",
+				"Standard_DS3_v2",
+				"Standard_DS4_v2",
+				"Standard_DS5_v2",
+				"Standard_DS11_v2",
+				"Standard_DS12_v2",
+				"Standard_DS13_v2",
+				"Standard_DS14_v2",
+				"Standard_DS15_v2",
+				"Standard_DS2_v2_Promo",
+				"Standard_DS3_v2_Promo",
+				"Standard_DS4_v2_Promo",
+				"Standard_DS5_v2_Promo",
+				"Standard_DS11_v2_Promo",
+				"Standard_DS12_v2_Promo",
+				"Standard_DS13_v2_Promo",
+				"Standard_DS14_v2_Promo",
+				"Standard_F1s",
+				"Standard_F2s",
+				"Standard_F4s",
+				"Standard_F8s",
+				"Standard_F16s",
+				"Standard_A0",
+				"Standard_A1",
+				"Standard_A2",
+				"Standard_A3",
+				"Standard_A5",
+				"Standard_A4",
+				"Standard_A6",
+				"Standard_A7",
+				"Basic_A0",
+				"Basic_A1",
+				"Basic_A2",
+				"Basic_A3",
+				"Basic_A4",
+				"Standard_D1_v2",
+				"Standard_D2_v2",
+				"Standard_D3_v2",
+				"Standard_D4_v2",
+				"Standard_D5_v2",
+				"Standard_D11_v2",
+				"Standard_D12_v2",
+				"Standard_D13_v2",
+				"Standard_D14_v2",
+				"Standard_D15_v2",
+				"Standard_D2_v2_Promo",
+				"Standard_D3_v2_Promo",
+				"Standard_D4_v2_Promo",
+				"Standard_D5_v2_Promo",
+				"Standard_D11_v2_Promo",
+				"Standard_D12_v2_Promo",
+				"Standard_D13_v2_Promo",
+				"Standard_D14_v2_Promo",
+				"Standard_F1",
+				"Standard_F2",
+				"Standard_F4",
+				"Standard_F8",
+				"Standard_F16",
+				"Standard_A1_v2",
+				"Standard_A2m_v2",
+				"Standard_A2_v2",
+				"Standard_A4m_v2",
+				"Standard_A4_v2",
+				"Standard_A8m_v2",
+				"Standard_A8_v2",
+				"Standard_H8",
+				"Standard_H16",
+				"Standard_H8m",
+				"Standard_H16m",
+				"Standard_H16r",
+				"Standard_H16mr",
+				"Standard_D1",
+				"Standard_D2",
+				"Standard_D3",
+				"Standard_D4",
+				"Standard_D11",
+				"Standard_D12",
+				"Standard_D13",
+				"Standard_D14",
+				"Standard_NV6",
+				"Standard_NV12",
+				"Standard_NV24",
+				"Standard_DS1",
+				"Standard_DS2",
+				"Standard_DS3",
+				"Standard_DS4",
+				"Standard_DS11",
+				"Standard_DS12",
+				"Standard_DS13",
+				"Standard_DS14",
+				"Standard_NC6",
+				"Standard_NC12",
+				"Standard_NC24",
+				"Standard_NC24r",
+				"Standard_A8",
+				"Standard_A9",
+				"Standard_A10",
+				"Standard_A11",
+				"Standard_D2_v3",
+				"Standard_D4_v3",
+				"Standard_D8_v3",
+				"Standard_D16_v3",
+				"Standard_D32_v3",
+				"Standard_D64_v3",
+				"Standard_D2s_v3",
+				"Standard_D4s_v3",
+				"Standard_D8s_v3",
+				"Standard_D16s_v3",
+				"Standard_D32s_v3",
+				"Standard_D64s_v3",
+				"Standard_E2_v3",
+				"Standard_E4_v3",
+				"Standard_E8_v3",
+				"Standard_E16_v3",
+				"Standard_E32_v3",
+				"Standard_E64_v3",
+				"Standard_E2s_v3",
+				"Standard_E4s_v3",
+				"Standard_E8s_v3",
+				"Standard_E16s_v3",
+				"Standard_E32s_v3",
+				"Standard_E64s_v3"
+			],
+			"type": "String",
+			"metadata": {
+				"description": "Which machine type would you like to deploy to? Not all VMs are available in all regions"
+			}
+		},
+		"image": {
+			"type": "string",
+			"defaultValue": "OpenLogic:CentOS-HPC:7.1",
+			"allowedValues": [
+				"Canonical:UbuntuServer:16.04-LTS",
+				"Canonical:UbuntuServer:16.10",
+				"OpenLogic:CentOS-HPC:6.5",
+				"OpenLogic:CentOS:6.8",
+				"OpenLogic:CentOS-HPC:7.1",
+				"OpenLogic:CentOS:7.2",
+				"OpenLogic:CentOS:7.3",
+				"RedHat:RHEL:7.3",
+				"SUSE:SLES-HPC:12-SP1"
+			],
+			"metadata": {
+				"description": "OS version to deploy for the headnode."
+			}
+		},
+		"HeadNodeName": {
+			"maxLength": 10,
+			"type": "String",
+			"metadata": {
+				"description": "String used as a base for naming resources. Must be 3-10 characters in length and globally unique across Azure. A hash is prepended to this string for some resources, and resource-specific information is appended."
+			}
+		},
+		"adminUsername": {
+			"type": "String",
+			"metadata": {
+				"description": "Admin username on all VMs."
+			}
+		},
+		"adminPassword": {
+			"type": "SecureString",
+			"metadata": {
+				"description": "Admin password on all VMs."
+			}
+		},
+		"VNETName": {
+            "maxLength": 10,
+            "type": "String",
+            "metadata": {
+                "description": "This is the VNET to which all cluster resources will be deployed. Please specify the same VNET when creating other resources in your cluster."
+            }
+        }
+	},
+	"variables": {
+		"namingInfix": "[toLower(substring(concat(parameters('HeadNodeName'), uniqueString(resourceGroup().id)), 0, 9))]",
+		"longNamingInfix": "[toLower(parameters('HeadNodeName'))]",
+		"HeadNodeName": "[concat(variables('longNamingInfix'),'headnode')]",
+		"HeadNodeIPConfigName": "[concat(variables('HeadNodeName'), 'ipconfig')]",
+		"HeadNodeNicName": "[concat(variables('HeadNodeName'), 'nic')]",
+		"addressPrefix": "10.0.0.0/16",
+		"subnetPrefix": "10.0.0.0/24",
+		"virtualNetworkName": "parameters('VNETName')",
+		"subnetName": "[concat(variables('namingInfix'), 'subnet')]",
+		"vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
+		"subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+		"publicIPAddressName": "[concat(variables('namingInfix'), 'pip')]",
+		"scriptUrl": "https://raw.githubusercontent.com/mkiernan/FlexHPC/master/",
+		"imageReference_Canonical:UbuntuServer:16.04-LTS": {
+			"publisher": "Canonical",
+			"offer": "UbuntuServer",
+			"sku": "16.04-LTS",
+			"version": "latest"
+		},
+		"imageReference_Canonical:UbuntuServer:16.10": {
+			"publisher": "Canonical",
+			"offer": "UbuntuServer",
+			"sku": "16.10",
+			"version": "latest"
+		},
+		"imageReference_OpenLogic:CentOS-HPC:6.5": {
+			"publisher": "OpenLogic",
+			"offer": "CentOS-HPC",
+			"sku": "6.5",
+			"version": "latest"
+		},
+		"imageReference_OpenLogic:CentOS:6.8": {
+			"publisher": "OpenLogic",
+			"offer": "CentOS",
+			"sku": "6.8",
+			"version": "latest"
+		},
+		"imageReference_OpenLogic:CentOS-HPC:7.1": {
+			"publisher": "OpenLogic",
+			"offer": "CentOS-HPC",
+			"sku": "7.1",
+			"version": "latest"
+		},
+		"imageReference_OpenLogic:CentOS:7.2": {
+			"publisher": "OpenLogic",
+			"offer": "CentOS",
+			"sku": "7.2",
+			"version": "latest"
+		},
+		"imageReference_OpenLogic:CentOS:7.3": {
+			"publisher": "OpenLogic",
+			"offer": "CentOS",
+			"sku": "7.3",
+			"version": "latest"
+		},
+		"imageReference_RedHat:RHEL:7.3": {
+			"publisher": "RedHat",
+			"offer": "RHEL",
+			"sku": "7.3",
+			"version": "latest"
+		},
+		"imageReference_SUSE:SLES-HPC:12-SP1": {
+			"publisher": "SUSE",
+			"offer": "SLES-HPC",
+			"sku": "12-SP1",
+			"version": "latest"
+		},
+		"imageReference": "[variables(concat('imageReference_',parameters('image')))]",
+		"vmScripts": {
+			"scriptsToDownload": [
+				"[concat(variables('scriptUrl'), 'cn-setup.sh')]",
+				"[concat(variables('scriptUrl'), 'hn-setup.sh')]",
+				"[concat(variables('scriptUrl'), 'pingpong.sh')]",
+				"[concat(variables('scriptUrl'), 'clusRun.sh')]"
+			],
+			"commandToExecute": ""
+		},
+		"computeApiVersion": "2016-04-30-preview",
+		"networkApiVersion": "2016-06-01",
+		"storageApiVersion": "2015-06-15"
+	},
+	"resources": [
+		{
+			"type": "Microsoft.Network/virtualNetworks",
+			"name": "[variables('virtualNetworkName')]",
+			"apiVersion": "[variables('networkApiVersion')]",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"addressSpace": {
+					"addressPrefixes": [
+						"[variables('addressPrefix')]"
+					]
+				},
+				"subnets": [
+					{
+						"name": "[variables('subnetName')]",
+						"properties": {
+							"addressPrefix": "[variables('subnetPrefix')]"
+						}
+					}
+				]
+			}
+		},
+		{
+			"type": "Microsoft.Network/publicIPAddresses",
+			"name": "[variables('publicIPAddressName')]",
+			"apiVersion": "[variables('networkApiVersion')]",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"publicIPAllocationMethod": "Static",
+				"dnsSettings": {
+					"domainNameLabel": "[variables('longNamingInfix')]"
+				}
+			}
+		},
+		{
+			"type": "Microsoft.Network/networkInterfaces",
+			"name": "[variables('HeadNodeNicName')]",
+			"apiVersion": "[variables('networkApiVersion')]",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"ipConfigurations": [
+					{
+						"name": "[variables('HeadNodeIPConfigName')]",
+						"properties": {
+							"privateIPAllocationMethod": "Dynamic",
+							"publicIPAddress": {
+								"id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+							},
+							"subnet": {
+								"id": "[variables('subnetRef')]"
+							}
+						}
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
+				"[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+			]
+		},
+		{
+			"type": "Microsoft.Compute/disks",
+			"name": "disk0",
+			"apiVersion": "2016-04-30-preview",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"creationData": {
+					"createOption": "Empty"
+				},
+				"accountType": "Standard_LRS",
+				"diskSizeGB": 1023
+			}
+		},
+		{
+			"type": "Microsoft.Compute/disks",
+			"name": "disk1",
+			"apiVersion": "2016-04-30-preview",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"creationData": {
+					"createOption": "Empty"
+				},
+				"accountType": "Standard_LRS",
+				"diskSizeGB": 1023
+			}
+		},
+		{
+			"type": "Microsoft.Compute/virtualMachines",
+			"name": "[variables('HeadNodeName')]",
+			"apiVersion": "[variables('computeApiVersion')]",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"hardwareProfile": {
+					"vmSize": "[parameters('vmSku')]"
+				},
+				"osProfile": {
+					"computerName": "[variables('HeadNodeName')]",
+					"adminUsername": "[parameters('adminUsername')]",
+					"adminPassword": "[parameters('adminPassword')]"
+				},
+				"storageProfile": {
+					"imageReference": "[variables('imageReference')]",
+					"osDisk": {
+						"caching": "ReadWrite",
+						"createOption": "FromImage"
+					},
+					"dataDisks": [
+						{
+							"lun": 0,
+							"createOption": "Attach",
+							"caching": "ReadWrite",
+							"managedDisk": {
+								"id": "[resourceId('Microsoft.Compute/disks', 'disk0')]"
+							}
+						},
+						{
+							"lun": 1,
+							"createOption": "Attach",
+							"caching": "ReadWrite",
+							"managedDisk": {
+								"id": "[resourceId('Microsoft.Compute/disks', 'disk1')]"
+							}
+						}
+					]
+				},
+				"networkProfile": {
+					"networkInterfaces": [
+						{
+							"id": "[resourceId('Microsoft.Network/networkInterfaces',variables('HeadNodeNicName'))]"
+						}
+					]
+				}
+			},
+			"resources": [
+				{
+					"type": "extensions",
+					"name": "masterExtension",
+					"apiVersion": "[variables('storageApiVersion')]",
+					"location": "[resourceGroup().location]",
+					"tags": {
+						"displayName": "masterExtension"
+					},
+					"properties": {
+						"publisher": "Microsoft.OSTCExtensions",
+						"type": "CustomScriptForLinux",
+						"typeHandlerVersion": "1.5",
+						"autoUpgradeMinorVersion": true,
+						"settings": {
+							"fileUris": "[variables('vmScripts').scriptsToDownload]",
+							"commandToExecute": "[concat('bash ', 'hn-setup.sh ',parameters('adminUsername'),' ',parameters('image')) ]",
+							"timestamp": 4
+						}
+					},
+					"dependsOn": [
+						"[concat('Microsoft.Compute/virtualMachines/', variables('HeadNodeName'))]"
+					]
+				}
+			],
+			"dependsOn": [
+				"[concat('Microsoft.Network/networkInterfaces/', variables('HeadNodeNicName'))]"
+			]
+		}
+	]
+}
