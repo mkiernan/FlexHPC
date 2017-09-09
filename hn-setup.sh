@@ -136,7 +136,7 @@ setup_system_centosredhat()
 	ln -s /opt/intel/impi/5.1.3.181/lib64/ /opt/intel/impi/5.1.3.181/lib
 
 	#--- Setup BeeGFS Management Node
-	setup_beegfs_mgmt_centos()
+	setup_beegfs_mgmt_centos
 
 	functiontimer "setup_system_centosredhat()"
 
