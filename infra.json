@@ -155,6 +155,7 @@
 		"HeadNodeName": {
 			"maxLength": 10,
 			"type": "String",
+			"defaultValue": "headnode",
 			"metadata": {
 				"description": "String used as a base for naming resources. Must be 3-10 characters in length and globally unique across Azure. A hash is prepended to this string for some resources, and resource-specific information is appended."
 			}
@@ -290,7 +291,7 @@
 			"properties": {
 				"publicIPAllocationMethod": "Static",
 				"dnsSettings": {
-					"domainNameLabel": "[variables('longNamingInfix')]"
+					"domainNameLabel": "[variables('namingInfix')]"
 				}
 			}
 		},
