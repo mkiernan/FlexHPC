@@ -28,17 +28,17 @@
         },
         "image": {
             "type": "string",
-            "defaultValue": "OpenLogic:CentOS-HPC:7.1",
+            "defaultValue": "OpenLogic:CentOS:7.2",
             "allowedValues": [
                 "Canonical:UbuntuServer:16.04-LTS",
                 "Canonical:UbuntuServer:16.10",
-                "OpenLogic:CentOS-HPC:6.5",
+                "OpenLogic:CentOS:6.5",
                 "OpenLogic:CentOS:6.8",
-                "OpenLogic:CentOS-HPC:7.1",
+                "OpenLogic:CentOS:7.1",
                 "OpenLogic:CentOS:7.2",
                 "OpenLogic:CentOS:7.3",
                 "RedHat:RHEL:7.3",
-                "SUSE:SLES-HPC:12-SP1"
+                "SUSE:SLES:12-SP1"
             ],
             "metadata": {
                 "description": "OS version to deploy on Storage Nodes."
@@ -115,17 +115,18 @@
                 "description": "If you care about performance: Premium_LRS is **STRONGLY** recommended."
             }
         },
-        "VNETName": {
+        "vnetName": {
             "maxLength": 10,
             "type": "String",
+            "defaultVault": "vnethpc",            
             "metadata": {
                 "description": "This is the VNET to which the beeGFS server will be deployed. Please specify the same VNET when creating other resources in your cluster."
             }
         }
     },
     "variables": {
-        "virtualNetworkName": "[parameters('VNETName')]",
-        "subnetName": "storageSubnet",
+        "virtualNetworkName": "[parameters('vnetName')]",
+        "subnetName": "StorageSubnet",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
         "scriptUrl": "https://raw.githubusercontent.com/mkiernan/FlexHPC/beegfs/",
