@@ -31,15 +31,19 @@ This template deploys a complete cluster composed of a head node + nfs server (c
 ## 2. Modular Step-by-Step Deployment 
 This section allows you to deploy the cluster infrastructure step-by-step. You will need to deploy the components of your infrastructure into the same VNET in order for them to connect to each other. 
 
-Example usage of this is so that you can setup a "permanent" NFS server & Head node with your application software and data stored safely, and then tear-up and down compute nodes (Fat Nodes & Scale Sets) as you require. 
+Example usage of this is so that you can setup a "permanent" Head node and NFS AND/OR BeeGFS Server with your application software and data stored safely, and then tear-up and down compute nodes (Fat Nodes & Scale Sets) as you require. 
 
 ***
 
 ### 2a. [Mandatory] Create the Network Infrastructure & Head Node
 
-TBD
-This template will create the main VNET & Subnet for the cluster - deploy this template first. 
+This template will create the main VNET & Subnets for the cluster - deploy this template first. 
 You can treat this system purely as a standalone Head/Master/JumpBox node, or as a combined NFS server & Head/MasterJumpBox node.
+<br><br>
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmkiernan%2FFlexHPC%2Fmaster%2F
+infra.json" target="_blank">
+    <img src="http://azuredeploy.net/deploybutton.png"/>
+</a>
 
 ### 2b. [Optional] Deploy a Standalone Linux NFS Server 
 
