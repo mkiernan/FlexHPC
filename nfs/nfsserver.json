@@ -217,7 +217,7 @@
         "subnetName": "StorageSubnet",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
-        "scriptUrl": "https://raw.githubusercontent.com/mkiernan/FlexHPC/master/beegfs/",
+        "scriptUrl": "https://raw.githubusercontent.com/mkiernan/FlexHPC/master/nfs",
         "StorageMap": {
             "P10": {
                 "size": 128
@@ -442,7 +442,8 @@
                     "storageAccountType": "[parameters('storageAccountType')]"
                 },
                 "createOption": "Empty"
-            },            ,
+            },
+            ,
             {
                 "lun": "[add(variables('numStorageDisks'), 16)]",
                 "caching": "ReadWrite",
