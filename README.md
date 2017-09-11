@@ -17,6 +17,9 @@ If you find a problem, please report it <a href="https://github.com/mkiernan/Fle
 
 ***
 ## 1. Deploy a Complete Cluster with Head Node & NFS Server. 
+
+*** Under Maintenance DO NOT USE - 9/9/2017 ***
+
 This template deploys a complete cluster composed of a head node + nfs server (combined on the same VM), and a cluster of a selectable number of nodes (1-100), built as a scale-set. 
 <br><br>
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmkiernan%2FFlexHPC%2Fmaster%2Fazuredeploy.json" target="_blank">
@@ -55,7 +58,7 @@ Standalone Linux NFS Server
 
 ### 2c. [Optional] Deploy a Standalone BeeGFS Storage Cluster
 
-This template deploys a BeeGFS Storage Cluster with mixed data + metadata capability on each node. Number of storage/metadata nodes are configurable, as is the size and number of disks to attach. Premium_LRS storage is recommended. 
+This template deploys a BeeGFS Storage Cluster built using a VM ScaleSet with mixed data + metadata capability on each node. Number of storage/metadata disks and their sizes are configurable. Premium_LRS storage is recommended. 
 <br><br>
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmkiernan%2FFlexHPC%2Fmaster%2Fbeegfs%2Fbeegfs.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>

@@ -1,7 +1,7 @@
 #!/bin/bash
 ################################################################################
 #
-# Head-Node Installation Script
+# Flexible NFS Server Installation Script
 #
 # Tested On:
 # CentOS HPC:6.5, 6.8, HPC:7.1, 7.2, 7.3
@@ -19,9 +19,9 @@ if [[ $(id -u) -ne 0 ]] ; then
 fi
 
 # Passed in user created by waagent
-HPC_ADMIN=$1
-HPC_GROUP=$HPC_ADMIN
-HPC_GID=1000
+NFS_ADMIN=$1
+NFS_GROUP=$NFS_ADMIN
+NFS_GID=1000
 
 # Linux distro detection remains a can of worms, just pass it in here:
 VMIMAGE=$2 
@@ -45,19 +45,17 @@ OSVERS=`echo $VMIMAGE| awk -F ":" '{print $4}'`
 SHARE_ROOT=/share
 SHARE_DATA=/share/data
 SHARE_HOME=/share/home
-SHARE_CLUSTERMAP=/share/clustermap
 SHARE_SCRATCH=/share/scratch
 #LOCAL_SCRATCH=/mnt/resource
 
 # Local filesystem to map shares to
 DATAFS=/data
 #SCRATCHFS=/scratch_local
-CLUSTERMAPFS=/clustermap
 
 IP=`ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'`
 localip=`echo $IP | cut --delimiter='.' -f -3`
 
-echo User is: $HPC_ADMIN
+echo User is: $NFS_ADMIN
 
 SECONDS=0 #-- use builtin shell var to record function times
 WALLTIME=0 #-- record wall time of script
@@ -75,14 +73,11 @@ setup_shares()
 	mkdir -p $SHARE_HOME
 #	mkdir -p $SCRATCHFS
 	mkdir -p $SHARE_SCRATCH
-	mkdir -p $SHARE_CLUSTERMAP
 	chmod -R 777 $SHARE_HOME
 	chmod -R 777 $SHARE_DATA
 #	chmod -R 777 $SCRATCHFS
-	chmod -R 777 $SHARE_CLUSTERMAP
 	echo "$SHARE_DATA $localip.*(rw,sync,no_root_squash,no_all_squash,no_subtree_check)" | tee -a /etc/exports
 	echo "$SHARE_HOME $localip.*(rw,sync,no_root_squash,no_all_squash,no_subtree_check)" | tee -a /etc/exports
-	echo "$SHARE_CLUSTERMAP $localip.*(rw,sync,no_root_squash,no_all_squash,no_subtree_check)" | tee -a /etc/exports
 	exportfs -a
 	functiontimer "setup_shares()"
 
@@ -235,43 +230,43 @@ setup_user()
         # Add User + Group 
 	# waagent takes care of the user and group; except on SLES for some reason we still need to groupadd
 	# will fail harmlessly on all but SLES
-	groupadd -g $HPC_GID $HPC_GROUP
-#	useradd -c "HPC User" -g $HPC_GROUP -m -d $SHARE_HOME/$HPC_ADMIN -s /bin/bash -u $HPC_UID $HPC_ADMIN
+	groupadd -g $NFS_GID $NFS_GROUP
+#	useradd -c "HPC User" -g $NFS_GROUP -m -d $SHARE_HOME/$NFS_ADMIN -s /bin/bash -u $NFS_UID $NFS_ADMIN
 
 	# Undo the HOME setup done by waagent ossetup -> move it to NFS share
-	#usermod -m -d $SHARE_HOME/$HPC_ADMIN $HPC_ADMIN
+	#usermod -m -d $SHARE_HOME/$NFS_ADMIN $NFS_ADMIN
 	# automount will pick this up at the /share/home location and map it back to /home
 	# purpose of this is to have plenty of space in the homedir and keep it off the os disk. 
-	mv /home/$HPC_ADMIN $SHARE_HOME
-	usermod -d $SHARE_HOME/$HPC_ADMIN $HPC_ADMIN
+	mv /home/$NFS_ADMIN $SHARE_HOME
+	usermod -d $SHARE_HOME/$NFS_ADMIN $NFS_ADMIN
 
 	# Don't require password for HPC user sudo
-	echo "$HPC_ADMIN ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+	echo "$NFS_ADMIN ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 	# Disable tty requirement for sudo
 	sed -i 's/^Defaults[ ]*requiretty/# Defaults requiretty/g' /etc/sudoers
 
-	mkdir -p $SHARE_HOME/$HPC_ADMIN/.ssh
+	mkdir -p $SHARE_HOME/$NFS_ADMIN/.ssh
 
 	# Configure public key auth for the HPC user
-	#ssh-keygen -t rsa -f $SHARE_HOME/$HPC_ADMIN/.ssh/id_rsa -q -P ""
-	ssh-keygen -t rsa -f $SHARE_HOME/$HPC_ADMIN/.ssh/id_rsa -q -N ""
-	cat $SHARE_HOME/$HPC_ADMIN/.ssh/id_rsa.pub >> $SHARE_HOME/$HPC_ADMIN/.ssh/authorized_keys
+	#ssh-keygen -t rsa -f $SHARE_HOME/$NFS_ADMIN/.ssh/id_rsa -q -P ""
+	ssh-keygen -t rsa -f $SHARE_HOME/$NFS_ADMIN/.ssh/id_rsa -q -N ""
+	cat $SHARE_HOME/$NFS_ADMIN/.ssh/id_rsa.pub >> $SHARE_HOME/$NFS_ADMIN/.ssh/authorized_keys
 
-	echo "Host *" > $SHARE_HOME/$HPC_ADMIN/.ssh/config
-	echo "StrictHostKeyChecking no" >> $SHARE_HOME/$HPC_ADMIN/.ssh/config
-# 	echo "UserKnownHostsFile /dev/null" >> $SHARE_HOME/$HPC_ADMIN/.ssh/config
-# 	echo "PasswordAuthentication no" >> $SHARE_HOME/$HPC_ADMIN/.ssh/config
+	echo "Host *" > $SHARE_HOME/$NFS_ADMIN/.ssh/config
+	echo "StrictHostKeyChecking no" >> $SHARE_HOME/$NFS_ADMIN/.ssh/config
+# 	echo "UserKnownHostsFile /dev/null" >> $SHARE_HOME/$NFS_ADMIN/.ssh/config
+# 	echo "PasswordAuthentication no" >> $SHARE_HOME/$NFS_ADMIN/.ssh/config
 
 	# Fix .ssh folder ownership
-	chown -R $HPC_ADMIN:$HPC_GROUP $SHARE_HOME/$HPC_ADMIN
+	chown -R $NFS_ADMIN:$NFS_GROUP $SHARE_HOME/$NFS_ADMIN
 
 	# Fix permissions
-	chmod 700 $SHARE_HOME/$HPC_ADMIN/.ssh
-	chmod 644 $SHARE_HOME/$HPC_ADMIN/.ssh/config
-	chmod 644 $SHARE_HOME/$HPC_ADMIN/.ssh/authorized_keys
-	chmod 600 $SHARE_HOME/$HPC_ADMIN/.ssh/id_rsa
-	chmod 644 $SHARE_HOME/$HPC_ADMIN/.ssh/id_rsa.pub
+	chmod 700 $SHARE_HOME/$NFS_ADMIN/.ssh
+	chmod 644 $SHARE_HOME/$NFS_ADMIN/.ssh/config
+	chmod 644 $SHARE_HOME/$NFS_ADMIN/.ssh/authorized_keys
+	chmod 600 $SHARE_HOME/$NFS_ADMIN/.ssh/id_rsa
+	chmod 644 $SHARE_HOME/$NFS_ADMIN/.ssh/id_rsa.pub
 
 	functiontimer "setup_user()"
 
@@ -279,43 +274,32 @@ setup_user()
 
 setup_utilities()
 {
-	mkdir -p $SHARE_CLUSTERMAP/hosts
-	chmod 755 $SHARE_CLUSTERMAP/hosts
-	mkdir -p $SHARE_HOME/$HPC_ADMIN/bin
-	chown $HPC_ADMIN:$HPC_GROUP $SHARE_HOME/$HPC_ADMIN/bin
-	#mkdir -p $SHARE_HOME/$HPC_ADMIN/deploy
-	#chmod 755 $SHARE_HOME/$HPC_ADMIN/deploy
-	#chown $HPC_ADMIN:$HPC_GROUP $SHARE_HOME/$HPC_ADMIN/deploy
-	#cp hn-setup.sh cn-setup.sh $SHARE_HOME/$HPC_ADMIN/deploy
-	cp clusRun.sh pingpong.sh $SHARE_HOME/$HPC_ADMIN/bin
-	chmod 755 $SHARE_HOME/$HPC_ADMIN/bin/*.sh
+	mkdir -p $SHARE_HOME/$NFS_ADMIN/bin
+	chown $NFS_ADMIN:$NFS_GROUP $SHARE_HOME/$NFS_ADMIN/bin
+	#mkdir -p $SHARE_HOME/$NFS_ADMIN/deploy
+	#chmod 755 $SHARE_HOME/$NFS_ADMIN/deploy
+	#chown $NFS_ADMIN:$NFS_GROUP $SHARE_HOME/$NFS_ADMIN/deploy
+	#cp hn-setup.sh cn-setup.sh $SHARE_HOME/$NFS_ADMIN/deploy
+	cp clusRun.sh pingpong.sh $SHARE_HOME/$NFS_ADMIN/bin
+	chmod 755 $SHARE_HOME/$NFS_ADMIN/bin/*.sh
 
-	nmap -sn $localip.* | grep $localip. | awk '{print $5}' > $SHARE_HOME/$HPC_ADMIN/bin/nodeips.txt
+	nmap -sn $localip.* | grep $localip. | awk '{print $5}' > $SHARE_HOME/$NFS_ADMIN/bin/nodeips.txt
 	myhost=`hostname -i`
-	sed -i '/\<'$myhost'\>/d' $SHARE_HOME/$HPC_ADMIN/bin/nodeips.txt
-	sed -i '/\<10.0.0.1\>/d' $SHARE_HOME/$HPC_ADMIN/bin/nodeips.txt
+	sed -i '/\<'$myhost'\>/d' $SHARE_HOME/$NFS_ADMIN/bin/nodeips.txt
+	sed -i '/\<10.0.0.1\>/d' $SHARE_HOME/$NFS_ADMIN/bin/nodeips.txt
 #
 # Problem to record scale set node names since the nodes are not up yet. 
 # Workaround to have each scale set node create a file with it's hostname in /clustermap/hosts directory. 
 # See touch statement in cn-setup.sh. clusRun.sh updated accordingly. 
 # This approach has the advantage that it's easy to add scale set nodes to the config also.
 #
-#	for NAME in `cat $SHARE_HOME/$HPC_ADMIN/bin/nodeips.txt`; do sudo -u $HPC_ADMIN -s ssh -o ConnectTimeout=2 $HPC_ADMIN@$NAME 'hostname' >> $SHARE_HOME/$HPC_ADMIN/bin/nodenames.txt;done
-#	NAMES=`ls $SHARE_HOME/$HPC_ADMIN/hosts`
-#	for NAME in $NAMES; do echo $NAME >> $SHARE_HOME/$HPC_ADMIN/bin/nodenames.txt; done
+#	for NAME in `cat $SHARE_HOME/$NFS_ADMIN/bin/nodeips.txt`; do sudo -u $NFS_ADMIN -s ssh -o ConnectTimeout=2 $NFS_ADMIN@$NAME 'hostname' >> $SHARE_HOME/$NFS_ADMIN/bin/nodenames.txt;done
+#	NAMES=`ls $SHARE_HOME/$NFS_ADMIN/hosts`
+#	for NAME in $NAMES; do echo $NAME >> $SHARE_HOME/$NFS_ADMIN/bin/nodenames.txt; done
 
 	functiontimer "setup_utilities()"
 
 } #--- end of setup_utilities() ---#
-
-#
-# For later, will use environment modules to load user app environments
-#
-setup_environment_modules()
-{
-	echo "source /etc/profile.d/modules.sh" >> $SHARE_HOME/$HPC_ADMIN/.bashrc
-	functiontimer "setup_environment_modules()"
-}
 
 setup_diskpack()
 {
@@ -387,54 +371,18 @@ EOF
 
 } #--- end of setup_diskpack() ---#
 
-#-- currently this is CentOS specific
-setup_beegfs_mgmt_centos()
-{
-	MGMT_HOSTNAME=`hostname`
-	# BeeGFS 
-	BEEGFS_SBIN=/opt/beegfs/sbin
-	BEEGFS_MGMT=/var/beegfs/mgmt
-
-	wget -O /etc/yum.repos.d/beegfs-rhel7.repo https://www.beegfs.io/release/latest-stable/dists/beegfs-rhel7.repo
-	rpm --import http://www.beegfs.com/release/beegfs_6/gpg/RPM-GPG-KEY-beegfs
-	yum install -y beegfs-mgmtd beegfs-helperd beegfs-utils beegfs-admon beegfs-utils beegfs-client
-        
-	# Install management server and admon
-	mkdir -p $BEEGFS_MGMT
-	$BEEGFS_SBIN/beegfs-setup-mgmtd -p $BEEGFS_MGMT
-	sed -i 's/^sysMgmtdHost.*/sysMgmtdHost = '$MGMT_HOSTNAME'/g' /etc/beegfs/beegfs-admon.conf
-	systemctl daemon-reload
-	systemctl enable beegfs-mgmtd.service
-	systemctl enable beegfs-admon.service
-
-	# setup client
-	$BEEGFS_SBIN/beegfs-setup-client -m $MGMT_HOSTNAME
-	# disable RDMA
-	sed -i 's/^connUseRDMA.*/connUseRDMA = false/g' /etc/beegfs/beegfs-client.conf
-	# increase the timeout of mount check to 30s
-	sed -i 's/^sysMountSanityCheckMS.*/sysMountSanityCheckMS = 30000/g' /etc/beegfs/beegfs-client.conf
-	echo "$SHARE_SCRATCH /etc/beegfs/beegfs-client.conf" > /etc/beegfs/beegfs-mounts.conf
-
-	systemctl daemon-reload
-	systemctl enable beegfs-helperd.service
-	systemctl enable beegfs-client.service
-
-	functiontimer "setup_beegfs_mgmt()"
-
-} #--- end of setup_beegfs_mgmt() ---#
-
 echo "##################################################"
 echo "############### Head Node Setup ##################"
 echo "##################################################"
 #comment out the password locks when testing. 
-passwd -l $HPC_ADMIN #-- lock account to prevent conflicts during install
+passwd -l $NFS_ADMIN #-- lock account to prevent conflicts during install
 echo "Deploying $PUBLISHER, $OFFER, $SKU....."
 setup_system
 setup_diskpack
 setup_shares
 setup_user
 setup_utilities
-passwd -u $HPC_ADMIN #-- unlock account
+passwd -u $NFS_ADMIN #-- unlock account
 #reboot #--- not really necessary, just to be 100% sure storage devices persist before users put data here. 
 echo "Script ran for $WALLTIME seconds."
 #chmod +x custom_extras.sh 

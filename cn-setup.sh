@@ -48,6 +48,7 @@ IPHEADNODE=10.0.0.4
 SHARE_DATA="$IPHEADNODE:/share/data"
 SHARE_HOME="$IPHEADNODE:/share/home"
 CLUSTERMAP="$IPHEADNODE:/share/clustermap"
+SHARE_SCRATCH="/share/beegfs"
 LOCAL_SCRATCH=/mnt/resource
 
 # Local filesystem to map shares to
@@ -107,6 +108,9 @@ setup_system_centosredhat()
         yum install -y -q environment-modules
 	yum install -y -q openmpi-bin openmpi-common openmpi-dev openmpi-doc
         yum install -y -q gcc g++ kernel-devel
+
+	#-- Setup BeeGFS Client whether we will use it or not
+	install_beegfs_client_centos
 
 	functiontimer "setup_system_centosredhat()"
 
@@ -292,6 +296,29 @@ setup_nfs_client()
 
 } #--- end of setup_nfs_client() ---#
 
+install_beegfs_client_centos()
+{
+        # Install BeeGFS repo
+        wget -O /etc/yum.repos.d/beegfs-rhel7.repo https://www.beegfs.io/release/latest-stable/dists/beegfs-rhel7.repo
+        rpm --import http://www.beegfs.com/release/beegfs_6/gpg/RPM-GPG-KEY-beegfs
+
+        # setup client
+	yum install -y beegfs-client beegfs-helperd beegfs-utils
+	# setup client
+	$BEEGFS_SBIN/beegfs-setup-client -m $MGMT_HOSTNAME
+	# disable RDMA
+	sed -i 's/^connUseRDMA.*/connUseRDMA = false/g' /etc/beegfs/beegfs-client.conf
+	# increase the timeout of mount check to 30s
+	sed -i 's/^sysMountSanityCheckMS.*/sysMountSanityCheckMS = 30000/g' /etc/beegfs/beegfs-client.conf
+	echo "$SHARE_SCRATCH /etc/beegfs/beegfs-client.conf" > /etc/beegfs/beegfs-mounts.conf
+	
+	systemctl daemon-reload
+	systemctl enable beegfs-helperd.service
+	systemctl enable beegfs-client.service
+
+        functiontimer "install_beegfs_client_centos()"
+
+} #-- end of install_beegfs() --#
 
 echo "##################################################"
 echo "############# Compute Node Setup #################"
