@@ -52,7 +52,7 @@ infra.json" target="_blank">
 
 Standalone Linux NFS Server
 <br><br>
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmkiernan%2FFlexHPC%2Fmaster%2Fnfs%2Fnfsserver.json" target="_blank">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmkiernan%2FFlexHPC%2Fmaster%2Fnfs%2Fnfs.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 
