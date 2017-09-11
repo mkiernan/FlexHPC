@@ -1,21 +1,21 @@
 {
-    "$schema": "http://schema.management.azure.com/schemas/2015-01-01-preview/deploymentTemplate.json",
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
         "adminUsername": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "Admin username on all VMs."
             }
         },
         "adminPassword": {
-            "type": "SecureString",
+            "type": "secureObject",
             "metadata": {
                 "description": "Admin password on all VMs."
             }
         },
         "NFSServerName": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "Hostname to use for the NFS Server"
             }
@@ -146,7 +146,7 @@
                 "Standard_E32s_v3",
                 "Standard_E64s_v3"
             ],
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "D-Series is highly recommended as an NFS Server. The instance must allow at least 2 x Data disks"
             }
@@ -204,7 +204,7 @@
             }
         },
         "vnetName": {
-            "type": "String",
+            "type": "string",
             "defaultValue": "vnethpc",
             "metadata": {
                 "description": "This is the VNET to which the NFS Server will be deployed."
