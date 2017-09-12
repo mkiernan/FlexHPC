@@ -1,5 +1,5 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
     "contentVersion": "1.0.0.0",
     "parameters": {
         "adminUsername": {
@@ -209,14 +209,25 @@
             "metadata": {
                 "description": "This is the VNET to which the NFS Server will be deployed."
             }
+        },
+        "subnetName": {
+            "type": "string",
+            "defaultValue": "StorageSubnet",
+            "metadata": {
+                "description": "This is the existing subnet within the existing VNET to which the NFS Server will be deployed."
+            }
         }
     },
     "variables": {
         "virtualNetworkName": "[parameters('vnetName')]",
+        "namingInfix": "[toLower(substring(concat(parameters('NFSServerName'), uniqueString(resourceGroup().id)), 0, 9))]",
+        "NFSServerIPConfigName": "[concat(parameters('NFSServerName'), 'ipconfig')]",
         "NFSServerNicName": "[concat(parameters('NFSServerName'), 'nic')]",
-        "subnetName": "StorageSubnet",
+        "subnetName": "[parameters('subnetName')]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
-        "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+        "storagesubnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+        "existingSubnetResourceId": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'), '/subnets/', variables('subnetName'))]",       
+		"publicIPAddressName": "[concat(variables('namingInfix'), 'pip')]",
         "scriptUrl": "https://raw.githubusercontent.com/mkiernan/FlexHPC/master/nfs",
         "StorageMap": {
             "P10": {
@@ -443,7 +454,6 @@
                 },
                 "createOption": "Empty"
             },
-            ,
             {
                 "lun": "[add(variables('numStorageDisks'), 16)]",
                 "caching": "ReadWrite",
@@ -670,11 +680,49 @@
                 "createOption": "Empty"
             }
         ],
-        "computeApiVersion": "2016-04-30-preview",
-        "networkApiVersion": "2016-06-01",
-        "storageApiVersion": "2015-06-15"
+        "computeApiVersion": "2017-03-30",
+        "networkApiVersion": "2017-04-01",
+        "storageApiVersion": "2017-04-17"
     },
     "resources": [
+        {
+			"type": "Microsoft.Network/publicIPAddresses",
+			"name": "[variables('publicIPAddressName')]",
+			"apiVersion": "[variables('networkApiVersion')]",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"publicIPAllocationMethod": "Static",
+				"dnsSettings": {
+					"domainNameLabel": "[variables('namingInfix')]"
+				}
+			}
+		},
+		{
+			"type": "Microsoft.Network/networkInterfaces",
+			"name": "[variables('NFSServerNicName')]",
+			"apiVersion": "[variables('networkApiVersion')]",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"ipConfigurations": [
+					{
+						"name": "[variables('NFSServerIPConfigName')]",
+						"properties": {
+							"privateIPAllocationMethod": "Dynamic",
+							"publicIPAddress": {
+								"id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+							},
+							"subnet": {
+                                "id": "[variables('existingSubnetResourceId')]"
+							}
+						}
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
+				"[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+			]
+		},
         {
             "type": "Microsoft.Compute/virtualMachines",
             "name": "[parameters('NFSServerName')]",
