@@ -9,7 +9,7 @@
             }
         },
         "adminPassword": {
-            "type": "SecureString",
+            "type": "securestring",
             "metadata": {
                 "description": "Admin password on all VMs."
             }
