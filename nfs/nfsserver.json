@@ -229,7 +229,7 @@
         "storagesubnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
         "existingSubnetResourceId": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'), '/subnets/', variables('subnetName'))]",       
 		"publicIPAddressName": "[concat(variables('namingInfix'), 'pip')]",
-        "scriptUrl": "https://raw.githubusercontent.com/mkiernan/FlexHPC/master/nfs",
+        "scriptUrl": "https://raw.githubusercontent.com/mkiernan/FlexHPC/master/nfs/",
         "StorageMap": {
             "P10": {
                 "size": 128
