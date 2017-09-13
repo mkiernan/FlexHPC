@@ -9,7 +9,7 @@
             }
         },
         "adminPassword": {
-            "type": "secureObject",
+            "type": "SecureString",
             "metadata": {
                 "description": "Admin password on all VMs."
             }
@@ -207,14 +207,14 @@
             "type": "string",
             "defaultValue": "vnethpc",
             "metadata": {
-                "description": "This is the VNET to which the NFS Server will be deployed."
+                "description": "**MUST ALREADY EXIST**. This is the existing VNET to which the NFS Server will be deployed."
             }
         },
         "subnetName": {
             "type": "string",
             "defaultValue": "StorageSubnet",
             "metadata": {
-                "description": "This is the existing subnet within the existing VNET to which the NFS Server will be deployed."
+                "description": "**MUST ALREADY EXIST**. This is the existing subnet within the existing VNET to which the NFS Server will be deployed."
             }
         }
     },
