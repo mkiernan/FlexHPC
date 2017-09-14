@@ -221,7 +221,7 @@
     },
     "variables": {
         "virtualNetworkName": "[parameters('vnetName')]",
-        "namingInfix": "[toLower(substring(concat(parameters('NFSServerName'), uniqueString(resourceGroup().id)), 0, 9))]",
+        "namingInfix": "[toLower(substring(concat('nfs', uniqueString(resourceGroup().id)), 0, 9))]",
         "NFSServerIPConfigName": "[concat(parameters('NFSServerName'), 'ipconfig')]",
         "NFSServerNicName": "[concat(parameters('NFSServerName'), 'nic')]",
         "subnetName": "[parameters('subnetName')]",
