@@ -122,7 +122,7 @@
 		},
 		"instanceCount": {
 			"maxValue": 100,
-			"type": "Int",
+			"type": "int",
 			"metadata": {
 				"description": "Number of VM instances (100 or less)."
 			}
@@ -240,7 +240,7 @@
 			"scriptToDownload": [
 				"[concat(variables('scriptUrl'), 'cn-setup.sh')]"
 			],
-			"commandToExecute": "[concat('bash ', 'cn-setup.sh ',parameters('adminUsername'),' ',parameters('image')) ]",
+			"commandToExecute": "[concat('bash ', 'cn-setup.sh ',parameters('adminUsername'),' ',parameters('image')) ]"
 		},
 		"vmScripts": {
 			"scriptsToDownload": [
@@ -249,7 +249,7 @@
 				"[concat(variables('scriptUrl'), 'pingpong.sh')]",
 				"[concat(variables('scriptUrl'), 'clusRun.sh')]"
 			],
-			"commandToExecute": "",
+			"commandToExecute": ""
 		},
 		"computeApiVersion": "2016-04-30-preview",
 		"networkApiVersion": "2016-06-01",
